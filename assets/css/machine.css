@@ -1,0 +1,617 @@
+/* 機種ページ専用: シミュレーターUI */
+
+.machine-header__name {
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.machine-header__maker {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  margin-top: 2px;
+}
+
+/* スペック・ゲームフロー: 初期状態は畳んでおき、押すと開くことが
+   ひと目でわかるよう、ネイティブの開閉マーカーに加えてヒント文言も添える */
+.rules-summary {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.rules-summary__label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.rules-summary__hint {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--color-accent);
+  white-space: nowrap;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.rules-details[open] .rules-summary {
+  margin-bottom: var(--space-3);
+}
+
+.rules-list li {
+  position: relative;
+  padding-left: 1.1em;
+  font-size: 0.85rem;
+  color: var(--color-text);
+  margin-bottom: var(--space-2);
+}
+
+.rules-list li::before {
+  content: "・";
+  position: absolute;
+  left: 0;
+  color: var(--color-accent);
+}
+
+/* データランプ（実機のデータランプを模した積み上げゲージ表現）
+   「現在」列はライブ進行中の回転数に連動してゲージが伸びる。当たると
+   その列がそのまま履歴側へスライドし、「現在」は空へ戻る。
+   履歴の有無やバナーの有無で高さが変わるとボタン位置がずれてプレイしづらいため、
+   空表示時とゲージ表示時で常に同じ高さを確保する */
+#dataLamp {
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.data-lamp__chart {
+  width: 100%;
+  display: grid;
+  grid-template-rows: 18px 1fr;
+  gap: 4px 2px;
+  background: #0a0b0d;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-2) var(--space-2);
+  overflow-x: auto;
+}
+
+.data-lamp__banner {
+  grid-row: 1;
+  align-self: end;
+  margin-bottom: 2px;
+  padding: 2px 4px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ff6b6b 0%, #c62828 100%);
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-align: center;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(198, 40, 40, 0.4);
+}
+
+.data-lamp__col {
+  grid-row: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-width: 30px;
+}
+
+.data-lamp__gauge {
+  width: 16px;
+  height: 90px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.data-lamp__segment {
+  flex: 1;
+  border-radius: 1px;
+  background: #1c1f24;
+}
+
+.data-lamp__segment--green {
+  background: linear-gradient(180deg, #d2ffdf 0%, #3ecf6a 55%, #1c6b39 100%);
+}
+
+.data-lamp__segment--yellow {
+  background: linear-gradient(180deg, #fff3b0 0%, #f1c40f 55%, #a97e0a 100%);
+}
+
+.data-lamp__segment--red {
+  background: linear-gradient(180deg, #ffc9c9 0%, #e94b4b 55%, #8a1f1f 100%);
+}
+
+.data-lamp__segment--blink {
+  animation: data-lamp-blink 0.6s ease-in-out infinite;
+}
+
+@keyframes data-lamp-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+
+.data-lamp__rounds {
+  min-height: 1.1em;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #ffb648;
+}
+
+.data-lamp__game {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #f2f3f5;
+  font-variant-numeric: tabular-nums;
+}
+
+.data-lamp__collabel {
+  font-size: 0.6rem;
+  color: var(--color-text-muted);
+}
+
+/* 本日の成績 */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-2);
+}
+
+.stat-tile {
+  background: var(--color-surface-raised);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat-tile__label {
+  font-size: 0.68rem;
+  color: var(--color-text-muted);
+}
+
+.stat-tile__value {
+  font-size: 1.05rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-tile--balance {
+  grid-column: 1 / -1;
+}
+
+.stat-tile__value.is-plus {
+  color: var(--color-plus);
+}
+
+.stat-tile__value.is-minus {
+  color: var(--color-minus);
+}
+
+.reset-button-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--space-2);
+}
+
+/* 通常の.btnの約半分のサイズ（リセットボタンなど、控えめに置きたい操作用） */
+.btn-small {
+  padding: 6px 10px;
+  font-size: 0.7rem;
+}
+
+/* シミュレーションエリア（状態表示・回転数・演出欄・保留欄をすべて内包する） */
+/* シミュレーションエリアは「状態〜保留」までの本体と、下部の帯（演出欄）の
+   2段構成にする。演出欄はカードの左右下端いっぱいまで伸びる帯として置く。 */
+.simulation-area {
+  position: relative;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  min-height: 220px;
+  background: var(--theme-normal);
+  transition: background 0.5s ease;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.simulation-area[data-theme="chance"] {
+  background: linear-gradient(180deg, var(--theme-chance) 0%, #241a10 100%);
+}
+
+.simulation-area[data-theme="rush"] {
+  background: linear-gradient(180deg, var(--theme-rush) 0%, #240c14 100%);
+}
+
+.simulation-area__body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  min-width: 0;
+}
+
+.sim-divider {
+  width: 100%;
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  margin: 0;
+}
+
+.sim-state {
+  text-align: center;
+}
+
+.sim-state__label {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  letter-spacing: 0.08em;
+}
+
+.sim-state__value {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--color-accent-strong);
+}
+
+.spin-counter {
+  font-size: 2.4rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-accent-strong);
+}
+
+.investment-display {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.hold-queue {
+  position: relative;
+  display: flex;
+  gap: var(--space-3);
+  min-height: 44px;
+  align-items: center;
+}
+
+.hold-ball {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff6df 0%, var(--color-accent) 60%, #8f6a35 100%);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+  transform: translateY(0) scale(1);
+  opacity: 1;
+  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease;
+}
+
+.hold-ball--enter {
+  transform: translateY(-18px) scale(0.6);
+  opacity: 0;
+}
+
+.hold-ball--emphasize {
+  transform: scale(1.35);
+  box-shadow: 0 0 16px rgba(255, 220, 150, 0.7);
+}
+
+/* 保留色予告（全機種共通の演出。抽選結果には影響しない） */
+.hold-ball--color-red {
+  background: radial-gradient(circle at 35% 30%, #ffe3e3 0%, #e94b4b 60%, #7a1f1f 100%);
+  box-shadow: 0 4px 12px rgba(233, 75, 75, 0.55);
+}
+
+.hold-ball--color-green {
+  background: radial-gradient(circle at 35% 30%, #e2ffe9 0%, #3ecf6a 60%, #1c6b39 100%);
+  box-shadow: 0 4px 12px rgba(62, 207, 106, 0.55);
+}
+
+.hold-ball--color-blue {
+  background: radial-gradient(circle at 35% 30%, #e2f0ff 0%, #4b8ee9 60%, #1f4a8a 100%);
+  box-shadow: 0 4px 12px rgba(75, 142, 233, 0.55);
+}
+
+.hold-ball--burst {
+  transform: scale(0.2);
+  opacity: 0;
+}
+
+.hold-ball--burst-hit {
+  transform: scale(1.9);
+  opacity: 0;
+  background: radial-gradient(circle at 35% 30%, #fff6df 0%, #ffdd7a 50%, #ff9a3d 100%);
+  box-shadow: 0 0 24px rgba(255, 200, 100, 0.7);
+}
+
+/* リーチ演出（3つの数字リール）。機種共通の演出で、抽選結果には関与しない。 */
+.reel-display {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: center;
+  align-items: center;
+}
+
+/* 数字が縦に流れる「窓」。枠のデザインは数字の色に関係なく常に統一する。 */
+.reel-viewport {
+  width: 68px;
+  height: 68px;
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: #0a0b0d;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.reel-idle {
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: var(--color-text-muted);
+}
+
+.reel-viewport.is-idle .reel-idle {
+  display: flex;
+}
+
+.reel-viewport.is-idle .reel-strip {
+  visibility: hidden;
+}
+
+/* 大当たり（数字が揃った）ときだけ、枠をレインボーに光らせる演出。
+   filter:hue-rotateを使うと中の数字の色（青/緑/金）まで一緒に回ってしまうため、
+   border-color/box-shadowだけをキーフレームでhsl色相を直接回す（数字の色には影響しない）。 */
+.reel-viewport--hit-glow {
+  animation: reel-rainbow-glow 1.4s linear infinite;
+}
+
+@keyframes reel-rainbow-glow {
+  0% {
+    border-color: hsl(0, 100%, 60%);
+    box-shadow: 0 0 14px 4px hsla(0, 100%, 60%, 0.85), 0 0 4px 1px hsla(0, 100%, 60%, 0.6) inset;
+  }
+  16.6% {
+    border-color: hsl(60, 100%, 55%);
+    box-shadow: 0 0 14px 4px hsla(60, 100%, 55%, 0.85), 0 0 4px 1px hsla(60, 100%, 55%, 0.6) inset;
+  }
+  33.3% {
+    border-color: hsl(120, 100%, 45%);
+    box-shadow: 0 0 14px 4px hsla(120, 100%, 45%, 0.85), 0 0 4px 1px hsla(120, 100%, 45%, 0.6) inset;
+  }
+  50% {
+    border-color: hsl(190, 100%, 55%);
+    box-shadow: 0 0 14px 4px hsla(190, 100%, 55%, 0.85), 0 0 4px 1px hsla(190, 100%, 55%, 0.6) inset;
+  }
+  66.6% {
+    border-color: hsl(250, 100%, 65%);
+    box-shadow: 0 0 14px 4px hsla(250, 100%, 65%, 0.85), 0 0 4px 1px hsla(250, 100%, 65%, 0.6) inset;
+  }
+  83.3% {
+    border-color: hsl(300, 100%, 60%);
+    box-shadow: 0 0 14px 4px hsla(300, 100%, 60%, 0.85), 0 0 4px 1px hsla(300, 100%, 60%, 0.6) inset;
+  }
+  100% {
+    border-color: hsl(360, 100%, 60%);
+    box-shadow: 0 0 14px 4px hsla(360, 100%, 60%, 0.85), 0 0 4px 1px hsla(360, 100%, 60%, 0.6) inset;
+  }
+}
+
+.reel-strip {
+  display: flex;
+  flex-direction: column;
+  will-change: transform;
+}
+
+/* JSのITEM_HEIGHT(68px)と、下のkeyframesのtranslateY量(68px*9=612px)に必ず合わせること */
+.reel-strip--spinning {
+  animation: reel-spin-loop 0.35s linear infinite;
+  filter: blur(1.5px);
+}
+
+/* 数字が上から下へ流れて見えるよう、translateYはプラス方向へ進める */
+@keyframes reel-spin-loop {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(612px);
+  }
+}
+
+.reel-item {
+  height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.4rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+}
+
+/* 数字の色（枠の色は変えない） */
+.reel-item.reel-digit--blue {
+  color: #5ac8fa;
+  text-shadow: 0 0 10px rgba(90, 200, 250, 0.6);
+}
+
+.reel-item.reel-digit--green {
+  color: #3ecf6a;
+  text-shadow: 0 0 10px rgba(62, 207, 106, 0.6);
+}
+
+.reel-item.reel-digit--gold {
+  color: #ffd24a;
+  text-shadow: 0 0 14px rgba(255, 210, 74, 0.8);
+  animation: reel-gold-pulse 0.5s ease-in-out infinite;
+}
+
+@keyframes reel-gold-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+  }
+}
+
+@keyframes reel-gold-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+  }
+}
+
+/* 演出欄: シミュレーションエリア下端いっぱいに広がる帯として置く（角丸は付けない。
+   simulation-area自体の角丸だけがカード全体の輪郭になる）。
+   「抽選中」「大当たり＜○R獲得＞＋次回：〜」の最大2行を常に確保して、
+   表示内容が変わっても帯の高さが変わらないようにする */
+.effect-area {
+  width: 100%;
+  /* min-heightではなくheight固定にする。bodyのline-height:1.6が
+     中のテキストに継承されるため、内容の行数によって高さが変わり
+     ボタンの位置がズレてしまう問題があった（テキストなし/1行/2行を
+     すべて同じ高さに強制する）。 */
+  height: 60px;
+  overflow: hidden;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.28);
+  text-align: center;
+  padding: var(--space-2) var(--space-3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+.effect-area__idle {
+  font-size: 0.8rem;
+  line-height: 1.3;
+  color: var(--color-text-muted);
+}
+
+.effect-area__title {
+  font-size: 0.92rem;
+  line-height: 1.3;
+  font-weight: 800;
+  color: var(--color-accent-strong);
+  animation: result-pop 0.32s ease;
+}
+
+.effect-area[data-kind="exhausted"] .effect-area__title {
+  color: var(--color-text-muted);
+}
+
+.effect-area__sub {
+  font-size: 0.72rem;
+  line-height: 1.3;
+  color: var(--color-text-muted);
+}
+
+@keyframes result-pop {
+  from {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.action-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.action-button {
+  width: 100%;
+  max-width: 320px;
+  padding: 20px;
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(212, 175, 122, 0.5);
+  background: linear-gradient(180deg, #3a2f22 0%, #1a1512 100%);
+  color: var(--color-accent-strong);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+}
+
+.action-button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.action-button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* 抽選中はSTOP表示になり、押すと演出を早送りして結果を表示する */
+.action-button[data-mode="stop"] {
+  border-color: rgba(255, 120, 120, 0.6);
+  background: linear-gradient(180deg, #4a2323 0%, #2a1414 100%);
+  color: #ffbdbd;
+}
+
+.speed-button {
+  font-size: 0.8rem;
+  padding: 10px 18px;
+}
+
+.back-to-top {
+  text-align: center;
+}
+
+.back-to-top a {
+  display: inline-block;
+  text-decoration: none;
+}
+
+.machine-error {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+.machine-error[hidden] {
+  display: none;
+}
+
+@media (min-width: 480px) {
+  .stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

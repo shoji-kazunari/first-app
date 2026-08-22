@@ -3,19 +3,46 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>カウンターアプリ</title>
-  <link rel="stylesheet" href="style.css">
+  <title>パチンコシミュレーター</title>
+  <meta name="description" content="パチンコ実機のスペックをもとに、初当たりや連チャン、出玉を実際にボタンを押しながら疑似体験できるシミュレーターサイトです。">
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/top.css">
 </head>
 <body>
-  <main class="card">
-    <h1 class="title">カウンター</h1>
-    <p id="count" class="count">0</p>
-    <div class="buttons">
-      <button id="minus" class="btn btn-minus" aria-label="マイナス1">-1</button>
-      <button id="reset" class="btn btn-reset" aria-label="リセット">リセット</button>
-      <button id="plus" class="btn btn-plus" aria-label="プラス1">+1</button>
-    </div>
-  </main>
-  <script src="script.js"></script>
+  <div class="page">
+    <header class="site-header">
+      <h1 id="siteTitle" class="site-header__title">パチンコシミュレーター</h1>
+      <p id="siteTagline" class="site-header__tagline"></p>
+    </header>
+
+    <section class="search-box card" aria-label="機種検索">
+      <h2 class="card__heading">機種検索</h2>
+      <input id="searchInput" class="search-box__input" type="search" placeholder="機種名を入力（ひらがなでも検索できます）" autocomplete="off">
+      <div id="searchResults" class="search-results" hidden></div>
+    </section>
+
+    <section class="card" aria-label="メーカー別機種一覧">
+      <h2 class="card__heading">メーカー別機種一覧</h2>
+      <div id="manufacturerList"></div>
+    </section>
+
+    <section class="card" aria-label="一撃出玉ランキング">
+      <h2 class="card__heading">今日の一撃出玉ランキング</h2>
+      <div id="rankingToday"></div>
+    </section>
+
+    <p class="disclaimer">
+      本サイトはパチンコの公開スペックをもとにした疑似シミュレーションです。実機の演出・画像・音源は使用していません。実際の遊技結果や収支を保証するものではありません。
+    </p>
+  </div>
+
+  <script src="assets/js/core/config.js"></script>
+  <script src="assets/js/core/kana.js"></script>
+  <script src="assets/js/core/format.js"></script>
+  <script src="assets/js/core/rankingService.js"></script>
+  <script src="assets/js/data/registry.js"></script>
+  <script src="assets/js/data/machines/cr-fever-symphogear.js"></script>
+  <script src="assets/js/data/machines/eva17-hajimari.js"></script>
+  <script src="assets/js/pages/top.js"></script>
 </body>
 </html>

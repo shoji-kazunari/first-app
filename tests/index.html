@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PachiSim ロジックテスト</title>
+  <style>
+    body { font-family: monospace; background:#0f1115; color:#f2f3f5; padding:24px; }
+    h1 { font-size:1.1rem; }
+    ul { list-style:none; padding:0; }
+    li { padding:6px 10px; border-radius:6px; margin-bottom:4px; }
+    li.pass { background: rgba(80,200,120,0.15); color:#7ee2a0; }
+    li.fail { background: rgba(220,80,80,0.18); color:#ff9d9d; }
+    #summary { margin-top:16px; font-weight:bold; }
+  </style>
+</head>
+<body>
+  <h1>PachiSim ロジックテスト（ブラウザ実行）</h1>
+  <p>Node.jsが無い環境でも動作確認できるよう、ブラウザで開くだけで実行される自作テストランナーです。</p>
+  <ul id="results"></ul>
+  <p id="summary"></p>
+
+  <!-- テスト対象の本体スクリプト（機種ページと同じ依存関係） -->
+  <script src="../assets/js/core/config.js"></script>
+  <script src="../assets/js/core/kana.js"></script>
+  <script src="../assets/js/core/rng.js"></script>
+  <script src="../assets/js/core/format.js"></script>
+  <script src="../assets/js/core/holdOmens.js"></script>
+  <script src="../assets/js/core/reelOmens.js"></script>
+  <script src="../assets/js/core/stateEngine.js"></script>
+  <script src="../assets/js/core/streakTracker.js"></script>
+  <script src="../assets/js/data/registry.js"></script>
+  <script src="../assets/js/data/machines/cr-fever-symphogear.js"></script>
+  <script src="../assets/js/data/machines/eva17-hajimari.js"></script>
+
+  <!-- テストランナーとテストケース -->
+  <script src="assert.js"></script>
+  <script src="engine.tests.js"></script>
+
+  <script>
+    const results = PachiSimTest.getResults();
+    const list = document.getElementById("results");
+    list.innerHTML = results
+      .map(
+        (r) =>
+          `<li class="${r.pass ? "pass" : "fail"}">${r.pass ? "OK" : "NG"} - ${r.name}${
+            r.pass ? "" : ` (${r.error})`
+          }</li>`
+      )
+      .join("");
+    const passCount = results.filter((r) => r.pass).length;
+    document.getElementById("summary").textContent = `${passCount}/${results.length} passed`;
+  </script>
+</body>
+</html>

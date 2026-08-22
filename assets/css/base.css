@@ -1,0 +1,224 @@
+/* 全ページ共通のリセット・デザイントークン・共通コンポーネント */
+
+:root {
+  --color-bg: #0f1115;
+  --color-surface: #171a21;
+  --color-surface-raised: #1f232c;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-text: #f2f3f5;
+  --color-text-muted: #9aa0ab;
+  --color-accent: #d4af7a;
+  --color-accent-strong: #f3dfb0;
+  --color-plus: #6fd98f;
+  --color-minus: #ff8686;
+
+  --theme-normal: #2a2f3a;
+  --theme-chance: #5a3a1f;
+  --theme-rush: #6a1f2f;
+
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  --font-sans: "Hiragino Sans", "Yu Gothic", "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: dark;
+}
+
+html, body {
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(circle at 50% 0%, #22262f 0%, var(--color-bg) 55%, #08090b 100%);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  line-height: 1.6;
+}
+
+a {
+  color: inherit;
+}
+
+h1, h2, h3, p, ul, ol, dl, dd {
+  margin: 0;
+}
+
+ul, ol {
+  padding: 0;
+  list-style: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--space-4) var(--space-4) var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  min-width: 0;
+}
+
+/* flexアイテムはデフォルトでmin-width:autoとなり、中の長いテキストが
+   コンテナ幅を超えてはみ出すことがあるため、明示的に0へ倒しておく */
+.page > *,
+.simulation-area > *,
+.action-row > * {
+  min-width: 0;
+}
+
+.site-header {
+  text-align: center;
+  padding-top: var(--space-3);
+}
+
+.site-header__title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  background: linear-gradient(180deg, var(--color-accent-strong) 0%, var(--color-accent) 60%, #a97e3f 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.site-header__tagline {
+  margin-top: var(--space-1);
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.breadcrumb {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  display: flex;
+  gap: var(--space-1);
+  flex-wrap: wrap;
+}
+
+.breadcrumb a {
+  text-decoration: none;
+  color: var(--color-text-muted);
+}
+
+.breadcrumb a:hover {
+  color: var(--color-accent);
+}
+
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+}
+
+.card__heading {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: var(--space-3);
+}
+
+.btn {
+  border: 1px solid rgba(212, 175, 122, 0.35);
+  border-radius: var(--radius-md);
+  background: linear-gradient(180deg, #2a231c 0%, #1a1512 100%);
+  color: var(--color-accent-strong);
+  padding: 12px 16px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform 0.12s ease, box-shadow 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+}
+
+.btn:hover {
+  border-color: rgba(212, 175, 122, 0.7);
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+  transform: none;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--color-text-muted);
+  border-color: var(--color-border);
+  font-weight: 500;
+}
+
+.ad-slot {
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+.ad-slot__label {
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: var(--space-1);
+}
+
+.ad-slot__placeholder {
+  font-size: 0.85rem;
+}
+
+.affiliate-section__empty {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+.affiliate-section__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: var(--space-2);
+}
+
+.affiliate-card {
+  display: block;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  text-decoration: none;
+  font-size: 0.85rem;
+  background: var(--color-surface-raised);
+}
+
+.disclaimer {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  line-height: 1.7;
+}
+
+@media (min-width: 600px) {
+  .page {
+    padding-top: var(--space-5);
+  }
+}

@@ -1,0 +1,137 @@
+/* TOPページ専用: 検索・メーカー一覧・ランキング */
+
+.search-box {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.search-box__input {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  font-size: 1rem;
+}
+
+.search-box__input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.search-box__input:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.search-results__list li + li {
+  margin-top: var(--space-1);
+}
+
+.search-results__list a {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-raised);
+  text-decoration: none;
+}
+
+.search-results__name {
+  font-weight: 600;
+}
+
+.search-results__maker {
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+}
+
+.search-results__empty {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  padding: var(--space-2) 0;
+}
+
+.manufacturer-group {
+  border-bottom: 1px solid var(--color-border);
+  padding: var(--space-2) 0;
+}
+
+.manufacturer-group:last-child {
+  border-bottom: none;
+}
+
+.manufacturer-group__name {
+  cursor: pointer;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-1);
+}
+
+.manufacturer-group__count {
+  color: var(--color-text-muted);
+  font-weight: 400;
+  font-size: 0.8rem;
+}
+
+.manufacturer-group__machines {
+  padding: var(--space-2) var(--space-1) var(--space-1);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.manufacturer-group__machines a {
+  display: block;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-raised);
+  text-decoration: none;
+}
+
+.manufacturer-group__machines a:hover {
+  color: var(--color-accent);
+}
+
+.ranking__empty {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+.ranking__list li {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.ranking__list li:last-child {
+  border-bottom: none;
+}
+
+.ranking__rank {
+  font-weight: 700;
+  color: var(--color-accent);
+  width: 2.5em;
+}
+
+.ranking__name {
+  flex: 1;
+}
+
+.ranking__balls {
+  font-weight: 700;
+}
+
+.top-cta {
+  text-align: center;
+}
+
+.top-cta a {
+  text-decoration: none;
+}
