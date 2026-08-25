@@ -74,30 +74,21 @@
       .join("");
   }
 
-  function renderRanking(container, result) {
-    if (result.entries.length === 0) {
-      container.innerHTML = `
-        <p class="ranking__empty">
-          ${result.backendConnected ? "本日の記録はまだありません。" : "ランキング機能は準備中です。実装が完了すると、ここに一撃出玉ランキングが表示されます。"}
-        </p>
-      `;
-      return;
-    }
-    container.innerHTML = `
-      <ol class="ranking__list">
-        ${result.entries
-          .map(
-            (e, i) => `
-              <li>
-                <span class="ranking__rank">${i + 1}位</span>
-                <span class="ranking__name">${e.machineName}</span>
-                <span class="ranking__balls">${PachiSim.format.ball(e.balls)}</span>
-              </li>
-            `
-          )
-          .join("")}
-      </ol>
-    `;
+  // period: "allTime"|"today" - 空表示時の文言だけ変える
+  async function renderRankingSection(container, period) {
+    const result = await PachiSim.rankingService.fetchRanking(period);
+    PachiSim.ui.renderRankingList(container, result.entries, {
+      showMachine: true,
+      emptyText: period === "today" ? "本日の記録はまだありません。" : "まだ記録がありません。",
+      onDelete: (id) => {
+        PachiSim.rankingService.removeEntry(id);
+        renderRankingSection(container, period);
+      },
+      onClearAll: () => {
+        PachiSim.rankingService.clearScope(period);
+        renderRankingSection(container, period);
+      },
+    });
   }
 
   async function init() {
@@ -107,7 +98,8 @@
       searchInput: $("searchInput"),
       searchResults: $("searchResults"),
       manufacturerList: $("manufacturerList"),
-      ranking: $("rankingToday"),
+      rankingAllTime: $("rankingAllTime"),
+      rankingToday: $("rankingToday"),
     };
 
     els.siteTitle.textContent = PachiSim.config.siteTitle;
@@ -123,8 +115,8 @@
       renderSearchResults(els.searchResults, machines, e.target.value.trim());
     });
 
-    const rankingResult = await PachiSim.rankingService.fetchRanking("today");
-    renderRanking(els.ranking, rankingResult);
+    renderRankingSection(els.rankingAllTime, "allTime");
+    renderRankingSection(els.rankingToday, "today");
   }
 
   if (document.readyState === "loading") {

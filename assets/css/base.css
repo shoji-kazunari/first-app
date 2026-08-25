@@ -139,6 +139,89 @@ button {
   margin-bottom: var(--space-3);
 }
 
+/* 一撃出玉ランキング（機種別・全体全期間・全体本日、共通の見た目） */
+.ranking-list__empty {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+.ranking-list__items {
+  display: flex;
+  flex-direction: column;
+}
+
+.ranking-list__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.ranking-list__item:last-child {
+  border-bottom: none;
+}
+
+.ranking-list__rank {
+  font-weight: 700;
+  color: var(--color-accent);
+  width: 2.5em;
+  flex-shrink: 0;
+}
+
+.ranking-list__entry {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.ranking-list__balls {
+  font-weight: 700;
+  color: var(--color-accent-strong);
+}
+
+.ranking-list__machine {
+  font-size: 0.85rem;
+  color: var(--color-text);
+}
+
+.ranking-list__date {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
+.ranking-list__delete {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.ranking-list__delete:hover {
+  border-color: var(--color-minus);
+  color: var(--color-minus);
+}
+
+.ranking-list__toggle,
+.ranking-list__clear-all {
+  margin-top: var(--space-3);
+  font-size: 0.8rem;
+  padding: 8px 16px;
+}
+
+.ranking-list__clear-all {
+  margin-left: var(--space-2);
+}
+
 .btn {
   border: 1px solid rgba(212, 175, 122, 0.35);
   border-radius: var(--radius-md);

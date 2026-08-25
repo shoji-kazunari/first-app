@@ -32,5 +32,16 @@ PachiSim.format = (function () {
     return `1/${trimmed}`;
   }
 
-  return { yen, ball, number, roundUpTo, percent, probabilityFraction };
+  // ISO文字列(Date.toISOString()等)を「2026.08.26.23:59」の形式にする。
+  // 不正な日時が渡された場合は空文字を返す。
+  function dateTimeLabel(isoString) {
+    const d = new Date(isoString);
+    if (Number.isNaN(d.getTime())) return "";
+    const pad = (n) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}.${pad(d.getMonth() + 1)}.${pad(d.getDate())}.${pad(
+      d.getHours()
+    )}:${pad(d.getMinutes())}`;
+  }
+
+  return { yen, ball, number, roundUpTo, percent, probabilityFraction, dateTimeLabel };
 })();

@@ -1,13 +1,25 @@
 // 第2号機: eパチンコ 新世紀エヴァンゲリオン〜はじまりの記憶〜（2025年 ビスティ スマパチ/ST機）
 //
-// 「新機種はデータだけを追加すればよい」設計の実証として作成。
-// 実機の確率・回転数・出玉（1/399.9、1/99.6、ST157回転、時短100回転、
-// ラウンド構成2/8/10R、出玉300/1500/2400/4800個、LT突入率約61.4%）は
-// 公開スペック情報どおりだが、「大当たりがどの割合でどのラウンド/遷移先に
-// 振り分けられるか」という詳細な内訳表は公開情報に見当たらなかったため、
-// 実機の合算値（LT突入率・継続率など）と矛盾しない範囲でこのファイル内で
-// 仮の重み付けをしている（rulesには実機で確認できる数値のみを表示し、
-// 仮の内訳は表示していない）。
+// 情報源: 1geki.jp（https://1geki.jp/pachinko/e_eva17/）。この機種以降、
+// 新機種のスペック確認は1geki.jpを標準ソースにする方針（詳細は
+// memory: machine-spec-sourcing を参照）。
+//
+// 大当たり振り分けは、同ページに掲載されている円グラフ画像を直接読み取って
+// 確認した実数値（WebFetchはテキストしか読めず%を拾えなかったが、画像
+// ファイルとしてダウンロードしてReadツールで直接見れば読み取れた）。
+//
+// ヘソ入賞時（特図1・通常時）の大当たり振り分け:
+//   ・2R大当り(約300個)→インパクトモード(ST157回)：約50.0%
+//   ・2R大当り(約300個)→チャンスタイム(時短100回)：約49.5%
+//   ・10R大当り(約1500個)→インパクトモード(ST157回)：約0.5%
+// 電チュー入賞時（特図2・インパクトモード中/チャンスタイム中共通）の振り分け:
+//   ・8R大当り×2(約2400個)→インパクトモード(ST157回)：約99.5%
+//   ・8R大当り×4(約4800個・LT成立)→インパクトモード(ST157回)：約0.5%
+// 状態遷移: ST全弾外れ（157回転消化）→通常、チャンスタイム全弾外れ（100回転消化）→通常
+// （いずれも1geki.jpのゲームフロー説明に明記）。
+//
+// 上記以外の基本値（確率1/399.9・1/99.6、ST157回転、時短100回転）は
+// 複数の情報源で一致しており確定値として扱っている。
 window.PachiSim = window.PachiSim || {};
 
 PachiSim.machineRegistry.register({
@@ -25,14 +37,13 @@ PachiSim.machineRegistry.register({
 
   rules: [
     "通常時大当たり確率：約1/399.9",
-    "ST（IMPACT MODE）中大当たり確率：約1/99.6",
-    "ST：157回転（1回でも当選すれば再びST継続）",
+    "ST（インパクトモード）中大当たり確率：約1/99.6",
+    "ST：157回転（1回でも当選すれば再びST継続。継続率は約80%）",
     "時短（チャンスタイム）：100回転（大当たり確率は通常時と同じ約1/399.9）",
-    "初当たりは「時短（チャンスタイム）」または「ST直行」のいずれかへ",
-    "ST中はラッキートリガー（LT）成立でより有利な当選が期待できる（LT成立時の合算突入率：約61.4%）",
-    "STを全弾外すと時短（チャンスタイム）へ引き戻し、時短も全弾外すと通常へ",
-    "ラウンド構成：2R／8R／10R×10カウント",
-    "大当たり出玉目安：約300／1500／2400／4800個（獲得ラウンド・当選内容により変動）",
+    "通常時の大当たり振り分け（ヘソ入賞時）：2R・約300個でST直行が約50.0%、2R・約300個で時短が約49.5%、10R・約1500個でST直行が約0.5%",
+    "時短（チャンスタイム）中に当選するとST（インパクトモード）へ",
+    "ST・時短中の当選振り分け（電チュー入賞時）：8R・約2400個が約99.5%、8R・約4800個（LT成立）が約0.5%",
+    "STを全弾外すと通常へ、時短（チャンスタイム）を全弾外すと通常へ",
   ],
 
   states: {
@@ -49,16 +60,15 @@ PachiSim.machineRegistry.register({
       isRushEntry: false,
       onHit: {
         outcomes: [
+          { weight: 0.5, rounds: 2, balls: 300, nextState: "st", tag: "toStDirect" },
           { weight: 0.495, rounds: 2, balls: 300, nextState: "chanceTime", tag: "toChanceTime" },
-          { weight: 0.35, rounds: 8, balls: 1500, nextState: "st", tag: "toStDirect8" },
-          { weight: 0.13, rounds: 10, balls: 2400, nextState: "st", tag: "toStDirect10" },
           {
-            weight: 0.025,
+            weight: 0.005,
             rounds: 10,
-            balls: 4800,
+            balls: 1500,
             nextState: "st",
             tag: "toStDirectMega",
-            resultNote: "特別大当たり",
+            resultNote: "全回転",
           },
         ],
       },
@@ -78,15 +88,14 @@ PachiSim.machineRegistry.register({
       isRushEntry: false,
       onHit: {
         outcomes: [
-          { weight: 0.6, rounds: 8, balls: 1500, nextState: "st", tag: "chanceToSt8" },
-          { weight: 0.3, rounds: 10, balls: 2400, nextState: "st", tag: "chanceToSt10" },
+          { weight: 0.995, rounds: 8, balls: 2400, nextState: "st", tag: "chanceToSt" },
           {
-            weight: 0.1,
-            rounds: 10,
+            weight: 0.005,
+            rounds: 8,
             balls: 4800,
             nextState: "st",
             tag: "chanceToStMega",
-            resultNote: "特別大当たり",
+            resultNote: "LT成立",
           },
         ],
       },
@@ -95,7 +104,7 @@ PachiSim.machineRegistry.register({
 
     st: {
       id: "st",
-      label: "ST（IMPACT MODE）",
+      label: "ST（インパクトモード）",
       mode: "countDown",
       maxAttempts: 157,
       probability: 1 / 99.6,
@@ -106,24 +115,24 @@ PachiSim.machineRegistry.register({
       isRushEntry: true,
       onHit: {
         outcomes: [
+          { weight: 0.995, rounds: 8, balls: 2400, nextState: "st", tag: "stContinue" },
           {
-            weight: 0.614,
-            rounds: 10,
+            weight: 0.005,
+            rounds: 8,
             balls: 4800,
             nextState: "st",
             tag: "ltEntry",
-            resultNote: "LT突入",
+            resultNote: "LT成立",
           },
-          { weight: 0.386, rounds: 8, balls: 1500, nextState: "st", tag: "stContinue" },
         ],
       },
-      onExhausted: { nextState: "chanceTime", tag: "stEnd", resultLabel: "ST終了（時短引き戻し）" },
+      onExhausted: { nextState: "normal", tag: "stEnd", resultLabel: "ST終了" },
     },
   },
 
   distributionTables: {},
 
-  // 10Rには通常大当たり(2400個)と特別大当たり(4800個)の2種類があるため、
+  // ST・時短中の8Rには通常(2400個)とLT成立(4800個)の2種類があるため、
   // ここには代表値のみ置き、実際の出玉は各onHit.outcomesのballsで上書きする。
-  payoutTable: { 2: 300, 8: 1500, 10: 2400 },
+  payoutTable: { 2: 300, 8: 2400, 10: 1500 },
 });

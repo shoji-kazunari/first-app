@@ -71,22 +71,47 @@
     }
   });
 
-  test("holdOmens: 当たり保留は50%赤・15%緑・残り無色", () => {
-    assertEqual(PachiSim.holdOmens.pickColor(true, () => 0.1), "red");
-    assertEqual(PachiSim.holdOmens.pickColor(true, () => 0.49), "red");
-    assertEqual(PachiSim.holdOmens.pickColor(true, () => 0.5), "green");
-    assertEqual(PachiSim.holdOmens.pickColor(true, () => 0.64), "green");
-    assertEqual(PachiSim.holdOmens.pickColor(true, () => 0.65), null);
-    assertEqual(PachiSim.holdOmens.pickColor(true, () => 0.99), null);
+  test("holdOmens: 当たり保留は色推移パターンを万分率で選ぶ", () => {
+    // 1つ目のパターン(赤そのまま, 累積0〜1000/10000)
+    const p1 = PachiSim.holdOmens.pickPattern(true, () => 0.05);
+    assertEqual(p1[4], "red");
+    assertEqual(p1.big, "red");
+    // 6つ目のパターン(緑そのまま, 累積5000〜6000/10000)
+    const p6 = PachiSim.holdOmens.pickPattern(true, () => 0.55);
+    assertEqual(p6[4], "green");
+    assertEqual(p6.big, "green");
+    // 5つ目のパターン(青→緑→赤, 累積4000〜5000/10000)
+    const p5 = PachiSim.holdOmens.pickPattern(true, () => 0.45);
+    assertEqual(p5[4], "blue");
+    assertEqual(p5[2], "green");
+    assertEqual(p5.big, "red");
+    // 最後のパターン(無色そのまま, 累積9500〜10000/10000)
+    const pLast = PachiSim.holdOmens.pickPattern(true, () => 0.999);
+    assertEqual(pLast[4], null);
+    assertEqual(pLast.big, null);
   });
 
-  test("holdOmens: ハズレ保留は5%青・3%緑・残り無色", () => {
-    assertEqual(PachiSim.holdOmens.pickColor(false, () => 0.02), "blue");
-    assertEqual(PachiSim.holdOmens.pickColor(false, () => 0.049), "blue");
-    assertEqual(PachiSim.holdOmens.pickColor(false, () => 0.05), "green");
-    assertEqual(PachiSim.holdOmens.pickColor(false, () => 0.079), "green");
-    assertEqual(PachiSim.holdOmens.pickColor(false, () => 0.08), null);
-    assertEqual(PachiSim.holdOmens.pickColor(false, () => 0.99), null);
+  test("holdOmens: ハズレ保留は色推移パターンを万分率で選ぶ（赤は出ない）", () => {
+    // 1つ目のパターン(緑そのまま, 累積0〜400/10000)
+    const p1 = PachiSim.holdOmens.pickPattern(false, () => 0.01);
+    assertEqual(p1[4], "green");
+    assertEqual(p1.big, "green");
+    // 5つ目のパターン(無→無→青→緑→緑, 累積900〜1000/10000)
+    const p5 = PachiSim.holdOmens.pickPattern(false, () => 0.095);
+    assertEqual(p5[4], null);
+    assertEqual(p5[2], "blue");
+    assertEqual(p5.big, "green");
+    // 最後のパターン(無色そのまま, 累積1000〜10000/10000, 全体の90%)
+    const pLast = PachiSim.holdOmens.pickPattern(false, () => 0.99);
+    assertEqual(pLast[4], null);
+    assertEqual(pLast.big, null);
+    // ハズレ側にはどのパターンにも赤は出現しない（赤=当たり確定を守るため）
+    for (let i = 0; i < 50; i++) {
+      const p = PachiSim.holdOmens.pickPattern(false, PachiSim.rng.createSeededRng(i));
+      ["4", "3", "2", "1", "big"].forEach((k) => {
+        assertTrue(p[k] !== "red", `miss pattern must never contain red (key=${k})`);
+      });
+    }
   });
 
   test("engine: 通常時ハズレ→ハズレ→当たり(99%側 4R→最終決戦)", () => {
@@ -262,46 +287,47 @@
     assertTrue(!!machine2, "machine2 not registered");
   });
 
-  test("engine(エヴァ17): 通常時ハズレ→当たり(2R→時短)", () => {
+  test("engine(エヴァ17): 通常時ハズレ→当たり(2R→時短、昇格演出失敗パターン)", () => {
     const session = PachiSim.engine.createSession(machine2);
-    const rng = PachiSim.rng.createScriptedRng([0.9, 0.001, 0.1]);
+    const rng = PachiSim.rng.createScriptedRng([0.9, 0.001, 0.9]);
     const result = PachiSim.engine.resolveAction(session, machine2, rng);
     assertEqual(result.outcome.type, "hit");
     assertEqual(result.outcome.attempts, 2);
     assertEqual(result.outcome.rounds, 2);
     assertEqual(result.outcome.balls, 300);
     assertEqual(result.outcome.nextStateId, "chanceTime");
+    assertEqual(result.outcome.tag, "toChanceTime");
   });
 
-  test("engine(エヴァ17): 通常1発目で特別大当たり(10R・4800個)→ST。同じ10Rでも出玉が上書きされる", () => {
+  test("engine(エヴァ17): 通常1発目で全回転(10R・1500個)→ST直行", () => {
     const session = PachiSim.engine.createSession(machine2);
     const rng = PachiSim.rng.createScriptedRng([0.001, 0.999]);
     const result = PachiSim.engine.resolveAction(session, machine2, rng);
     assertEqual(result.outcome.rounds, 10);
-    assertEqual(result.outcome.balls, 4800, "payoutTable[10]=2400ではなく、outcome側のballs上書きが使われるべき");
+    assertEqual(result.outcome.balls, 1500);
     assertEqual(result.outcome.nextStateId, "st");
     assertEqual(result.outcome.tag, "toStDirectMega");
   });
 
-  test("engine(エヴァ17): ST中LT成立(10R・4800個)→ST継続", () => {
+  test("engine(エヴァ17): ST中LT成立(8R・4800個)→ST継続。同じ8Rでも出玉が上書きされる", () => {
     const session = { stateId: "st", remaining: 157, streak: null };
-    const rng = PachiSim.rng.createScriptedRng([0.001, 0.1]);
+    const rng = PachiSim.rng.createScriptedRng([0.001, 0.999]);
     const result = PachiSim.engine.resolveAction(session, machine2, rng);
-    assertEqual(result.outcome.rounds, 10);
-    assertEqual(result.outcome.balls, 4800);
+    assertEqual(result.outcome.rounds, 8);
+    assertEqual(result.outcome.balls, 4800, "payoutTable[8]=2400ではなく、outcome側のballs上書きが使われるべき");
     assertEqual(result.outcome.nextStateId, "st");
     assertEqual(result.outcome.tag, "ltEntry");
     assertEqual(result.newSession.stateId, "st");
   });
 
-  test("engine(エヴァ17): ST157回すべてハズレ→時短へ引き戻し", () => {
+  test("engine(エヴァ17): ST157回すべてハズレ→通常へ", () => {
     const session = { stateId: "st", remaining: 157, streak: null };
     const rng = PachiSim.rng.createScriptedRng(new Array(157).fill(0.9));
     const result = PachiSim.engine.resolveAction(session, machine2, rng);
     assertEqual(result.outcome.type, "exhausted");
     assertEqual(result.outcome.attempts, 157);
-    assertEqual(result.outcome.nextStateId, "chanceTime");
-    assertEqual(result.outcome.resultLabel, "ST終了（時短引き戻し）");
+    assertEqual(result.outcome.nextStateId, "normal");
+    assertEqual(result.outcome.resultLabel, "ST終了");
   });
 
   test("engine(エヴァ17): 時短100回すべてハズレ→通常へ", () => {

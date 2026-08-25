@@ -81,6 +81,7 @@ PachiSim.reelOmens = (function () {
     const forcedReach = isColored || rng() < 0.03;
     if (forcedReach) {
       const digit = weightedDigit(rng, NON_SEVEN, 1, 1);
+      // 行き過ぎて止まる場合は、必ずリーチ数字の「次の数字」で止める（7はスキップ）
       const missDigit = nextNonSeven(digit);
       return {
         reach: true,

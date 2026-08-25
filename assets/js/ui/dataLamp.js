@@ -40,23 +40,36 @@ PachiSim.ui.renderDataLamp = function (containerEl, entries, liveAttempts) {
     });
   }
 
-  // 連チャンのまとめ（履歴列のみが対象。現在列・空列は対象外）
+  // 連チャンのまとめ（履歴列のみが対象。現在列・空列は対象外）。
+  // 表示している列の中でのcountは「見えている範囲」でしかなく、連チャンが
+  // 表示列数（9列）を超えて続くと、実際にはもっと連チャンしているのに
+  // 表示が頭打ちになってしまう。streakIdごとの本当の連チャン数は、
+  // 表示範囲に関係なく全履歴(entries)の中から同じstreakIdを数えれば求まる
+  // （1回の連チャンのentriesは必ず連続しているため、単純にフィルタして
+  // 件数を数えるだけでよい）。
+  const totalCountByStreak = {};
+  entries.forEach((e) => {
+    if (e.streakId == null) return;
+    totalCountByStreak[e.streakId] = (totalCountByStreak[e.streakId] || 0) + 1;
+  });
+
   const groups = [];
   columns.forEach((col, idx) => {
     if (idx === 0 || col.streakId == null) return;
     const last = groups[groups.length - 1];
     if (last && col.streakId === last.streakId && last.endIdx === idx - 1) {
       last.endIdx = idx;
-      last.count += 1;
     } else {
-      groups.push({ streakId: col.streakId, startIdx: idx, endIdx: idx, count: 1 });
+      groups.push({ streakId: col.streakId, startIdx: idx, endIdx: idx });
     }
   });
   const banners = groups
-    .filter((g) => g.count >= 2)
+    .filter((g) => (totalCountByStreak[g.streakId] || 0) >= 2)
     .map(
       (g) =>
-        `<div class="data-lamp__banner" style="grid-column:${g.startIdx + 1} / ${g.endIdx + 2}">${g.count}連</div>`
+        `<div class="data-lamp__banner" style="grid-column:${g.startIdx + 1} / ${g.endIdx + 2}">${
+          totalCountByStreak[g.streakId]
+        }連</div>`
     )
     .join("");
 

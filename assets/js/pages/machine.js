@@ -27,11 +27,15 @@
       simulationArea: $("simulationArea"),
       holdQueueEl: $("holdQueue"),
       reelDisplayEl: $("reelDisplay"),
+      resultPanel: $("resultPanel"),
+      resultRenchan: $("resultRenchan"),
+      resultBalls: $("resultBalls"),
       effectArea: $("effectArea"),
       actionButton: $("actionButton"),
-      speedButton: $("speedButton"),
+      speedToggleButtons: Array.from(document.querySelectorAll(".speed-toggle__btn")),
       adSlot: $("adSlot"),
       affiliateSection: $("affiliateSection"),
+      machineRanking: $("machineRanking"),
       errorBox: $("machineError"),
     };
 
@@ -63,6 +67,7 @@
     let liveCount = 0; // countUp表示中の一時カウント
     let liveRemaining = null; // countDown表示中の一時カウント
     let activePlayback = null; // 実行中のplayback制御（pause/resumeで使用）
+    let pendingStart = null; // 保留チャージ中にSTOPされた場合、再開時に実行する消化開始処理
     let currentStreakId = null; // 進行中の「一撃」を識別するID（データランプの連チャンまとめ用）
     let streakSeq = 0;
     // Date.now()だけだと同一ミリ秒内の連続実行でID衝突する可能性があるため、
@@ -98,6 +103,36 @@
       return stats.totalBalls * yenPerBall - investmentYen();
     }
 
+    // 1回転（1保留）あたりの消費玉数。総投資（stats.totalNormalSpins由来、1000円単位に
+    // 丸めた「目安」）とは別に、持ち玉表示は保留が1つ貯まるたびに実際に細かく
+    // 減っていくよう、丸めない厳密な値をここで使う。
+    function ballsPerSpin() {
+      const yenPerBall = machine.yenPerBall || PachiSim.config.yenPerBall;
+      return 1000 / machine.spinsPer1000Yen / yenPerBall;
+    }
+
+    // extraNormalSpins: ティック中に「まだstats.totalNormalSpinsへ加算されていない
+    // 今回分」を仮に上乗せして計算したいときに渡す。
+    // 持ち玉＝獲得出玉から、使った玉数（回転数×1回転あたりの消費玉数）を差し引いた値。
+    // 収支目安は持ち玉を等価交換レートで円換算しただけなので、常に一致する。
+    function mochidamaAndBalance(extraNormalSpins) {
+      const yenPerBall = machine.yenPerBall || PachiSim.config.yenPerBall;
+      const spins = stats.totalNormalSpins + (extraNormalSpins || 0);
+      const mochidama = Math.round(stats.totalBalls - spins * ballsPerSpin());
+      return { mochidama, balance: mochidama * yenPerBall };
+    }
+
+    // 持ち玉・収支目安はプラスなら緑、マイナスなら赤で表示する（HTML断片を返すため、
+    // 呼び出し側はtextContentではなくinnerHTMLへ代入すること）。
+    function investmentDisplayText(extraNormalSpins) {
+      const { mochidama, balance } = mochidamaAndBalance(extraNormalSpins);
+      const cls = balance >= 0 ? "is-plus" : "is-minus";
+      const sign = balance >= 0 ? "+" : "";
+      return `持ち玉 <span class="${cls}">${PachiSim.format.ball(
+        mochidama
+      )}</span> / 収支目安 <span class="${cls}">${sign}${PachiSim.format.yen(balance)}</span>`;
+    }
+
     function renderStats() {
       const yenPerBall = machine.yenPerBall || PachiSim.config.yenPerBall;
       const balance = balanceYen();
@@ -114,6 +149,23 @@
       `;
     }
 
+    // この機種の出玉ランキング（全期間・上位10件）。記録が増減するたびに呼び直す。
+    async function renderMachineRanking() {
+      const result = await PachiSim.rankingService.fetchRanking("allTime", slug);
+      PachiSim.ui.renderRankingList(els.machineRanking, result.entries, {
+        showMachine: false,
+        emptyText: "まだ記録がありません。",
+        onDelete: (id) => {
+          PachiSim.rankingService.removeEntry(id);
+          renderMachineRanking();
+        },
+        onClearAll: () => {
+          PachiSim.rankingService.clearScope("allTime", slug);
+          renderMachineRanking();
+        },
+      });
+    }
+
     function spinCounterText(state) {
       if (state.mode === "countUp") {
         return `${PachiSim.format.number(liveCount)}回転`;
@@ -126,27 +178,39 @@
     // 待機中・一時停止中はいつでも操作できる。
     function syncSpeedButtonLock() {
       const locked = isAnimating && !isPaused;
-      els.speedButton.disabled = locked;
+      els.speedToggleButtons.forEach((btn) => {
+        btn.disabled = locked;
+      });
       els.resetButton.disabled = locked;
     }
 
-    // freezeSpinCounter: trueの間は回転数表示を更新しない。
-    // 大当たり直後、「当たった回転数がわかるように」上部表示をそのまま残すために使う
-    // （次のアクション開始時にresetLiveCountersForState経由であらためて更新される）。
+    // 現在選択中の速度ボタンだけにis-activeを付け、選択状態がひと目でわかるようにする。
+    function syncSpeedButtonsActive() {
+      const activeId = currentSpeedMode().id;
+      els.speedToggleButtons.forEach((btn) => {
+        btn.classList.toggle("is-active", btn.dataset.speedId === activeId);
+      });
+    }
+
+    // freezeStateDisplay: trueの間は「現在の状態」表示（状態名・背景テーマ・回転数）を
+    // 更新しない。大当たり直後、session.stateIdは既に次の状態へ切り替わっているが、
+    // 上部表示は「今までいた状態で何回転で当たったか」がわかるようそのまま残す
+    // （次回：〜は演出欄で案内するので、ここで次の状態名を先出しすると紛らわしい）。
+    // 次のアクション開始時にresetLiveCountersForState経由であらためて更新される。
     function renderCurrentState(options) {
-      const freezeSpinCounter = !!(options && options.freezeSpinCounter);
+      const freezeStateDisplay = !!(options && options.freezeStateDisplay);
       const state = machine.states[session.stateId];
-      els.currentStateLabel.textContent = state.label;
-      els.simulationArea.dataset.theme = state.theme;
-      if (!freezeSpinCounter) {
+      if (!freezeStateDisplay) {
+        els.currentStateLabel.textContent = state.label;
+        els.simulationArea.dataset.theme = state.theme;
         els.spinCounter.textContent = spinCounterText(state);
       }
-      els.investmentDisplay.textContent = `投資目安：約${PachiSim.format.yen(investmentYen())}`;
+      els.investmentDisplay.innerHTML = investmentDisplayText(null);
       if (!isAnimating) {
         els.actionButton.textContent = state.actionLabel;
         els.actionButton.dataset.mode = "action";
       }
-      els.speedButton.textContent = `抽選速度：${currentSpeedMode().label}`;
+      syncSpeedButtonsActive();
       syncSpeedButtonLock();
     }
 
@@ -165,6 +229,22 @@
     function resetLiveCountersForState(state) {
       liveCount = 0;
       liveRemaining = state.maxAttempts;
+    }
+
+    // 一撃（連チャン）が終わって通常へ戻る瞬間だけ、リール/保留の代わりに
+    // 連チャン数・獲得出玉をまとめたRESULT表示を出す。次のアクション開始時に隠す。
+    function showResultPanel(renchan, balls) {
+      els.resultRenchan.textContent = PachiSim.format.number(renchan);
+      els.resultBalls.textContent = PachiSim.format.number(balls);
+      els.resultPanel.hidden = false;
+      els.reelDisplayEl.hidden = true;
+      els.holdQueueEl.hidden = true;
+    }
+
+    function hideResultPanel() {
+      els.resultPanel.hidden = true;
+      els.reelDisplayEl.hidden = false;
+      els.holdQueueEl.hidden = false;
     }
 
     // 一度もSTART/JUDGEMENTを押していない・押し直せる状態（何も表示しない）
@@ -188,9 +268,11 @@
         activePlayback.pause();
         activePlayback = null;
       }
+      pendingStart = null;
       isAnimating = false;
       isPaused = false;
       showIdleEffect();
+      hideResultPanel();
       holdQueue.reset();
       reelDisplay.reset();
       resetLiveCountersForState(machine.states[session.stateId]);
@@ -316,6 +398,7 @@
       els.actionButton.textContent = "STOP";
       els.actionButton.dataset.mode = "stop";
       showSpinningEffect();
+      hideResultPanel();
       reelDisplay.reset();
 
       const state = machine.states[session.stateId];
@@ -325,9 +408,6 @@
       const result = PachiSim.engine.resolveAction(session, machine, rng);
       const speedMode = currentSpeedMode();
 
-      // 保留の色予告（機種共通演出）はSTART時にチャージされる初期4個には付けない。
-      // 消化が進んで新しく補充される保留からだけ色が付く可能性がある。
-      holdQueue.fillInitial();
       renderCurrentState();
       renderDataLampLive();
 
@@ -337,14 +417,9 @@
         liveCount = roll.index;
         liveRemaining = state.maxAttempts == null ? null : state.maxAttempts - roll.index;
         els.spinCounter.textContent = spinCounterText(state);
-        els.investmentDisplay.textContent = `投資目安：約${PachiSim.format.yen(
-          state.accruesInvestment
-            ? PachiSim.format.roundUpTo(
-                ((stats.totalNormalSpins + roll.index) / machine.spinsPer1000Yen) * 1000,
-                PachiSim.config.investmentRoundingYen
-              )
-            : investmentYen()
-        )}`;
+        els.investmentDisplay.innerHTML = investmentDisplayText(
+          state.accruesInvestment ? roll.index : null
+        );
         renderDataLampLive();
       }
 
@@ -389,38 +464,81 @@
         return { durationMs: reelResolveMs + SETTLE_MS };
       }
 
-      activePlayback = playback(
-        result.rolls,
-        state,
-        speedMode,
-        {
-          onEmphasize: (roll) => {
-            holdQueue.emphasizeFirst();
-            return playReelFor(roll);
+      function start() {
+        activePlayback = playback(
+          result.rolls,
+          state,
+          currentSpeedMode(), // チャージ中に速度が変わっていた場合、開始時点の速度を使う
+          {
+            onEmphasize: (roll) => {
+              // 補充される保留の色変化予告は、実際にスライド一式が終わった瞬間に
+              // holdQueue側で自動的に反映される（固定の待ち時間で見計らうのではなく、
+              // 「スライドが終わったらすぐ」を実際の完了検知で実現するため）。
+              const upcomingRoll = result.rolls[nextUpcomingIndex];
+              const refillPattern = upcomingRoll
+                ? PachiSim.holdOmens.pickPattern(upcomingRoll.hit)
+                : null;
+              nextUpcomingIndex += 1;
+              // 拡大フェーズより移動が長引くと、移動しきる前に次のバーストが
+              // 割り込んで「移動中に大きくなる」ように見えてしまうため、
+              // 現在の速度の拡大フェーズの長さに収まる範囲に短縮する。
+              const moveMs = Math.min(
+                140,
+                Math.max(80, Math.round(computeTickSplit(currentSpeedMode()).emphasizeMs * 0.7))
+              );
+              holdQueue.emphasizeFirst(!roll.hit, refillPattern, moveMs);
+              return playReelFor(roll);
+            },
+            onResolve: (roll) => {
+              holdQueue.resolveFirst(roll.hit);
+              updateLiveDisplay(roll);
+            },
           },
-          onResolve: (roll) => {
-            const upcomingRoll = result.rolls[nextUpcomingIndex];
-            const refillColor = upcomingRoll ? PachiSim.holdOmens.pickColor(upcomingRoll.hit) : null;
-            nextUpcomingIndex += 1;
-            holdQueue.resolveFirst(roll.hit, refillColor);
-            updateLiveDisplay(roll);
-          },
-        },
-        (viaSkip) => {
-          activePlayback = null;
-          finishAction(result, state, viaSkip);
+          (viaSkip) => {
+            activePlayback = null;
+            finishAction(result, state, viaSkip);
+          }
+        );
+      }
+
+      // チャージ（または「当たりまで」時はスキップ）完了時点で既にSTOPされていた
+      // 場合は、再開操作を待ってから始める。
+      function beginConsumption() {
+        if (isPaused) {
+          pendingStart = start;
+        } else {
+          start();
         }
-      );
+      }
+
+      if (currentSpeedMode().id === "instant") {
+        // 「当たりまで」を選んだ状態でSTARTした場合、結果への一発ジャンプしか
+        // 見せないので、保留が1個ずつチャージされる演出自体が不要
+        // （見えている暇もなく終わってしまう）。
+        beginConsumption();
+      } else {
+        // 保留0個→4個まで「1個ずつ順番に」チャージし終えるまでは消化を始めない。
+        // 初期4個も、それぞれが表す先の4回転(result.rolls[0..3])のhit結果に応じて
+        // 色変化パターンを割り当てる。
+        const initialPatterns = [0, 1, 2, 3].map((i) => {
+          const r = result.rolls[i];
+          return r ? PachiSim.holdOmens.pickPattern(r.hit) : null;
+        });
+        holdQueue.fillInitial(initialPatterns, beginConsumption);
+      }
     }
 
     function finishAction(result, fromState, viaSkip) {
       const outcome = result.outcome;
       const toState = machine.states[outcome.nextStateId];
 
-      // 「当たりまで」の一発ジャンプで終わった場合、演出を1回転ずつ見せていないので
-      // 保留は非表示にし、リールは結果に応じた見た目（当たりなら揃った状態、
-      // ハズレならアイドル状態）に揃えておく。
+      // 「当たりまで」の一発ジャンプで終わった場合、1回転ずつのupdateLiveDisplayを
+      // 経由していないので、回転数表示が初期値のまま(0回転など)取り残されてしまう。
+      // ここで実際の消化回数(outcome.attempts)をもとに直接反映してから凍結する。
       if (viaSkip) {
+        liveCount = outcome.attempts;
+        liveRemaining = fromState.maxAttempts == null ? null : fromState.maxAttempts - outcome.attempts;
+        els.spinCounter.textContent = spinCounterText(fromState);
         holdQueue.reset();
         if (outcome.type === "hit") {
           const plan = PachiSim.reelOmens.decide(
@@ -460,6 +578,8 @@
       session = result.newSession;
       session.streak = streakResult.streak;
 
+      const line2 = `次回：${toState.label}`;
+
       if (outcome.type === "hit") {
         stats.totalHitCount += 1;
         stats.totalBalls += outcome.balls;
@@ -474,13 +594,13 @@
 
         showResultEffect({
           line1: `大当たり＜${outcome.rounds}R獲得＞${outcome.resultNote ? `（${outcome.resultNote}）` : ""}`,
-          line2: `次回：${toState.label}`,
+          line2,
           kind: "hit",
         });
       } else {
         showResultEffect({
           line1: outcome.resultLabel || `${fromState.label}終了`,
-          line2: `次回：${toState.label}`,
+          line2,
           kind: "exhausted",
         });
       }
@@ -491,6 +611,7 @@
         stats.maxIkkiBalls = Math.max(stats.maxIkkiBalls, balls);
         stats.maxRenchan = Math.max(stats.maxRenchan, renchan);
         currentStreakId = null;
+        showResultPanel(renchan, balls);
         PachiSim.rankingService.submitResult({
           machineSlug: slug,
           machineName: machine.name,
@@ -499,6 +620,7 @@
           renchan,
           achievedAt: new Date().toISOString(),
         });
+        renderMachineRanking();
       }
 
       PachiSim.statsStore.save(slug, stats);
@@ -506,9 +628,10 @@
       isAnimating = false;
       isPaused = false;
       activePlayback = null;
-      // 上部の回転数表示は「当たった回転数がわかるように」あえてリセットせずそのまま残す。
-      // 実際のリセットは次のhandleAction()の冒頭で行われる。
-      renderAll({ freezeSpinCounter: true });
+      // 上部の状態名・回転数表示は「どの状態で何回転当たったか」がわかるように
+      // あえてリセットせずそのまま残す。実際のリセットは次のhandleAction()の
+      // 冒頭で行われる。
+      renderAll({ freezeStateDisplay: true });
     }
 
     els.actionButton.addEventListener("click", () => {
@@ -527,18 +650,29 @@
         els.actionButton.textContent = "STOP";
         els.actionButton.dataset.mode = "stop";
         syncSpeedButtonLock();
-        if (activePlayback) activePlayback.resume();
+        if (pendingStart) {
+          // 保留チャージ中にSTOPされていた場合、チャージ完了時点で消化を始める
+          const fn = pendingStart;
+          pendingStart = null;
+          fn();
+        } else if (activePlayback) {
+          activePlayback.resume();
+        }
         return;
       }
       handleAction();
     });
 
-    els.speedButton.addEventListener("click", () => {
-      speedModeIndex = (speedModeIndex + 1) % PachiSim.config.speedModes.length;
-      els.speedButton.textContent = `抽選速度：${currentSpeedMode().label}`;
-      // 一時停止中に速度を変えても、それまでの回転数・保留はそのまま維持し、
-      // 再開後のテンポだけを新しい速度に切り替える
-      if (activePlayback) activePlayback.setSpeed(currentSpeedMode());
+    els.speedToggleButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const newIndex = PachiSim.config.speedModes.findIndex((m) => m.id === btn.dataset.speedId);
+        if (newIndex < 0 || newIndex === speedModeIndex) return;
+        speedModeIndex = newIndex;
+        syncSpeedButtonsActive();
+        // 一時停止中に速度を変えても、それまでの回転数・保留はそのまま維持し、
+        // 再開後のテンポだけを新しい速度に切り替える
+        if (activePlayback) activePlayback.setSpeed(currentSpeedMode());
+      });
     });
 
     els.resetButton.addEventListener("click", () => {
@@ -551,6 +685,7 @@
       session = PachiSim.engine.createSession(machine);
       currentStreakId = null;
       showIdleEffect();
+      hideResultPanel();
       holdQueue.reset();
       reelDisplay.reset();
       resetLiveCountersForState(machine.states[session.stateId]);
@@ -560,6 +695,7 @@
     resetLiveCountersForState(machine.states[session.stateId]);
     showIdleEffect();
     renderAll();
+    renderMachineRanking();
   }
 
   if (document.readyState === "loading") {

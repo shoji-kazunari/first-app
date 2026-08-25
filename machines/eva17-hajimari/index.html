@@ -59,6 +59,11 @@
           <hr class="sim-divider">
           <div id="reelDisplay" class="reel-display" aria-hidden="true"></div>
           <div id="holdQueue" class="hold-queue" aria-hidden="true"></div>
+          <div id="resultPanel" class="result-panel" hidden>
+            <p class="result-panel__title">RESULT</p>
+            <p class="result-panel__renchan"><span id="resultRenchan">0</span>連</p>
+            <p class="result-panel__balls"><span id="resultBalls">0</span>玉獲得</p>
+          </div>
         </div>
         <div id="effectArea" class="effect-area" data-kind="idle"></div>
       </section>
@@ -67,7 +72,11 @@
 
       <section class="action-row">
         <button id="actionButton" class="action-button" type="button">START</button>
-        <button id="speedButton" class="btn btn-secondary speed-button" type="button">抽選速度：普通</button>
+        <div class="speed-toggle" role="group" aria-label="抽選速度">
+          <button class="speed-toggle__btn" data-speed-id="normal" type="button">普通</button>
+          <button class="speed-toggle__btn" data-speed-id="fast" type="button">早い</button>
+          <button class="speed-toggle__btn" data-speed-id="instant" type="button">当たりまで</button>
+        </div>
       </section>
 
       <section class="card" aria-label="本日の成績">
@@ -82,6 +91,11 @@
       <section class="card" aria-label="関連商品">
         <h3 class="card__heading">関連商品</h3>
         <div id="affiliateSection"></div>
+      </section>
+
+      <section class="card" aria-label="出玉ランキング">
+        <h3 class="card__heading">出玉ランキング</h3>
+        <div id="machineRanking"></div>
       </section>
 
       <p class="disclaimer">
@@ -102,6 +116,7 @@
   <script src="../../assets/js/core/streakTracker.js"></script>
   <script src="../../assets/js/core/statsStore.js"></script>
   <script src="../../assets/js/core/historyStore.js"></script>
+  <script src="../../assets/js/core/rankingStore.js"></script>
   <script src="../../assets/js/core/rankingService.js"></script>
   <script src="../../assets/js/data/registry.js"></script>
   <script src="../../assets/js/data/machines/eva17-hajimari.js"></script>
@@ -110,6 +125,7 @@
   <script src="../../assets/js/ui/dataLamp.js"></script>
   <script src="../../assets/js/ui/adSlot.js"></script>
   <script src="../../assets/js/ui/affiliateSection.js"></script>
+  <script src="../../assets/js/ui/rankingList.js"></script>
   <script src="../../assets/js/pages/machine.js"></script>
 </body>
 </html>
