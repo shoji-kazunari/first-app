@@ -4,14 +4,21 @@
 // 土台（台座）を5つ常設し、玉はその上を移動していくだけの構成にしている：
 //   ・小さい台×4＝待機列（1〜4番目）
 //   ・大きい台×1＝これから消化される保留専用（左端）
-// 台自体は常に表示されたまま動かない。玉の移動・拡大縮小はすべて
-// FLIP（先に動かしてから、動く前の状態を装うtransformを当てて0へ戻す）で
-// アニメーションする。土台という固定レイアウトの上で完結するため、
-// 「拡大した拍子に隣の玉がずれる」ようなレイアウト起因のバグが起きない。
+// 台自体は常に表示されたまま動かない。玉のスライドはFLIP（先に動かしてから、
+// 動く前の位置を装うtransformを当てて0へ戻す）でアニメーションする。
+// 土台という固定レイアウトの上で完結するため、「隣の玉がずれる」ような
+// レイアウト起因のバグが起きない。
+//
+// 大きさの変化はアニメーションしない。小台の玉と大台の玉はサイズが違うが、
+// 先頭が大台へ進むときは玉を「移動」させず、小台の玉を消して大台に最初から
+// 大きいサイズで出し直す。移動と拡大を同時にやると「膨らみながら滑っていく」、
+// 順番にやると「着いてからガコッと大きくなる」ように見えてしまうため、
+// サイズ変化を伴う動き自体を作らない方針にしている。
+// したがってアニメーションするスライドは、常に同じ大きさの台の間だけになる。
 //
 // 1回の消化は2段階で表現する:
-//   1. emphasizeFirst() - 先頭の保留が大台へスライド移動しつつ拡大し、
-//      「これから消化される」ことを示す。同時に、残りの待機列も1つずつ詰める。
+//   1. emphasizeFirst() - 先頭の保留を大台へ出し直して「これから消化される」ことを
+//      示す。同時に、残りの待機列は1つずつスライドして詰める。
 //      このスライド一式が完全に終わった直後（ハズレなら）、待機列の空いた
 //      4番目に新しい保留が補充される。
 //   2. resolveFirst(isHit) - 大台の保留がその場でバーストして消える
@@ -23,13 +30,12 @@ PachiSim.ui.HoldQueue = (function () {
   // smallSlots[i]に対応する色パターンのキー（保留の色変化演出はこのキーで
   // 「今どの位置にいるか」を引く。データは保留4(一番奥)〜保留1(先頭)の順）
   const SLOT_POSITION_KEYS = ["1", "2", "3", "4"];
-  // 移動・拡大縮小のトランジション設定。.hold-ballのデフォルト（burst/enter用）は
+  // スライドのトランジション設定。.hold-ballのデフォルト（burst/enter用）は
   // 跳ねる感じのcubic-bezier(0.34, 1.56, 0.64, 1)だが、これをそのまま移動にも
   // 使うと「動いた後、少し戻る」ような跳ね返りに見えてしまうため、
   // 移動中だけは跳ね返りのないイージングを明示的に指定する。
-  // デフォルト値。実際の長さはemphasizeFirst()の引数で速度に応じて渡される。
-  const DEFAULT_MOVE_MS = 140; // 位置を動かすフェーズ
-  const DEFAULT_GROW_MS = 120; // 着いてから大きさが変わるフェーズ
+  // 実際の長さはemphasizeFirst()の引数で速度に応じて渡される。
+  const DEFAULT_MOVE_MS = 140;
   const MOVE_EASING = "cubic-bezier(0.22, 1, 0.36, 1)";
 
   function HoldQueue(containerEl) {
@@ -153,27 +159,21 @@ PachiSim.ui.HoldQueue = (function () {
     this._schedule(done, durationMs + 80);
   };
 
-  // FLIP: ballを実際にtoSlotへ移してしまってから、移す前の見た目（位置・大きさ）を
-  // 装うtransformを一旦当て、そこから元へ戻すことで「なめらかに移動・拡大縮小した」
-  // ように見せる。
+  // FLIP: ballを実際にtoSlotへ移してしまってから、移す前の位置を装うtransformを
+  // 一旦当て、そこから0へ戻すことで「なめらかにスライドした」ように見せる。
   //
-  // 大きさが変わる移動（小台→大台）は、移動と拡大を1本のtransformで同時にやると
-  // 「膨らみながら滑っていく」不自然な見た目になる。特に「早い」速度では拡大フェーズが
-  // 短く、大きくなりきった直後にバーストするため、膨らみながら滑る姿しか見えない。
-  // そこで必ず2段階に分ける:
-  //   1. 移動前の大きさを保ったまま、位置だけを動かす（moveMs）
-  //   2. 着いてからその場で大きさを変える（growMs）
-  // 呼び出し側は、この2つの合計が現在の速度の拡大フェーズに収まる長さを渡すこと。
+  // 動かすのは位置だけで、大きさは一切アニメーションしない（大きさが変わる場面は
+  // 玉を出し直して表現する。ファイル冒頭のコメント参照）。呼び出し元は必ず
+  // 同じ大きさの台の間で使うこと。
   //
-  // onSettled（任意）: 上記2段階が完全に終わった瞬間を検知したい場合に渡す。
-  // moveMs/growMs（任意）: 各フェーズの所要時間。省略時はDEFAULT_*_MS。
-  HoldQueue.prototype._flipMove = function (ball, toSlot, onSettled, moveMs, growMs) {
+  // onSettled（任意）: スライドが完全に終わった瞬間を検知したい場合に渡す。
+  // moveMs（任意）: スライドの所要時間。省略時はDEFAULT_MOVE_MS。
+  HoldQueue.prototype._flipMove = function (ball, toSlot, onSettled, moveMs) {
     const moveDuration = moveMs || DEFAULT_MOVE_MS;
-    const growDuration = typeof growMs === "number" ? growMs : DEFAULT_GROW_MS;
 
-    // 直前の演出（落ちてくるenterや前回の移動）がまだ途中の玉をそのまま測ると、
-    // 「途中の小さい状態」を移動前の大きさとして拾ってしまい、やはり移動中に
-    // 伸び縮みして見える。測る前に必ず、今いる台での静止状態へ確定させる。
+    // 直前の演出（落ちてくるenterや前回のスライド）がまだ途中の玉をそのまま測ると、
+    // 「途中の位置」を移動前の位置として拾ってしまい、動きがおかしくなる。
+    // 測る前に必ず、今いる台での静止状態へ確定させる。
     ball.style.transition = "none";
     ball.classList.remove("hold-ball--enter");
     ball.style.transform = "";
@@ -182,13 +182,8 @@ PachiSim.ui.HoldQueue = (function () {
     const before = ball.getBoundingClientRect();
     toSlot.appendChild(ball);
     const after = ball.getBoundingClientRect();
-    // ズレは中心同士で求める。左上同士で求めると、大きさが変わるときに
-    // 半径の差（小台30px→大台40pxなら5px）だけ位置がずれてしまう。
-    const dx = before.left + before.width / 2 - (after.left + after.width / 2);
-    const dy = before.top + before.height / 2 - (after.top + after.height / 2);
-    const scale = after.width > 0 ? before.width / after.width : 1;
-    const moved = Math.abs(dx) >= 0.5 || Math.abs(dy) >= 0.5;
-    const resized = Math.abs(scale - 1) >= 0.01;
+    const dx = before.left - after.left;
+    const dy = before.top - after.top;
 
     // 終わったら、次にburst/enterが来たとき用に.hold-ballのデフォルト
     // （跳ねる方）のトランジションへ戻しておく。
@@ -198,36 +193,20 @@ PachiSim.ui.HoldQueue = (function () {
       if (onSettled) onSettled();
     };
 
-    if (!moved && !resized) {
+    if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) {
       finish();
       return;
     }
 
-    // 第2段階: その場で大きさだけを変える。
-    // 第1段階の完了時点（transitionend）で今の姿は既に描画済みなので、
-    // ここでは待たずにそのまま次のtransitionを始めてよい。
-    const grow = () => {
-      if (!resized) {
-        finish();
-        return;
-      }
-      this._transitionTransform(ball, "scale(1)", growDuration, finish);
-    };
-
-    ball.style.transform = `translate(${dx}px, ${dy}px) scale(${scale})`;
+    ball.style.transform = `translate(${dx}px, ${dy}px)`;
     void ball.offsetWidth; // 強制リフローでtransform適用を確定させる
 
     // 強制リフローはレイアウトの確定であってペイントの確定ではないため、
     // モバイル端末ではこの直後の変更が同じフレームにまとめられ、瞬間移動して
-    // 見えることがある。第1段階の開始前だけはrAFを2重にしてペイントを1回挟む。
+    // 見えることがある。rAFを2重にしてペイントを1回挟む。
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        if (!moved) {
-          grow();
-          return;
-        }
-        // 第1段階: 大きさは移動前のまま、位置だけを動かす
-        this._transitionTransform(ball, `scale(${scale})`, moveDuration, grow);
+        this._transitionTransform(ball, "", moveDuration, finish);
       });
     });
   };
@@ -273,21 +252,46 @@ PachiSim.ui.HoldQueue = (function () {
     this._playEnter(ball);
   };
 
-  // 先頭の保留を大台へスライド移動＋拡大し、同時に残りの待機列も1つずつ詰める。
+  // 先頭の保留を、小台から消して大台へ出し直す。
+  // 玉を移動させて拡大するのではなく、そのまま最初から大きいサイズで描き直すので、
+  // 「膨らみながら滑る」「着いてからガコッと大きくなる」といった見え方が起きない。
+  // 色は引き継ぐ（同じ保留が進んだことが分かるように、割り当てられたパターンから
+  // 大台の位置に対応する色を反映する）。
+  HoldQueue.prototype._redrawIntoBigSlot = function (fromBall) {
+    fromBall.remove();
+    // 前の消化のバースト玉がまだ残っていることがある（resolveFirstは少し遅れて
+    // 取り除くため）。台に玉が2つ並ばないよう、ここで確実に片付ける。
+    this.bigSlot.querySelectorAll(".hold-ball").forEach((old) => old.remove());
+    // _makeBall()は「落ちてくる」enter状態で作られるが、ここは移動の続きなので
+    // アニメーションなしでそのまま置く。
+    const ball = document.createElement("span");
+    ball.className = "hold-ball";
+    ball._pattern = fromBall._pattern;
+    this.bigSlot.appendChild(ball);
+    this._applyColorForPosition(ball, "big");
+    return ball;
+  };
+
+  // 先頭の保留を大台へ出し直し、同時に残りの待機列を1つずつスライドさせて詰める。
   // 移動先に応じて、それぞれの保留に割り当てられたパターンから色を反映し直す。
   // shouldRefill/refillPattern: trueなら、このスライド一式が完全に終わった直後に
   // 待機列の空いた4番目へ新しい保留を補充する（当たり時は補充しないのでfalse）。
   // 「スライドが終わったらすぐ」という体感を、固定の待ち時間で見計らうのではなく、
   // 実際にすべての移動が完了した瞬間（transitionend）を検知して行う。
-  // moveMs/growMs（任意）: 「移動」と「着いてから拡大」の各所要時間。呼び出し側
-  // （機種ページコントローラ）が現在の速度のテンポに応じて渡す。2つの合計が
-  // 拡大フェーズを超えると、拡大しきる前にバーストが割り込んでしまう。
-  HoldQueue.prototype.emphasizeFirst = function (shouldRefill, refillPattern, moveMs, growMs) {
+  // moveMs（任意）: 待機列のスライドの所要時間。呼び出し側（機種ページコントローラ）が
+  // 現在の速度のテンポに応じて渡す。
+  HoldQueue.prototype.emphasizeFirst = function (shouldRefill, refillPattern, moveMs) {
     const target = this.queue.shift();
     if (!target) return;
-    this.processing = target;
+    this.processing = this._redrawIntoBigSlot(target);
 
-    const movingBalls = [target, ...this.queue];
+    // スライドするのは待機列の残りだけ。全部終わってから補充する。
+    const movingBalls = this.queue.slice();
+    if (movingBalls.length === 0) {
+      if (shouldRefill) this._addRefill(refillPattern);
+      return;
+    }
+
     let settledCount = 0;
     const onAnySettled = () => {
       settledCount++;
@@ -296,12 +300,9 @@ PachiSim.ui.HoldQueue = (function () {
       }
     };
 
-    this._flipMove(target, this.bigSlot, onAnySettled, moveMs, growMs);
-    this._applyColorForPosition(target, "big");
     // 残りの待機列（今はslot2〜4にいる）を、1〜3番目へ詰める
-    // （こちらは大きさが変わらないので、実際には移動フェーズのみ行われる）
-    this.queue.forEach((ball, i) => {
-      this._flipMove(ball, this.smallSlots[i], onAnySettled, moveMs, growMs);
+    movingBalls.forEach((ball, i) => {
+      this._flipMove(ball, this.smallSlots[i], onAnySettled, moveMs);
       this._applyColorForPosition(ball, SLOT_POSITION_KEYS[i]);
     });
   };

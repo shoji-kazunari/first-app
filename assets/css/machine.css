@@ -345,6 +345,10 @@
 .hold-ball {
   width: 30px;
   height: 30px;
+  /* 台はflexコンテナなので、玉が一時的に2つ入ると（前の玉のバーストが
+     終わりきる前に次の玉が乗る等）flexに押し潰されて小さくなってしまう。
+     サイズは常にwidth/heightの指定どおりに保つ。 */
+  flex: none;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 30%, #fff6df 0%, var(--color-accent) 60%, #8f6a35 100%);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
