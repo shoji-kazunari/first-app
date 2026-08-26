@@ -114,6 +114,38 @@
     }
   });
 
+  test("holdOmens: 途中から色が付くパターンも『色保留』として判定される", () => {
+    // 最初から最後まで無色のパターンだけがfalse
+    assertEqual(PachiSim.holdOmens.isColoredPattern(null), false);
+    assertEqual(
+      PachiSim.holdOmens.isColoredPattern({ 4: null, 3: null, 2: null, 1: null, big: null }),
+      false
+    );
+    // 保留2の位置から赤くなるパターン（出現時点では無色）も色保留として扱う。
+    // ここをfalseにしてしまうと、後から色が付いて画面に色保留が2つ並ぶ。
+    assertEqual(
+      PachiSim.holdOmens.isColoredPattern({ 4: null, 3: null, 2: "red", 1: "red", big: "red" }),
+      true
+    );
+    assertEqual(
+      PachiSim.holdOmens.isColoredPattern({ 4: "blue", 3: "blue", 2: "green", 1: "red", big: "red" }),
+      true
+    );
+    // 大台でだけ色が付く場合も拾えること
+    assertEqual(
+      PachiSim.holdOmens.isColoredPattern({ 4: null, 3: null, 2: null, 1: null, big: "green" }),
+      true
+    );
+  });
+
+  test("holdOmens: pickPatternの戻り値はisColoredPatternで判定できる形になっている", () => {
+    // 無色固定のパターン（ハズレ側の重み9000）と、色付きパターンの両方を実際に引く
+    const miss = PachiSim.holdOmens.pickPattern(false, () => 0.99);
+    assertEqual(PachiSim.holdOmens.isColoredPattern(miss), false);
+    const colored = PachiSim.holdOmens.pickPattern(false, () => 0.01);
+    assertEqual(PachiSim.holdOmens.isColoredPattern(colored), true);
+  });
+
   test("engine: 通常時ハズレ→ハズレ→当たり(99%側 4R→最終決戦)", () => {
     const session = PachiSim.engine.createSession(machine);
     const rng = PachiSim.rng.createScriptedRng([0.5, 0.5, 0.001, 0.1]);

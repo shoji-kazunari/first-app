@@ -486,10 +486,14 @@
               // 補充される保留の色変化予告は、実際にスライド一式が終わった瞬間に
               // holdQueue側で自動的に反映される（固定の待ち時間で見計らうのではなく、
               // 「スライドが終わったらすぐ」を実際の完了検知で実現するため）。
+              // 色保留が同時に複数出ると、どれが何を示しているのか分かりづらいので、
+              // 既に色保留（途中から色が付くものも含む）が残っている間は、
+              // 補充する保留に色を割り当てない。演出だけの話なので抽選結果は変わらない。
               const upcomingRoll = result.rolls[nextUpcomingIndex];
-              const refillPattern = upcomingRoll
-                ? PachiSim.holdOmens.pickPattern(upcomingRoll.hit)
-                : null;
+              const refillPattern =
+                upcomingRoll && !holdQueue.hasColoredPattern()
+                  ? PachiSim.holdOmens.pickPattern(upcomingRoll.hit)
+                  : null;
               nextUpcomingIndex += 1;
               const holdAnim = computeHoldAnimTiming(currentSpeedMode());
               holdQueue.emphasizeFirst(!roll.hit, refillPattern, holdAnim.moveMs, holdAnim.growMs);
@@ -526,9 +530,16 @@
         // 保留0個→4個まで「1個ずつ順番に」チャージし終えるまでは消化を始めない。
         // 初期4個も、それぞれが表す先の4回転(result.rolls[0..3])のhit結果に応じて
         // 色変化パターンを割り当てる。
+        // ここでも色保留は同時に1つまで。2つ目以降に色が出た場合は無色にする。
+        let coloredTaken = false;
         const initialPatterns = [0, 1, 2, 3].map((i) => {
           const r = result.rolls[i];
-          return r ? PachiSim.holdOmens.pickPattern(r.hit) : null;
+          if (!r) return null;
+          const pattern = PachiSim.holdOmens.pickPattern(r.hit);
+          if (!PachiSim.holdOmens.isColoredPattern(pattern)) return pattern;
+          if (coloredTaken) return null;
+          coloredTaken = true;
+          return pattern;
         });
         holdQueue.fillInitial(initialPatterns, beginConsumption);
       }

@@ -48,5 +48,14 @@ PachiSim.holdOmens = (function () {
     return picked.colors;
   }
 
-  return { pickPattern };
+  // そのパターンがどこかの位置で色付きになるか。
+  // 「今は無色だが保留2の位置から赤くなる」ようなパターンも色保留として扱う
+  // （色保留が画面に同時に2つ以上出ると、どれが何を示しているのか分かりづらいため、
+  // 呼び出し側はこれを使って色の重複を避ける）。
+  function isColoredPattern(pattern) {
+    if (!pattern) return false;
+    return ["4", "3", "2", "1", "big"].some((key) => !!pattern[key]);
+  }
+
+  return { pickPattern, isColoredPattern };
 })();

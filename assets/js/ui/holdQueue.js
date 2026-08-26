@@ -78,6 +78,14 @@ PachiSim.ui.HoldQueue = (function () {
     return Array.from(target.classList).some((c) => c.indexOf("hold-ball--color-") === 0);
   };
 
+  // 待機列または大台に、色が付く（途中から色が付くものも含む）保留が今いるか。
+  // 色保留が同時に複数出ると、どれが何を示しているのか分かりづらくなるため、
+  // 呼び出し側はこれがtrueの間、新しく出す保留に色を割り当てない。
+  HoldQueue.prototype.hasColoredPattern = function () {
+    const balls = this.processing ? [this.processing].concat(this.queue) : this.queue;
+    return balls.some((ball) => PachiSim.holdOmens.isColoredPattern(ball._pattern));
+  };
+
   // pattern: PachiSim.holdOmens.pickPattern()の戻り値（{4,3,2,1,big}の色推移パターン）。
   // 実際に画面へ反映するのは_applyColorForPositionの役目で、ここでは保持するだけ。
   HoldQueue.prototype._makeBall = function (pattern) {
