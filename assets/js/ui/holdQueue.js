@@ -27,10 +27,9 @@ PachiSim.ui.HoldQueue = (function () {
   // 跳ねる感じのcubic-bezier(0.34, 1.56, 0.64, 1)だが、これをそのまま移動にも
   // 使うと「動いた後、少し戻る」ような跳ね返りに見えてしまうため、
   // 移動中だけは跳ね返りのないイージングを明示的に指定する。
-  // デフォルト値。実際の長さはemphasizeFirst()の引数で速度に応じて渡される
-  // （「早い」速度の拡大フェーズ(約115ms)より長いままだと、移動しきる前に
-  // バーストが割り込んで「移動中に大きくなる」ような不自然な見た目になるため）。
-  const DEFAULT_MOVE_MS = 140;
+  // デフォルト値。実際の長さはemphasizeFirst()の引数で速度に応じて渡される。
+  const DEFAULT_MOVE_MS = 140; // 位置を動かすフェーズ
+  const DEFAULT_GROW_MS = 120; // 着いてから大きさが変わるフェーズ
   const MOVE_EASING = "cubic-bezier(0.22, 1, 0.36, 1)";
 
   function HoldQueue(containerEl) {
@@ -126,51 +125,101 @@ PachiSim.ui.HoldQueue = (function () {
     });
   };
 
+  // transformを指定値へアニメーションさせ、完了した瞬間にonDoneを呼ぶ小さなヘルパー。
+  // 呼んだ時点のtransformが開始値になるので、開始値が既に画面に描画済みである
+  // ことを呼び出し側が保証すること（未描画のまま呼ぶと、2つのスタイル変更が同じ
+  // フレームにまとめられ、アニメーションなしで瞬間移動して見える）。
+  // 完了はtransitionendで正確に検知する（setTimeoutで見計らうと実際の完了と数msずれ、
+  // そのわずかな差分がデフォルトの跳ねるイージングで埋められて「一瞬戻る」ように
+  // 見えるため）。バックグラウンドタブ等で発火しない場合に備え、保険のタイムアウトも併用する。
+  HoldQueue.prototype._transitionTransform = function (ball, toTransform, durationMs, onDone) {
+    ball.style.transition = `transform ${durationMs}ms ${MOVE_EASING}`;
+    ball.style.transform = toTransform;
+    let fired = false;
+    const done = () => {
+      if (fired) return;
+      fired = true;
+      onDone();
+    };
+    ball.addEventListener("transitionend", done, { once: true });
+    this._schedule(done, durationMs + 80);
+  };
+
   // FLIP: ballを実際にtoSlotへ移してしまってから、移す前の見た目（位置・大きさ）を
-  // 装うtransformを一旦当て、次フレームで0へ戻すことで「なめらかに移動・拡大縮小した」
-  // ように見せる。位置だけでなく大きさの変化（小台→大台など）も同時に扱える。
-  // onSettled（任意）: 移動が実際に完了した瞬間を検知したい場合に渡す
-  // （transitionendを正確な合図にしつつ、万一発火しないケースへの保険で
-  // タイムアウトも併用する）。
-  // moveMs（任意）: 移動の所要時間。省略時はDEFAULT_MOVE_MS。
-  HoldQueue.prototype._flipMove = function (ball, toSlot, onSettled, moveMs) {
-    const duration = moveMs || DEFAULT_MOVE_MS;
+  // 装うtransformを一旦当て、そこから元へ戻すことで「なめらかに移動・拡大縮小した」
+  // ように見せる。
+  //
+  // 大きさが変わる移動（小台→大台）は、移動と拡大を1本のtransformで同時にやると
+  // 「膨らみながら滑っていく」不自然な見た目になる。特に「早い」速度では拡大フェーズが
+  // 短く、大きくなりきった直後にバーストするため、膨らみながら滑る姿しか見えない。
+  // そこで必ず2段階に分ける:
+  //   1. 移動前の大きさを保ったまま、位置だけを動かす（moveMs）
+  //   2. 着いてからその場で大きさを変える（growMs）
+  // 呼び出し側は、この2つの合計が現在の速度の拡大フェーズに収まる長さを渡すこと。
+  //
+  // onSettled（任意）: 上記2段階が完全に終わった瞬間を検知したい場合に渡す。
+  // moveMs/growMs（任意）: 各フェーズの所要時間。省略時はDEFAULT_*_MS。
+  HoldQueue.prototype._flipMove = function (ball, toSlot, onSettled, moveMs, growMs) {
+    const moveDuration = moveMs || DEFAULT_MOVE_MS;
+    const growDuration = typeof growMs === "number" ? growMs : DEFAULT_GROW_MS;
+
+    // 直前の演出（落ちてくるenterや前回の移動）がまだ途中の玉をそのまま測ると、
+    // 「途中の小さい状態」を移動前の大きさとして拾ってしまい、やはり移動中に
+    // 伸び縮みして見える。測る前に必ず、今いる台での静止状態へ確定させる。
+    ball.style.transition = "none";
+    ball.classList.remove("hold-ball--enter");
+    ball.style.transform = "";
+    void ball.offsetWidth; // 強制リフローで確定させる
+
     const before = ball.getBoundingClientRect();
     toSlot.appendChild(ball);
     const after = ball.getBoundingClientRect();
-    const dx = before.left - after.left;
-    const dy = before.top - after.top;
+    // ズレは中心同士で求める。左上同士で求めると、大きさが変わるときに
+    // 半径の差（小台30px→大台40pxなら5px）だけ位置がずれてしまう。
+    const dx = before.left + before.width / 2 - (after.left + after.width / 2);
+    const dy = before.top + before.height / 2 - (after.top + after.height / 2);
     const scale = after.width > 0 ? before.width / after.width : 1;
-    if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5 && Math.abs(scale - 1) < 0.01) {
+    const moved = Math.abs(dx) >= 0.5 || Math.abs(dy) >= 0.5;
+    const resized = Math.abs(scale - 1) >= 0.01;
+
+    // 終わったら、次にburst/enterが来たとき用に.hold-ballのデフォルト
+    // （跳ねる方）のトランジションへ戻しておく。
+    const finish = () => {
+      ball.style.transition = "";
+      ball.style.transform = "";
       if (onSettled) onSettled();
+    };
+
+    if (!moved && !resized) {
+      finish();
       return;
     }
 
-    ball.style.transition = "none";
+    // 第2段階: その場で大きさだけを変える。
+    // 第1段階の完了時点（transitionend）で今の姿は既に描画済みなので、
+    // ここでは待たずにそのまま次のtransitionを始めてよい。
+    const grow = () => {
+      if (!resized) {
+        finish();
+        return;
+      }
+      this._transitionTransform(ball, "scale(1)", growDuration, finish);
+    };
+
     ball.style.transform = `translate(${dx}px, ${dy}px) scale(${scale})`;
     void ball.offsetWidth; // 強制リフローでtransform適用を確定させる
+
     // 強制リフローはレイアウトの確定であってペイントの確定ではないため、
     // モバイル端末ではこの直後の変更が同じフレームにまとめられ、瞬間移動して
-    // 見えることがある。rAFを2重にして間にペイントを挟む。
+    // 見えることがある。第1段階の開始前だけはrAFを2重にしてペイントを1回挟む。
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        ball.style.transition = `transform ${duration}ms ${MOVE_EASING}`;
-        ball.style.transform = "";
-        // 移動が終わったら、次にburst/enterが来たとき用に.hold-ballの
-        // デフォルト（跳ねる方）のトランジションへ戻しておく。setTimeoutで
-        // 見計らうと実際の完了タイミングと数msずれ、そのわずかな差分が
-        // デフォルトの跳ねるイージングで埋められて「一瞬戻る」ように見える
-        // バグになるため、実際の完了を検知できるtransitionendを使う
-        // （発火しないケースへの保険としてタイムアウトも併用）。
-        let fired = false;
-        const done = () => {
-          if (fired) return;
-          fired = true;
-          ball.style.transition = "";
-          if (onSettled) onSettled();
-        };
-        ball.addEventListener("transitionend", done, { once: true });
-        this._schedule(done, duration + 80);
+        if (!moved) {
+          grow();
+          return;
+        }
+        // 第1段階: 大きさは移動前のまま、位置だけを動かす
+        this._transitionTransform(ball, `scale(${scale})`, moveDuration, grow);
       });
     });
   };
@@ -222,11 +271,10 @@ PachiSim.ui.HoldQueue = (function () {
   // 待機列の空いた4番目へ新しい保留を補充する（当たり時は補充しないのでfalse）。
   // 「スライドが終わったらすぐ」という体感を、固定の待ち時間で見計らうのではなく、
   // 実際にすべての移動が完了した瞬間（transitionend）を検知して行う。
-  // moveMs（任意）: 移動の所要時間。呼び出し側（機種ページコントローラ）が
-  // 現在の速度のテンポ（拡大フェーズの長さ）に応じて短くするために渡す
-  // （「早い」速度のように拡大フェーズが短い場合、移動が終わりきる前に
-  // バーストが割り込んで「移動中に大きくなる」ように見えてしまうため）。
-  HoldQueue.prototype.emphasizeFirst = function (shouldRefill, refillPattern, moveMs) {
+  // moveMs/growMs（任意）: 「移動」と「着いてから拡大」の各所要時間。呼び出し側
+  // （機種ページコントローラ）が現在の速度のテンポに応じて渡す。2つの合計が
+  // 拡大フェーズを超えると、拡大しきる前にバーストが割り込んでしまう。
+  HoldQueue.prototype.emphasizeFirst = function (shouldRefill, refillPattern, moveMs, growMs) {
     const target = this.queue.shift();
     if (!target) return;
     this.processing = target;
@@ -240,11 +288,12 @@ PachiSim.ui.HoldQueue = (function () {
       }
     };
 
-    this._flipMove(target, this.bigSlot, onAnySettled, moveMs);
+    this._flipMove(target, this.bigSlot, onAnySettled, moveMs, growMs);
     this._applyColorForPosition(target, "big");
     // 残りの待機列（今はslot2〜4にいる）を、1〜3番目へ詰める
+    // （こちらは大きさが変わらないので、実際には移動フェーズのみ行われる）
     this.queue.forEach((ball, i) => {
-      this._flipMove(ball, this.smallSlots[i], onAnySettled, moveMs);
+      this._flipMove(ball, this.smallSlots[i], onAnySettled, moveMs, growMs);
       this._applyColorForPosition(ball, SLOT_POSITION_KEYS[i]);
     });
   };

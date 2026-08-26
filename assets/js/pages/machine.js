@@ -93,6 +93,18 @@
       return { emphasizeMs, resolveMs };
     }
 
+    // 保留が大台へ移るときの「移動」→「着いてから拡大」の2フェーズの長さ。
+    // 合計が拡大フェーズに収まらないと、拡大しきる前にバーストが割り込んで
+    // 「移動中に大きくなる」ように見えてしまうため、必ず拡大フェーズの内側に収める。
+    // アニメーション開始前のペイント待ち（rAF約2フレーム分）も要るので、
+    // 拡大フェーズを丸ごと使い切らず7割に抑えて余白を残す。
+    function computeHoldAnimTiming(speedMode) {
+      const budget = Math.round(computeTickSplit(speedMode).emphasizeMs * 0.7);
+      const moveMs = Math.max(40, Math.min(140, Math.round(budget * 0.6)));
+      const growMs = Math.max(24, Math.min(120, budget - moveMs));
+      return { moveMs, growMs };
+    }
+
     function investmentYen() {
       const raw = (stats.totalNormalSpins / machine.spinsPer1000Yen) * 1000;
       return PachiSim.format.roundUpTo(raw, PachiSim.config.investmentRoundingYen);
@@ -479,14 +491,8 @@
                 ? PachiSim.holdOmens.pickPattern(upcomingRoll.hit)
                 : null;
               nextUpcomingIndex += 1;
-              // 拡大フェーズより移動が長引くと、移動しきる前に次のバーストが
-              // 割り込んで「移動中に大きくなる」ように見えてしまうため、
-              // 現在の速度の拡大フェーズの長さに収まる範囲に短縮する。
-              const moveMs = Math.min(
-                140,
-                Math.max(80, Math.round(computeTickSplit(currentSpeedMode()).emphasizeMs * 0.7))
-              );
-              holdQueue.emphasizeFirst(!roll.hit, refillPattern, moveMs);
+              const holdAnim = computeHoldAnimTiming(currentSpeedMode());
+              holdQueue.emphasizeFirst(!roll.hit, refillPattern, holdAnim.moveMs, holdAnim.growMs);
               return playReelFor(roll);
             },
             onResolve: (roll) => {
