@@ -9,6 +9,7 @@ window.PachiSim = window.PachiSim || {};
 
 PachiSim.rankingService = (function () {
   const BACKEND_CONNECTED = false;
+  const DISPLAY_LIMIT = 10; // 各ランキングに載せる最大件数
 
   function isBackendConnected() {
     return BACKEND_CONNECTED;
@@ -36,22 +37,28 @@ PachiSim.rankingService = (function () {
       .slice(0, limit);
   }
 
-  // period: "today" | "allTime"
-  // machineSlug（任意）: 指定すると、その機種の記録だけに絞る（機種別ランキング用）
-  // 戻り値: { period, machineSlug, entries: [{id,machineSlug,machineName,manufacturerName,balls,achievedAt}], backendConnected }
-  async function fetchRanking(period, machineSlug) {
-    let entries = PachiSim.rankingStore.loadAll();
+  // 記録一覧を期間・機種で絞り込んで並べ替える純関数（localStorageを触らない）。
+  // 基準時刻nowを引数に取るので、tests/ranking.tests.jsから任意の日時で検証できる。
+  function selectRanking(allEntries, period, machineSlug, now) {
+    let entries = Array.isArray(allEntries) ? allEntries : [];
     if (machineSlug) {
       entries = entries.filter((e) => e.machineSlug === machineSlug);
     }
     if (period === "today") {
-      const key = todayKey();
+      const key = localDateKey(now ? new Date(now) : new Date());
       entries = entries.filter((e) => e.achievedAt && localDateKey(new Date(e.achievedAt)) === key);
     }
+    return sortAndLimit(entries, DISPLAY_LIMIT);
+  }
+
+  // period: "today" | "allTime"
+  // machineSlug（任意）: 指定すると、その機種の記録だけに絞る（機種別ランキング用）
+  // 戻り値: { period, machineSlug, entries: [{id,machineSlug,machineName,manufacturerName,balls,achievedAt}], backendConnected }
+  async function fetchRanking(period, machineSlug) {
     return {
       period,
       machineSlug: machineSlug || null,
-      entries: sortAndLimit(entries, 10),
+      entries: selectRanking(PachiSim.rankingStore.loadAll(), period, machineSlug, Date.now()),
       backendConnected: BACKEND_CONNECTED,
     };
   }
@@ -88,5 +95,9 @@ PachiSim.rankingService = (function () {
     submitResult,
     removeEntry,
     clearScope,
+    // 以下はtests/ranking.tests.jsから検証するために公開している純関数
+    selectRanking,
+    localDateKey,
+    DISPLAY_LIMIT,
   };
 })();

@@ -14,6 +14,14 @@ PachiSim.ui.renderRankingList = function (containerEl, entries, options) {
   const opts = options || {};
   const showMachine = !!opts.showMachine;
 
+  // 記録はlocalStorage由来（書き換えられている可能性がある）なので、
+  // innerHTMLへ差し込む前に必ずエスケープする。
+  const escapeHtml = (text) =>
+    String(text).replace(
+      /[&<>"']/g,
+      (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])
+    );
+
   if (!entries.length) {
     containerEl.innerHTML = `<p class="ranking-list__empty">${
       opts.emptyText || "まだ記録がありません。"
@@ -27,10 +35,12 @@ PachiSim.ui.renderRankingList = function (containerEl, entries, options) {
       const isExtra = rank > 1;
       const dateLabel = PachiSim.format.dateTimeLabel(e.achievedAt);
       const machinePart = showMachine
-        ? `<span class="ranking-list__machine">${e.machineName}</span>`
+        ? `<span class="ranking-list__machine">${escapeHtml(e.machineName)}</span>`
         : "";
       const deleteBtn = opts.onDelete
-        ? `<button class="ranking-list__delete" type="button" data-id="${e.id}" aria-label="この記録を削除">×</button>`
+        ? `<button class="ranking-list__delete" type="button" data-id="${escapeHtml(
+            e.id
+          )}" aria-label="この記録を削除">×</button>`
         : "";
       return `
         <li class="ranking-list__item${isExtra ? " ranking-list__item--extra" : ""}"${
