@@ -9,16 +9,18 @@
 // 土台という固定レイアウトの上で完結するため、「隣の玉がずれる」ような
 // レイアウト起因のバグが起きない。
 //
-// 大きさの変化はアニメーションしない。小台の玉と大台の玉はサイズが違うが、
-// 先頭が大台へ進むときは玉を「移動」させず、小台の玉を消して大台に最初から
-// 大きいサイズで出し直す。移動と拡大を同時にやると「膨らみながら滑っていく」、
-// 順番にやると「着いてからガコッと大きくなる」ように見えてしまうため、
-// サイズ変化を伴う動き自体を作らない方針にしている。
-// したがってアニメーションするスライドは、常に同じ大きさの台の間だけになる。
+// 玉の大きさはどの台でも同じで、大きさが変わる動きは一切作らない。
+// 大台の玉だけを大きくしていた時期があったが、そうすると先頭が大台へ進む動きが
+//   ・移動と拡大を同時 → 「膨らみながら滑っていく」
+//   ・移動してから拡大 → 「着いてからガコッと大きくなる」
+//   ・移動させず出し直す → 「一瞬消える」
+// のいずれかにしかならず、どれも見た目が悪かった。大きさを揃えれば、先頭は
+// ただ滑って大台へ入るだけになり、この3つがまとめて起きなくなる。
+// 「今から消化する保留」であることは、間隔・少し広い台座・玉の光彩で示す。
 //
 // 1回の消化は2段階で表現する:
-//   1. emphasizeFirst() - 先頭の保留を大台へ出し直して「これから消化される」ことを
-//      示す。同時に、残りの待機列は1つずつスライドして詰める。
+//   1. emphasizeFirst() - 先頭の保留が大台へスライドして「これから消化される」ことを
+//      示す。同時に、残りの待機列も1つずつスライドして詰める。
 //      このスライド一式が完全に終わった直後（ハズレなら）、待機列の空いた
 //      4番目に新しい保留が補充される。
 //   2. resolveFirst(isHit) - 大台の保留がその場でバーストして消える
@@ -37,6 +39,11 @@ PachiSim.ui.HoldQueue = (function () {
   // 実際の長さはemphasizeFirst()の引数で速度に応じて渡される。
   const DEFAULT_MOVE_MS = 140;
   const MOVE_EASING = "cubic-bezier(0.22, 1, 0.36, 1)";
+  // 新しい保留が上から落ちてくる動き。前寄りすぎるイージングだと、見えるように
+  // なった時にはもう着地していて「落ちてきた」と分からないため、
+  // 移動用より緩やかで、最後に軽く行き過ぎる程度のカーブにする。
+  const DEFAULT_ENTER_MS = 200;
+  const ENTER_EASING = "cubic-bezier(0.3, 0.75, 0.45, 1.2)";
 
   function HoldQueue(containerEl) {
     this.el = containerEl;
@@ -117,24 +124,31 @@ PachiSim.ui.HoldQueue = (function () {
   // 実際の完了タイミングをtransitionendで正確に検知するが、バックグラウンドタブでの
   // スロットリングなど、万一発火しないケースに備えて保険のタイムアウトも併用する
   // （そうしないと、その後の消化が永久に始まらなくなってしまう）。
-  HoldQueue.prototype._playEnter = function (ball, onLanded) {
+  // enterMs（任意）: 落ちてくる動きの所要時間。省略時はDEFAULT_ENTER_MS。
+  HoldQueue.prototype._playEnter = function (ball, onLanded, enterMs) {
+    const duration = enterMs || DEFAULT_ENTER_MS;
+    // 透明度は動きよりずっと早く立ち上げる。.hold-ballの既定値のままだと、
+    // 玉がほとんど透明なうちに落ちきってしまい（透明度0.6に達する頃には
+    // 着地点の2px手前まで来ている）、上から入ってくる動きが見えない。
+    const fadeMs = Math.max(40, Math.round(duration * 0.28));
     // enter状態が実際に1フレーム分描画されてからクラスを外さないと、
     // モバイル端末では2つのスタイル変更が同じフレームにまとめられてしまい
     // アニメーションなしで瞬間移動したように見えることがある（rAFを2重に
     // ネストして、間に確実にペイントを1回挟む）。
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
+        ball.style.transition = `transform ${duration}ms ${ENTER_EASING}, opacity ${fadeMs}ms ease`;
         ball.classList.remove("hold-ball--enter");
-        if (onLanded) {
-          let fired = false;
-          const done = () => {
-            if (fired) return;
-            fired = true;
-            onLanded();
-          };
-          ball.addEventListener("transitionend", done, { once: true });
-          this._schedule(done, 300); // enterのtransition(0.16s/0.14s)より十分長い保険
-        }
+        let fired = false;
+        const done = () => {
+          if (fired) return;
+          fired = true;
+          // 次のburst用に.hold-ballの既定のトランジションへ戻す
+          ball.style.transition = "";
+          if (onLanded) onLanded();
+        };
+        ball.addEventListener("transitionend", done, { once: true });
+        this._schedule(done, duration + 100);
       });
     });
   };
@@ -241,72 +255,49 @@ PachiSim.ui.HoldQueue = (function () {
     addNext(0);
   };
 
-  // 空いている待機列の末尾（通常は3=4番目）に新しい保留を1つ補充する
-  HoldQueue.prototype._addRefill = function (pattern) {
+  // 空いている待機列の末尾（通常は3=4番目）に新しい保留を1つ補充する。
+  // moveMs（任意）: そのときの速度のスライド時間。落下もこれに合わせて
+  // 長さを決めるので、テンポが変わっても浮いた速さにならない。
+  HoldQueue.prototype._addRefill = function (pattern, moveMs) {
     const slotIndex = this.queue.length;
     if (slotIndex >= SMALL_SLOT_COUNT) return;
     const ball = this._makeBall(pattern);
     this.smallSlots[slotIndex].appendChild(ball);
     this._applyColorForPosition(ball, SLOT_POSITION_KEYS[slotIndex]);
     this.queue.push(ball);
-    this._playEnter(ball);
+    this._playEnter(ball, null, moveMs ? Math.round(moveMs * 1.4) : undefined);
   };
 
-  // 先頭の保留を、小台から消して大台へ出し直す。
-  // 玉を移動させて拡大するのではなく、そのまま最初から大きいサイズで描き直すので、
-  // 「膨らみながら滑る」「着いてからガコッと大きくなる」といった見え方が起きない。
-  // 色は引き継ぐ（同じ保留が進んだことが分かるように、割り当てられたパターンから
-  // 大台の位置に対応する色を反映する）。
-  HoldQueue.prototype._redrawIntoBigSlot = function (fromBall) {
-    fromBall.remove();
-    // 前の消化のバースト玉がまだ残っていることがある（resolveFirstは少し遅れて
-    // 取り除くため）。台に玉が2つ並ばないよう、ここで確実に片付ける。
-    this.bigSlot.querySelectorAll(".hold-ball").forEach((old) => old.remove());
-    // _makeBall()は「落ちてくる」enter状態で作られるが、ここは移動の続きなので
-    // 位置も大きさも動かさず、透明度だけ短くフェードさせて置く。
-    const ball = document.createElement("span");
-    ball.className = "hold-ball hold-ball--appear";
-    ball._pattern = fromBall._pattern;
-    this.bigSlot.appendChild(ball);
-    this._applyColorForPosition(ball, "big");
-    // 透明な状態が実際に1フレーム描画されてからクラスを外さないと、
-    // 2つのスタイル変更が同じフレームにまとめられてフェードが起きない。
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => ball.classList.remove("hold-ball--appear"));
-    });
-    return ball;
-  };
-
-  // 先頭の保留を大台へ出し直し、同時に残りの待機列を1つずつスライドさせて詰める。
+  // 先頭の保留を大台へスライドさせ、同時に残りの待機列も1つずつスライドさせて詰める。
+  // どの台でも玉の大きさは同じなので、これは純粋な平行移動になる。
   // 移動先に応じて、それぞれの保留に割り当てられたパターンから色を反映し直す。
   // shouldRefill/refillPattern: trueなら、このスライド一式が完全に終わった直後に
   // 待機列の空いた4番目へ新しい保留を補充する（当たり時は補充しないのでfalse）。
   // 「スライドが終わったらすぐ」という体感を、固定の待ち時間で見計らうのではなく、
   // 実際にすべての移動が完了した瞬間（transitionend）を検知して行う。
-  // moveMs（任意）: 待機列のスライドの所要時間。呼び出し側（機種ページコントローラ）が
+  // moveMs（任意）: スライドの所要時間。呼び出し側（機種ページコントローラ）が
   // 現在の速度のテンポに応じて渡す。
   HoldQueue.prototype.emphasizeFirst = function (shouldRefill, refillPattern, moveMs) {
     const target = this.queue.shift();
     if (!target) return;
-    this.processing = this._redrawIntoBigSlot(target);
+    // 前の消化のバースト玉がまだ残っていることがある（resolveFirstは少し遅れて
+    // 取り除くため）。台に玉が2つ並ばないよう、先に片付ける。
+    this.bigSlot.querySelectorAll(".hold-ball").forEach((old) => old.remove());
+    this.processing = target;
 
-    // スライドするのは待機列の残りだけ。全部終わってから補充する。
-    const movingBalls = this.queue.slice();
-    if (movingBalls.length === 0) {
-      if (shouldRefill) this._addRefill(refillPattern);
-      return;
-    }
-
+    const movingBalls = [target].concat(this.queue);
     let settledCount = 0;
     const onAnySettled = () => {
       settledCount++;
       if (settledCount === movingBalls.length && shouldRefill) {
-        this._addRefill(refillPattern);
+        this._addRefill(refillPattern, moveMs);
       }
     };
 
+    this._flipMove(target, this.bigSlot, onAnySettled, moveMs);
+    this._applyColorForPosition(target, "big");
     // 残りの待機列（今はslot2〜4にいる）を、1〜3番目へ詰める
-    movingBalls.forEach((ball, i) => {
+    this.queue.forEach((ball, i) => {
       this._flipMove(ball, this.smallSlots[i], onAnySettled, moveMs);
       this._applyColorForPosition(ball, SLOT_POSITION_KEYS[i]);
     });
