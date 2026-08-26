@@ -48,6 +48,9 @@ PachiSim.ui.HoldQueue = (function () {
   // 移動用より緩やかで、最後に軽く行き過ぎる程度のカーブにする。
   const DEFAULT_ENTER_MS = 200;
   const ENTER_EASING = "cubic-bezier(0.3, 0.75, 0.45, 1.2)";
+  // 保留4個が貯まりきってから消化を始めるまでの間。貯まった瞬間に動き出すと
+  // 詰まって見えるので、ワンテンポ置く。
+  const DEFAULT_SETTLE_MS = 450;
 
   function HoldQueue(containerEl) {
     this.el = containerEl;
@@ -147,11 +150,19 @@ PachiSim.ui.HoldQueue = (function () {
         const done = () => {
           if (fired) return;
           fired = true;
+          ball.removeEventListener("transitionend", onEnd);
           // 次のburst用に.hold-ballの既定のトランジションへ戻す
           ball.style.transition = "";
           if (onLanded) onLanded();
         };
-        ball.addEventListener("transitionend", done, { once: true });
+        // transformとopacityを別々の長さで動かしているので、propertyNameを見ずに
+        // 最初のtransitionendで着地とみなすと、先に終わるopacity（動きの28%の長さ）で
+        // 着地扱いになってしまう。落下しきる前に次の演出が始まらないよう、
+        // 位置の遷移が終わったときだけ着地とする。
+        const onEnd = (e) => {
+          if (e.propertyName === "transform") done();
+        };
+        ball.addEventListener("transitionend", onEnd);
         this._schedule(done, duration + 100);
       });
     });
@@ -244,14 +255,16 @@ PachiSim.ui.HoldQueue = (function () {
   };
 
   // STARTを押した直後、0個→4個まで「1個ずつ順番に」小台へチャージされる演出。
-  // 4個目が着地（enterアニメーション完了）してからonDoneを呼ぶので、
-  // 呼び出し側はそれを合図に保留消化（emphasize/resolve）を開始すればよい
+  // 4個目が着地（enterアニメーション完了）し、さらにsettleMs待ってからonDoneを
+  // 呼ぶので、呼び出し側はそれを合図に保留消化（emphasize/resolve）を開始すればよい
   // （着地しきる前に消化が始まると、縮んだ途中の状態のままスライドしていって
-  // しまい不自然に見えるため）。
+  // しまい不自然に見えるうえ、貯まりきった瞬間に動き出すと詰まって見える）。
   // patterns: 各保留に割り当てる色推移パターンの配列（任意・省略可）。
   // patterns[i]は「保留4〜1」の色推移の一部として、smallSlots[i]の位置
   // （SLOT_POSITION_KEYS[i]）に対応する色をここで反映する。
-  HoldQueue.prototype.fillInitial = function (patterns, onDone) {
+  // settleMs（任意）: 4個貯まってから消化を始めるまでの間。
+  // this._scheduleで待つので、reset()すればこの待ちも取り消される。
+  HoldQueue.prototype.fillInitial = function (patterns, onDone, settleMs) {
     this.reset();
     const CHARGE_STAGGER_MS = 130;
     const addNext = (i) => {
@@ -263,7 +276,7 @@ PachiSim.ui.HoldQueue = (function () {
       const isLast = i === SMALL_SLOT_COUNT - 1;
       if (isLast) {
         this._playEnter(ball, () => {
-          if (onDone) onDone();
+          if (onDone) this._schedule(onDone, settleMs || DEFAULT_SETTLE_MS);
         });
       } else {
         this._playEnter(ball);

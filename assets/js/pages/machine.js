@@ -101,6 +101,13 @@
       return Math.max(110, Math.min(280, Math.round(speedMode.tickMs * 0.3)));
     }
 
+    // STARTで保留4個が貯まりきってから、消化を始めるまでの間。
+    // 貯まった瞬間に動き出すと詰まって見えるので、ワンテンポ置く。
+    // テンポの速い速度では短くするが、どの速度でも「一拍おいた」と分かる長さを残す。
+    function computeHoldSettleMs(speedMode) {
+      return Math.max(240, Math.min(700, Math.round(speedMode.tickMs * 0.55)));
+    }
+
     function investmentYen() {
       const raw = (stats.totalNormalSpins / machine.spinsPer1000Yen) * 1000;
       return PachiSim.format.roundUpTo(raw, PachiSim.config.investmentRoundingYen);
@@ -540,7 +547,11 @@
           coloredTaken = true;
           return pattern;
         });
-        holdQueue.fillInitial(initialPatterns, beginConsumption);
+        holdQueue.fillInitial(
+          initialPatterns,
+          beginConsumption,
+          computeHoldSettleMs(currentSpeedMode())
+        );
       }
     }
 
