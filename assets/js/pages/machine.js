@@ -93,13 +93,12 @@
       return { emphasizeMs, resolveMs };
     }
 
-    // 保留がスライド（＋先頭は拡大）する時間。動き終わってからバーストまでに
-    // 「大台に乗っている状態」を見せる間が要るので、拡大フェーズの半分に抑える。
-    // ここを長く取ると、特に「早い」で動きっぱなしのまま消化されてしまい、
-    // 玉が膨らみながら滑っているようにしか見えなくなる。
+    // 保留がスライド（＋先頭は拡大）する時間。
+    // 実機は約280msかけてなめらかに減速しながら動くので、普通ではそこに合わせる。
+    // テンポの速い速度では短くするが、下限は「滑って動いた」と分かる長さを残す
+    // （短すぎると瞬間移動に見え、長すぎると動きっぱなしのまま消化されてしまう）。
     function computeHoldMoveMs(speedMode) {
-      const budget = computeTickSplit(speedMode).emphasizeMs * 0.5;
-      return Math.max(50, Math.min(140, Math.round(budget)));
+      return Math.max(110, Math.min(280, Math.round(speedMode.tickMs * 0.3)));
     }
 
     function investmentYen() {

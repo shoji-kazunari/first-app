@@ -37,8 +37,12 @@ PachiSim.ui.HoldQueue = (function () {
   // 使うと「動いた後、少し戻る」ような跳ね返りに見えてしまうため、
   // 移動中だけは跳ね返りのないイージングを明示的に指定する。
   // 実際の長さはemphasizeFirst()の引数で速度に応じて渡される。
-  const DEFAULT_MOVE_MS = 140;
-  const MOVE_EASING = "cubic-bezier(0.22, 1, 0.36, 1)";
+  const DEFAULT_MOVE_MS = 280;
+  // 実機の保留は約280msかけて、なめらかに減速しながら横へ移動する。
+  // 以前のcubic-bezier(0.22, 1, 0.36, 1)は出だしが速すぎて、距離の大半を
+  // 最初の4割で進んでしまい「パッと動いて止まる」感じになっていた。
+  // 立ち上がりを少し抑えて、長く効く減速にする。
+  const MOVE_EASING = "cubic-bezier(0.3, 0.02, 0.2, 1)";
   // 新しい保留が上から落ちてくる動き。前寄りすぎるイージングだと、見えるように
   // なった時にはもう着地していて「落ちてきた」と分からないため、
   // 移動用より緩やかで、最後に軽く行き過ぎる程度のカーブにする。
@@ -187,6 +191,12 @@ PachiSim.ui.HoldQueue = (function () {
   HoldQueue.prototype._flipMove = function (ball, toSlot, onSettled, moveMs) {
     const moveDuration = moveMs || DEFAULT_MOVE_MS;
 
+    // 移動中は光らせない。玉はこの直後に移動先の台の子になるので、大台へ向かう
+    // 場合は appendChild した瞬間から光り始めてしまう。transformで見た目の位置は
+    // 移動前に戻せても光彩は戻せないため、「保留1にいるうちから光り出して、
+    // それから当該保留へ動く」ように見えてしまう。着いてから光らせる。
+    ball.classList.add("hold-ball--moving");
+
     // 直前の演出（落ちてくるenterや前回のスライド）がまだ途中の玉をそのまま測ると、
     // 「途中の位置・大きさ」を移動前の状態として拾ってしまい、動きがおかしくなる。
     // 測る前に必ず、今いる台での静止状態へ確定させる。
@@ -206,9 +216,12 @@ PachiSim.ui.HoldQueue = (function () {
 
     // 終わったら、次にburst/enterが来たとき用に.hold-ballのデフォルト
     // （跳ねる方）のトランジションへ戻しておく。
+    // --movingを外すのはトランジションを戻した後。CSS側でbox-shadowに遷移を
+    // 指定してあるので、着いた位置で光がふわっと点く。
     const finish = () => {
       ball.style.transition = "";
       ball.style.transform = "";
+      ball.classList.remove("hold-ball--moving");
       if (onSettled) onSettled();
     };
 
@@ -270,7 +283,13 @@ PachiSim.ui.HoldQueue = (function () {
     this.smallSlots[slotIndex].appendChild(ball);
     this._applyColorForPosition(ball, SLOT_POSITION_KEYS[slotIndex]);
     this.queue.push(ball);
-    this._playEnter(ball, null, moveMs ? Math.round(moveMs * 1.4) : undefined);
+    // 落下はスライドより短く。スライドと同じ長さにすると、上から入ってくる動きが
+    // もたついて見える。
+    this._playEnter(
+      ball,
+      null,
+      moveMs ? Math.max(110, Math.min(180, Math.round(moveMs * 0.6))) : undefined
+    );
   };
 
   // 先頭の保留を大台へスライドさせ、同時に残りの待機列も1つずつスライドさせて詰める。
