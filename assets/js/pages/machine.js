@@ -93,12 +93,13 @@
       return { emphasizeMs, resolveMs };
     }
 
-    // 待機列の保留がスライドして詰める時間。バーストが割り込む前に必ず
-    // 収まるよう、現在の速度の拡大フェーズの7割に抑える。
-    // （大台へ進む先頭の保留は移動せず出し直すので、ここには関係しない）
+    // 保留がスライド（＋先頭は拡大）する時間。動き終わってからバーストまでに
+    // 「大台に乗っている状態」を見せる間が要るので、拡大フェーズの半分に抑える。
+    // ここを長く取ると、特に「早い」で動きっぱなしのまま消化されてしまい、
+    // 玉が膨らみながら滑っているようにしか見えなくなる。
     function computeHoldMoveMs(speedMode) {
-      const budget = computeTickSplit(speedMode).emphasizeMs * 0.7;
-      return Math.max(60, Math.min(140, Math.round(budget)));
+      const budget = computeTickSplit(speedMode).emphasizeMs * 0.5;
+      return Math.max(50, Math.min(140, Math.round(budget)));
     }
 
     function investmentYen() {
