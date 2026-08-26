@@ -75,19 +75,27 @@
   }
 
   // period: "allTime"|"today" - 空表示時の文言だけ変える
+  // 削除ボタン（onDelete/onClearAll）は運営ログイン中のみ表示する。実際の削除権限は
+  // Firestore側のセキュリティルールで強制されるので、これはあくまで見た目の制御。
   async function renderRankingSection(container, period) {
+    if (window.PachiSim.fb) await PachiSim.fb.ready;
+    const isAdmin = window.PachiSim.fb && PachiSim.fb.isAdmin();
     const result = await PachiSim.rankingService.fetchRanking(period);
     PachiSim.ui.renderRankingList(container, result.entries, {
       showMachine: true,
       emptyText: period === "today" ? "本日の記録はまだありません。" : "まだ記録がありません。",
-      onDelete: (id) => {
-        PachiSim.rankingService.removeEntry(id);
-        renderRankingSection(container, period);
-      },
-      onClearAll: () => {
-        PachiSim.rankingService.clearScope(period);
-        renderRankingSection(container, period);
-      },
+      onDelete: isAdmin
+        ? async (id) => {
+            await PachiSim.rankingService.removeEntry(id);
+            renderRankingSection(container, period);
+          }
+        : null,
+      onClearAll: isAdmin
+        ? async () => {
+            await PachiSim.rankingService.clearScope(period);
+            renderRankingSection(container, period);
+          }
+        : null,
     });
   }
 
@@ -100,6 +108,7 @@
       manufacturerList: $("manufacturerList"),
       rankingAllTime: $("rankingAllTime"),
       rankingToday: $("rankingToday"),
+      adminAuthBar: $("adminAuthBar"),
     };
 
     els.siteTitle.textContent = PachiSim.config.siteTitle;
@@ -117,6 +126,13 @@
 
     renderRankingSection(els.rankingAllTime, "allTime");
     renderRankingSection(els.rankingToday, "today");
+
+    if (window.PachiSim.ui.renderAdminAuthBar) {
+      PachiSim.ui.renderAdminAuthBar(els.adminAuthBar, () => {
+        renderRankingSection(els.rankingAllTime, "allTime");
+        renderRankingSection(els.rankingToday, "today");
+      });
+    }
   }
 
   if (document.readyState === "loading") {

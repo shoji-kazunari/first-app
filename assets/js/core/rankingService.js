@@ -1,15 +1,18 @@
 // 一撃出玉ランキングの抽象化レイヤー。
 //
-// 現時点ではrankingStore.js（このブラウザのlocalStorage）のみを見ており、
-// サイト訪問者全員を横断した本当の意味での「全体」ランキングにはなっていない
-// （あくまで「このブラウザで記録した結果」の集計）。将来Supabase等の
-// バックエンドに接続する際は、この中身だけを実際のAPI呼び出しに差し替えれば、
-// 呼び出し側（top.js/machine.js）のコードは変更不要になる想定。
+// rankingStore.js（core/firebase.js経由のFirestore）を実体に持ち、サイト訪問者
+// 全員を横断した本当の意味での「全体」ランキングになっている。呼び出し側
+// （top.js/machine.js）はfetchRanking/submitResult等のインターフェースだけを見ればよく、
+// 裏側の永続化先が変わってもこのファイルの中身を差し替えるだけで済む想定。
 window.PachiSim = window.PachiSim || {};
 
 PachiSim.rankingService = (function () {
-  const BACKEND_CONNECTED = false;
+  const BACKEND_CONNECTED = true;
   const DISPLAY_LIMIT = 10; // 各ランキングに載せる最大件数
+  // どの機種でも現実的にありえない出玉数を弾くための簡易な上限。実際の強制力は
+  // Firestore側のセキュリティルール（開発者ツール経由の直接書き込み対策）にあり、
+  // ここでのチェックは通常のプレイでは絶対に超えない値の早期リジェクトにすぎない。
+  const BALLS_CAP = 50000;
 
   function isBackendConnected() {
     return BACKEND_CONNECTED;
@@ -55,21 +58,26 @@ PachiSim.rankingService = (function () {
   // machineSlug（任意）: 指定すると、その機種の記録だけに絞る（機種別ランキング用）
   // 戻り値: { period, machineSlug, entries: [{id,machineSlug,machineName,manufacturerName,balls,achievedAt}], backendConnected }
   async function fetchRanking(period, machineSlug) {
+    const all = await PachiSim.rankingStore.loadAll(machineSlug);
     return {
       period,
       machineSlug: machineSlug || null,
-      entries: selectRanking(PachiSim.rankingStore.loadAll(), period, machineSlug, Date.now()),
+      entries: selectRanking(all, period, machineSlug, Date.now()),
       backendConnected: BACKEND_CONNECTED,
     };
   }
 
   // シミュレーション結果を記録する
-  function submitResult(entry) {
+  async function submitResult(entry) {
+    if (!entry || typeof entry.balls !== "number" || entry.balls <= 0 || entry.balls > BALLS_CAP) {
+      return null;
+    }
     return PachiSim.rankingStore.append(entry);
   }
 
-  // 運営（サイト管理者）用: 記録の削除（1件）
-  function removeEntry(id) {
+  // 運営（サイト管理者）用: 記録の削除（1件）。Firestore側のセキュリティルールにより、
+  // 実際に運営としてログインしていない場合はここで例外を投げる（呼び出し側で捕まえること）。
+  async function removeEntry(id) {
     return PachiSim.rankingStore.remove(id);
   }
 
@@ -77,8 +85,8 @@ PachiSim.rankingService = (function () {
   // 該当する記録をすべて削除する。「本日のランキングを全削除」しても全期間の
   // 過去分までは消えない・「機種別ランキングを全削除」しても他機種は残る、
   // というように、押したランキングのスコープ内だけに影響を限定する。
-  function clearScope(period, machineSlug) {
-    const entries = PachiSim.rankingStore.loadAll();
+  async function clearScope(period, machineSlug) {
+    const entries = await PachiSim.rankingStore.loadAll(machineSlug);
     const idsToRemove = entries
       .filter((e) => {
         if (machineSlug && e.machineSlug !== machineSlug) return false;

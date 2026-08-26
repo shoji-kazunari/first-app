@@ -36,6 +36,8 @@
       adSlot: $("adSlot"),
       affiliateSection: $("affiliateSection"),
       machineRanking: $("machineRanking"),
+      machineRankingHeading: $("machineRankingHeading"),
+      adminAuthBar: $("adminAuthBar"),
       errorBox: $("machineError"),
     };
 
@@ -55,6 +57,7 @@
     document.title = `${machine.name}（${machine.manufacturer.name}） | ${PachiSim.config.siteTitle}`;
     els.machineName.textContent = `${machine.name}（${probabilityLabel}）`;
     els.manufacturerName.textContent = machine.manufacturer.name;
+    els.machineRankingHeading.textContent = machine.name;
     els.rulesList.innerHTML = machine.rules.map((r) => `<li>${r}</li>`).join("");
 
     const dateKey = PachiSim.statsStore.todayKey();
@@ -165,19 +168,27 @@
     }
 
     // この機種の出玉ランキング（全期間・上位10件）。記録が増減するたびに呼び直す。
+    // 削除ボタン（onDelete/onClearAll）は運営ログイン中のみ表示する。実際の削除権限は
+    // Firestore側のセキュリティルールで強制されるので、これはあくまで見た目の制御。
     async function renderMachineRanking() {
+      if (window.PachiSim.fb) await PachiSim.fb.ready;
+      const isAdmin = window.PachiSim.fb && PachiSim.fb.isAdmin();
       const result = await PachiSim.rankingService.fetchRanking("allTime", slug);
       PachiSim.ui.renderRankingList(els.machineRanking, result.entries, {
         showMachine: false,
         emptyText: "まだ記録がありません。",
-        onDelete: (id) => {
-          PachiSim.rankingService.removeEntry(id);
-          renderMachineRanking();
-        },
-        onClearAll: () => {
-          PachiSim.rankingService.clearScope("allTime", slug);
-          renderMachineRanking();
-        },
+        onDelete: isAdmin
+          ? async (id) => {
+              await PachiSim.rankingService.removeEntry(id);
+              renderMachineRanking();
+            }
+          : null,
+        onClearAll: isAdmin
+          ? async () => {
+              await PachiSim.rankingService.clearScope("allTime", slug);
+              renderMachineRanking();
+            }
+          : null,
       });
     }
 
@@ -534,21 +545,11 @@
         beginConsumption();
       } else {
         // 保留0個→4個まで「1個ずつ順番に」チャージし終えるまでは消化を始めない。
-        // 初期4個も、それぞれが表す先の4回転(result.rolls[0..3])のhit結果に応じて
-        // 色変化パターンを割り当てる。
-        // ここでも色保留は同時に1つまで。2つ目以降に色が出た場合は無色にする。
-        let coloredTaken = false;
-        const initialPatterns = [0, 1, 2, 3].map((i) => {
-          const r = result.rolls[i];
-          if (!r) return null;
-          const pattern = PachiSim.holdOmens.pickPattern(r.hit);
-          if (!PachiSim.holdOmens.isColoredPattern(pattern)) return pattern;
-          if (coloredTaken) return null;
-          coloredTaken = true;
-          return pattern;
-        });
+        // 初期4個は次々に貯まって流れていくテンポが速く、色変化が付いても
+        // 目で追いきれないため、初期チャージ分には色変化パターンを割り当てない
+        // （2周目以降、スライドで補充される保留からは通常どおり色が付く）。
         holdQueue.fillInitial(
-          initialPatterns,
+          [null, null, null, null],
           beginConsumption,
           computeHoldSettleMs(currentSpeedMode())
         );
@@ -639,15 +640,19 @@
         stats.maxRenchan = Math.max(stats.maxRenchan, renchan);
         currentStreakId = null;
         showResultPanel(renchan, balls);
-        PachiSim.rankingService.submitResult({
-          machineSlug: slug,
-          machineName: machine.name,
-          manufacturerName: machine.manufacturer.name,
-          balls,
-          renchan,
-          achievedAt: new Date().toISOString(),
-        });
-        renderMachineRanking();
+        // Firestoreへの書き込みが実際に終わってから再取得したいので、
+        // 再描画は完了後に行う（失敗してもプレイ自体は止めない）。
+        PachiSim.rankingService
+          .submitResult({
+            machineSlug: slug,
+            machineName: machine.name,
+            manufacturerName: machine.manufacturer.name,
+            balls,
+            renchan,
+            achievedAt: new Date().toISOString(),
+          })
+          .then(() => renderMachineRanking())
+          .catch(() => {});
       }
 
       PachiSim.statsStore.save(slug, stats);
@@ -723,6 +728,10 @@
     showIdleEffect();
     renderAll();
     renderMachineRanking();
+
+    if (window.PachiSim.ui.renderAdminAuthBar) {
+      PachiSim.ui.renderAdminAuthBar(els.adminAuthBar, () => renderMachineRanking());
+    }
   }
 
   if (document.readyState === "loading") {

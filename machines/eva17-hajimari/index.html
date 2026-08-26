@@ -94,9 +94,11 @@
       </section>
 
       <section class="card" aria-label="出玉ランキング">
-        <h3 class="card__heading">出玉ランキング</h3>
+        <h3 class="card__heading"><span id="machineRankingHeading"></span><br>出玉ランキング</h3>
         <div id="machineRanking"></div>
       </section>
+
+      <div id="adminAuthBar" class="admin-auth-bar"></div>
 
       <p class="disclaimer">
         本サイトはパチンコの確率をもとにした疑似シミュレーションです。実際の遊技結果や収支を保証するものではありません。
@@ -106,6 +108,7 @@
     </main>
   </div>
 
+  <script type="module" src="../../assets/js/core/firebase.js"></script>
   <script src="../../assets/js/core/config.js"></script>
   <script src="../../assets/js/core/kana.js"></script>
   <script src="../../assets/js/core/rng.js"></script>
@@ -126,6 +129,7 @@
   <script src="../../assets/js/ui/adSlot.js"></script>
   <script src="../../assets/js/ui/affiliateSection.js"></script>
   <script src="../../assets/js/ui/rankingList.js"></script>
+  <script src="../../assets/js/ui/adminAuth.js"></script>
   <script src="../../assets/js/pages/machine.js"></script>
 </body>
 </html>

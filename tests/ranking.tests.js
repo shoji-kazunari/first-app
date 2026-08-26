@@ -1,11 +1,10 @@
-// core/rankingService.js・rankingStore.js のテスト。
-// localStorageを触る関数（fetchRanking/submitResult/remove系）ではなく、
-// 純関数の selectRanking()/localDateKey()/trimEntries() を直接検証するので、
-// テストを開いても実際に貯めた記録は汚れない。
+// core/rankingService.js のテスト。
+// Firestoreを触る関数（fetchRanking/submitResult/remove系）ではなく、
+// 純関数の selectRanking()/localDateKey() を直接検証するので、
+// テストを開いてもFirestore上の実際の記録には触れない。
 (function () {
-  const { test, assertEqual, assertTrue } = PachiSimTest;
+  const { test, assertEqual } = PachiSimTest;
   const service = PachiSim.rankingService;
-  const store = PachiSim.rankingStore;
 
   // 基準時刻: ローカル時刻の2026-01-15 12:00
   const NOW = new Date(2026, 0, 15, 12, 0, 0).getTime();
@@ -111,28 +110,5 @@
     service.selectRanking(entries, "allTime", null, NOW);
     assertEqual(entries[0].id, "a", "元配列の並び順が変わってはいけない");
     assertEqual(entries.length, 2);
-  });
-
-  test("rankingStore: 上限以下なら間引かれない", () => {
-    const entries = [entry("a", 1000, localIso(2026, 1, 15, 10))];
-    assertEqual(store.trimEntries(entries).length, 1);
-  });
-
-  test("rankingStore: 上限を超えても全期間トップと直近の記録は残る", () => {
-    const entries = [];
-    // 一番古いが最高記録。古い順で切る実装だとここが真っ先に消える。
-    entries.push(entry("allTimeBest", 999999, localIso(2024, 1, 1, 12)));
-    for (let i = 0; i < store.MAX_ENTRIES; i++) {
-      entries.push(entry(`e${i}`, 1000 + i, localIso(2025, 1, 1, 0, i)));
-    }
-    entries.push(entry("newest", 2500, localIso(2026, 1, 15, 12)));
-
-    const trimmed = store.trimEntries(entries);
-    const ids = trimmed.map((e) => e.id);
-
-    assertTrue(trimmed.length <= store.MAX_ENTRIES, `上限超過 (${trimmed.length})`);
-    assertTrue(ids.indexOf("allTimeBest") >= 0, "全期間トップが消えてはいけない");
-    assertTrue(ids.indexOf("newest") >= 0, "最新の記録が消えてはいけない");
-    assertEqual(service.selectRanking(trimmed, "allTime", null, NOW)[0].id, "allTimeBest");
   });
 })();
