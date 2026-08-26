@@ -263,12 +263,17 @@ PachiSim.ui.HoldQueue = (function () {
     // 取り除くため）。台に玉が2つ並ばないよう、ここで確実に片付ける。
     this.bigSlot.querySelectorAll(".hold-ball").forEach((old) => old.remove());
     // _makeBall()は「落ちてくる」enter状態で作られるが、ここは移動の続きなので
-    // アニメーションなしでそのまま置く。
+    // 位置も大きさも動かさず、透明度だけ短くフェードさせて置く。
     const ball = document.createElement("span");
-    ball.className = "hold-ball";
+    ball.className = "hold-ball hold-ball--appear";
     ball._pattern = fromBall._pattern;
     this.bigSlot.appendChild(ball);
     this._applyColorForPosition(ball, "big");
+    // 透明な状態が実際に1フレーム描画されてからクラスを外さないと、
+    // 2つのスタイル変更が同じフレームにまとめられてフェードが起きない。
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => ball.classList.remove("hold-ball--appear"));
+    });
     return ball;
   };
 

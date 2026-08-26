@@ -21,7 +21,7 @@ PachiSim.config = {
   // 抽選速度モード。ボタンを押すたびにこの配列を順番に切り替える。
   // tickMs は1回転（1保留消化）ごとのアニメーション間隔。
   speedModes: [
-    { id: "normal", label: "普通", tickMs: 790 }, // 元の550msの0.7倍速(=1/0.7の時間)
+    { id: "normal", label: "普通", tickMs: 990 }, // 元の550msの0.56倍速。790msをさらに0.8倍速(=790/0.8)にしたもの
     { id: "fast", label: "早い", tickMs: 160 },
     { id: "instant", label: "当たりまで", tickMs: 35 },
   ],
