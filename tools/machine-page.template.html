@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>eパチンコ 新世紀エヴァンゲリオン〜はじまりの記憶〜（ビスティ） | パチンコシミュレーター</title>
-  <meta name="description" content="eパチンコ 新世紀エヴァンゲリオン〜はじまりの記憶〜のスペックをもとに、初当たり・時短（チャンスタイム）・ST（インパクトモード）をボタン操作で疑似体験できます。">
-  <link rel="canonical" href="/machines/eva17-hajimari/">
+  <title>{{NAME}}（{{MAKER}}） | {{SITE_TITLE}}</title>
+  <meta name="description" content="{{DESCRIPTION}}">
+  <link rel="canonical" href="/machines/{{SLUG}}/">
   <link rel="stylesheet" href="../../assets/css/base.css">
   <link rel="stylesheet" href="../../assets/css/machine.css">
 </head>
-<body data-machine-slug="eva17-hajimari">
+<body data-machine-slug="{{SLUG}}">
   <div class="page">
     <header class="site-header">
       <a href="../../index.html" id="siteTitle" class="site-header__title" style="text-decoration:none;"></a>
@@ -18,9 +18,9 @@
     <nav class="breadcrumb" aria-label="パンくずリスト">
       <a href="../../index.html">TOP</a>
       <span>&gt;</span>
-      <span id="manufacturerCrumb">ビスティ</span>
+      <span id="manufacturerCrumb">{{MAKER}}</span>
       <span>&gt;</span>
-      <span id="machineCrumb">eパチンコ 新世紀エヴァンゲリオン〜はじまりの記憶〜</span>
+      <span id="machineCrumb">{{NAME}}</span>
     </nav>
 
     <p id="machineError" class="machine-error" hidden></p>
@@ -123,7 +123,7 @@
   <script src="../../assets/js/core/rankingStore.js"></script>
   <script src="../../assets/js/core/rankingService.js"></script>
   <script src="../../assets/js/data/registry.js"></script>
-  <script src="../../assets/js/data/machines/eva17-hajimari.js"></script>
+  <script src="../../assets/js/data/machines/{{SLUG}}.js"></script>
   <script src="../../assets/js/ui/holdQueue.js"></script>
   <script src="../../assets/js/ui/reelDisplay.js"></script>
   <script src="../../assets/js/ui/dataLamp.js"></script>

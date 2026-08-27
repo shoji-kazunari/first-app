@@ -1,0 +1,190 @@
+// 機種データの検証。
+//
+// 機種は今後どんどん増えていく想定で、その追加はほぼコピー＆編集になる。
+// 状態IDのtypoや確率の桁間違いは、実行時にその状態へ到達して初めて壊れるため
+// 気づくのが遅れやすい。ここで登録時にまとめて検査し、おかしければ即座に落とす。
+//
+// validate()は副作用のない純関数で、問題点の説明を文字列の配列で返す
+// （空配列＝問題なし）。registry.register()がこれを呼び、tests/machines.tests.jsが
+// 登録済みの全機種に対して実行する。
+window.PachiSim = window.PachiSim || {};
+
+PachiSim.machineValidator = (function () {
+  // onHit.outcomes や distributionTables の重みは、rng.weightedPick が合計で
+  // 正規化するため合計1でなくても動く。ただし既存機種はすべて「確率そのもの」を
+  // 重みに書いており、合計が1から外れているのは書き間違いの可能性が高いので弾く。
+  const WEIGHT_SUM_TOLERANCE = 0.001;
+  const MODES = ["countUp", "countDown"];
+
+  function isNonEmptyString(v) {
+    return typeof v === "string" && v.trim() !== "";
+  }
+
+  function isPositiveNumber(v) {
+    return typeof v === "number" && Number.isFinite(v) && v > 0;
+  }
+
+  function isPositiveInteger(v) {
+    return isPositiveNumber(v) && Number.isInteger(v);
+  }
+
+  // 出玉が決まるか（payoutTableに該当ラウンドがあるか、balls指定があるか）。
+  // どちらも無いとengineが黙って0玉にしてしまい、テーブルの書き忘れに気づけない。
+  function payoutIsResolvable(machine, rounds, ballsOverride) {
+    if (ballsOverride != null) return isPositiveNumber(ballsOverride);
+    return isPositiveNumber(machine.payoutTable && machine.payoutTable[rounds]);
+  }
+
+  function checkWeightSum(entries, where, errors) {
+    const sum = entries.reduce((acc, e) => acc + (typeof e.weight === "number" ? e.weight : 0), 0);
+    if (Math.abs(sum - 1) > WEIGHT_SUM_TOLERANCE) {
+      errors.push(`${where}: weightの合計が${sum}（1になるはず）`);
+    }
+  }
+
+  function validateOutcome(machine, outcome, where, errors) {
+    if (!isPositiveNumber(outcome.weight)) {
+      errors.push(`${where}: weightが正の数でない（${outcome.weight}）`);
+    }
+    if (!isPositiveInteger(outcome.rounds)) {
+      errors.push(`${where}: roundsが正の整数でない（${outcome.rounds}）`);
+    } else if (!payoutIsResolvable(machine, outcome.rounds, outcome.balls)) {
+      errors.push(
+        `${where}: ${outcome.rounds}Rの出玉が決まらない（payoutTableに${outcome.rounds}が無く、balls指定も無い）`
+      );
+    }
+    if (!machine.states[outcome.nextState]) {
+      errors.push(`${where}: nextState "${outcome.nextState}" が存在しない`);
+    }
+  }
+
+  function validateState(machine, stateId, state, errors) {
+    const where = `states.${stateId}`;
+    if (state.id !== stateId) {
+      errors.push(`${where}: idが"${state.id}"でキーと一致しない`);
+    }
+    if (!isNonEmptyString(state.label)) errors.push(`${where}: labelが空`);
+    if (!isNonEmptyString(state.actionLabel)) errors.push(`${where}: actionLabelが空`);
+    if (!isNonEmptyString(state.theme)) errors.push(`${where}: themeが空`);
+
+    if (MODES.indexOf(state.mode) < 0) {
+      errors.push(`${where}: modeが"${state.mode}"（${MODES.join("|")} のいずれかであるべき）`);
+    }
+    if (!isPositiveNumber(state.probability) || state.probability > 1) {
+      errors.push(`${where}: probabilityが0より大きく1以下でない（${state.probability}）`);
+    }
+
+    if (state.mode === "countUp") {
+      // countUpは当たるまで回し続ける状態なので、規定回数を持たない
+      if (state.maxAttempts != null) {
+        errors.push(`${where}: countUpなのにmaxAttemptsがnullでない（${state.maxAttempts}）`);
+      }
+    } else if (state.mode === "countDown") {
+      if (!isPositiveInteger(state.maxAttempts)) {
+        errors.push(`${where}: countDownのmaxAttemptsが正の整数でない（${state.maxAttempts}）`);
+      }
+      // 規定回数を使い切ったときの行き先が無いと、消化しきった瞬間に落ちる
+      if (!state.onExhausted) {
+        errors.push(`${where}: countDownなのにonExhaustedが無い`);
+      } else if (!machine.states[state.onExhausted.nextState]) {
+        errors.push(
+          `${where}.onExhausted: nextState "${state.onExhausted.nextState}" が存在しない`
+        );
+      }
+    }
+
+    const onHit = state.onHit;
+    if (!onHit) {
+      errors.push(`${where}: onHitが無い`);
+      return;
+    }
+    if (onHit.outcomes) {
+      if (!Array.isArray(onHit.outcomes) || onHit.outcomes.length === 0) {
+        errors.push(`${where}.onHit.outcomes: 空の配列`);
+        return;
+      }
+      onHit.outcomes.forEach((o, i) => {
+        validateOutcome(machine, o, `${where}.onHit.outcomes[${i}]`, errors);
+      });
+      checkWeightSum(onHit.outcomes, `${where}.onHit.outcomes`, errors);
+    } else if (onHit.distributionTable) {
+      const table = machine.distributionTables && machine.distributionTables[onHit.distributionTable];
+      if (!Array.isArray(table) || table.length === 0) {
+        errors.push(
+          `${where}.onHit: distributionTable "${onHit.distributionTable}" が distributionTables に無い`
+        );
+        return;
+      }
+      if (!machine.states[onHit.nextState]) {
+        errors.push(`${where}.onHit: nextState "${onHit.nextState}" が存在しない`);
+      }
+      table.forEach((row, i) => {
+        const rowWhere = `distributionTables.${onHit.distributionTable}[${i}]`;
+        if (!isPositiveNumber(row.weight)) {
+          errors.push(`${rowWhere}: weightが正の数でない（${row.weight}）`);
+        }
+        if (!isPositiveInteger(row.rounds)) {
+          errors.push(`${rowWhere}: roundsが正の整数でない（${row.rounds}）`);
+        } else if (!payoutIsResolvable(machine, row.rounds, row.balls)) {
+          errors.push(`${rowWhere}: ${row.rounds}Rの出玉が決まらない`);
+        }
+      });
+      checkWeightSum(table, `distributionTables.${onHit.distributionTable}`, errors);
+    } else {
+      errors.push(`${where}.onHit: outcomesもdistributionTableも無い`);
+    }
+  }
+
+  // 戻り値: 問題点の説明の配列（空配列＝問題なし）
+  function validate(machine) {
+    const errors = [];
+    if (!machine || typeof machine !== "object") return ["機種データがオブジェクトでない"];
+
+    ["id", "slug", "name", "nameKana"].forEach((key) => {
+      if (!isNonEmptyString(machine[key])) errors.push(`${key}が空`);
+    });
+    if (!Array.isArray(machine.aliases) || !machine.aliases.every(isNonEmptyString)) {
+      errors.push("aliasesが文字列の配列でない");
+    }
+    if (!machine.manufacturer || !isNonEmptyString(machine.manufacturer.id) ||
+        !isNonEmptyString(machine.manufacturer.name)) {
+      errors.push("manufacturerにidとnameが揃っていない");
+    }
+    if (!isPositiveNumber(machine.spinsPer1000Yen)) {
+      errors.push(`spinsPer1000Yenが正の数でない（${machine.spinsPer1000Yen}）`);
+    }
+    if (!Array.isArray(machine.rules) || machine.rules.length === 0 ||
+        !machine.rules.every(isNonEmptyString)) {
+      errors.push("rulesが1つ以上の文字列の配列でない");
+    }
+    if (!machine.payoutTable || Object.keys(machine.payoutTable).length === 0) {
+      errors.push("payoutTableが空");
+    }
+
+    const states = machine.states;
+    if (!states || Object.keys(states).length === 0) {
+      errors.push("statesが空");
+      return errors;
+    }
+    if (!states[machine.baseStateId]) {
+      errors.push(`baseStateId "${machine.baseStateId}" がstatesに存在しない`);
+    }
+
+    const baseStates = Object.keys(states).filter((id) => states[id].isBaseState);
+    if (baseStates.length !== 1) {
+      errors.push(`isBaseStateがtrueの状態は1つであるべき（今は${baseStates.length}個）`);
+    } else if (baseStates[0] !== machine.baseStateId) {
+      errors.push(
+        `isBaseStateがtrueなのは"${baseStates[0]}"だが、baseStateIdは"${machine.baseStateId}"`
+      );
+    }
+
+    Object.keys(states).forEach((stateId) => {
+      validateState(machine, stateId, states[stateId], errors);
+    });
+
+    return errors;
+  }
+
+  return { validate };
+})();

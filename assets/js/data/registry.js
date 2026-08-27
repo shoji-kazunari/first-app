@@ -11,6 +11,14 @@ PachiSim.machineRegistry = (function () {
     if (machinesBySlug[machine.slug]) {
       throw new Error(`machine slug already registered: ${machine.slug}`);
     }
+    // 状態IDのtypoや確率の桁間違いは、その状態へ到達するまで表面化せず気づきにくい。
+    // 読み込んだ時点でまとめて検査し、おかしければここで落とす。
+    if (PachiSim.machineValidator) {
+      const errors = PachiSim.machineValidator.validate(machine);
+      if (errors.length > 0) {
+        throw new Error(`機種データが不正です（${machine.slug}）:\n  - ${errors.join("\n  - ")}`);
+      }
+    }
     machinesBySlug[machine.slug] = machine;
 
     let group = manufacturers.find((m) => m.id === machine.manufacturer.id);
