@@ -74,6 +74,9 @@
     // 通しで数える。157回転のSTが当たらずに終わったら、その後の通常は158回転目から
     // 始まる（0に戻らない）。大当たりを引いた時点で0へ戻す。
     let spinsCarriedOver = 0;
+    // 直前の大当たりの履歴を、データランプ上でまだ「1回前」へ送っていない状態かどうか。
+    // 次の1回転が始まるときにfalseへ戻し、そこで初めてスライドしたように見せる。
+    let historyRevealPending = false;
     let activePlayback = null; // 実行中のplayback制御（pause/resumeで使用）
     let pendingStart = null; // 保留チャージ中にSTOPされた場合、再開時に実行する消化開始処理
     let currentStreakId = null; // 進行中の「一撃」を識別するID（データランプの連チャンまとめ用）
@@ -247,8 +250,14 @@
 
     // データランプの「現在」列はライブ進行中の回転数(liveCount)に連動するため、
     // ティックのたびにも呼び出せるよう単独の関数にしてある。
+    //
+    // 当たった直後は、上部の回転数表示と同じく「現在」列も当たった回転数のまま止める。
+    // このとき履歴へも積んでしまうと、同じ回転数が「現在」と「1回前」に並んで見える。
+    // 実機と同じく、次の1回転が始まった瞬間に「1回前」へスライドさせたいので、
+    // それまでは積んだばかりの1件を表示から伏せておく（保存自体は済ませてある）。
     function renderDataLampLive() {
-      PachiSim.ui.renderDataLamp(els.dataLamp, historyEntries, liveCount);
+      const shown = historyRevealPending ? historyEntries.slice(0, -1) : historyEntries;
+      PachiSim.ui.renderDataLamp(els.dataLamp, shown, liveCount);
     }
 
     function renderAll(options) {
@@ -433,6 +442,8 @@
       showSpinningEffect();
       hideResultPanel();
       reelDisplay.reset();
+      // ここで前回の大当たりがデータランプの「1回前」へスライドする
+      historyRevealPending = false;
 
       const state = machine.states[session.stateId];
       resetLiveCountersForState(state);
@@ -627,6 +638,9 @@
         stats.totalBalls += outcome.balls;
         if (fromState.isBaseState) stats.initialHitCount += 1;
 
+        // 保存はここで済ませるが、データランプ上で「1回前」へ送るのは
+        // 次の1回転が始まってから（renderDataLampLiveのコメント参照）
+        historyRevealPending = true;
         historyEntries = PachiSim.historyStore.append(slug, dateKey, historyEntries, {
           // データランプに残す回転数も、ST・時短の分を含めた通算にする
           spins: spinsSinceLastHit,
@@ -732,6 +746,7 @@
       session = PachiSim.engine.createSession(machine);
       currentStreakId = null;
       spinsCarriedOver = 0;
+      historyRevealPending = false;
       showIdleEffect();
       hideResultPanel();
       holdQueue.reset();
