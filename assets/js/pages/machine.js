@@ -33,6 +33,8 @@
       effectArea: $("effectArea"),
       actionButton: $("actionButton"),
       speedToggleButtons: Array.from(document.querySelectorAll(".speed-toggle__btn")),
+      soundToggle: $("soundToggle"),
+      soundHint: $("soundHint"),
       adSlot: $("adSlot"),
       affiliateSection: $("affiliateSection"),
       machineRanking: $("machineRanking"),
@@ -94,6 +96,7 @@
     // 減らしたいので、消化（大台へ進む）時ではなくここで引く。
     // 電サポ中（accruesInvestment:false）の保留は玉が戻ってくるので消費しない。
     holdQueue.onCharge = () => {
+      playSound("charge"); // 音は玉の増減と関係なく、保留が貯まったこと自体に付ける
       const state = machine.states[session.stateId];
       if (!state || !state.accruesInvestment) return;
       chargedThisAction += 1;
@@ -101,6 +104,32 @@
     };
     const reelDisplay = new PachiSim.ui.ReelDisplay(els.reelDisplayEl);
     const maxRounds = Math.max(...Object.keys(machine.payoutTable).map(Number));
+
+    // 1回転の中で何度も鳴る音は、テンポが速いと潰れて雑音にしかならない。
+    // 「早い」(1回転160ms)では回転開始・リール停止・保留のスライドを落とし、
+    // 「当たりまで」(1回転35ms＝1秒に28回転)では1回転ごとの音を全部落として、
+    // 大当たり・終了・RESULTだけを鳴らす。
+    const PER_REEL_SOUNDS = ["reelStart", "reelStop", "slide"];
+    const PER_SPIN_SOUNDS = PER_REEL_SOUNDS.concat(["charge", "reach", "miss"]);
+
+    // exhaustedの音の長さ。RESULTのチャイムをこの分だけ後ろへずらして重なりを避ける。
+    const EXHAUSTED_SOUND_SEC = 0.56;
+
+    function playSound(name) {
+      const speedId = currentSpeedMode().id;
+      if (speedId === "instant" && PER_SPIN_SOUNDS.indexOf(name) >= 0) return;
+      if (speedId === "fast" && PER_REEL_SOUNDS.indexOf(name) >= 0) return;
+      PachiSim.soundPlayer.play(name);
+    }
+
+    // リール演出の節目に音を付ける。鳴らすかどうかだけをここで決め、
+    // タイミングはreelDisplay側の実際の進行に任せる（時間を二重に持たない）。
+    reelDisplay.onEvent = (name, matched) => {
+      if (name === "spin") playSound("reelStart");
+      else if (name === "stop") playSound("reelStop");
+      else if (name === "reach") playSound("reach");
+      else if (name === "settle") playSound(matched ? "hit" : "miss");
+    };
 
     PachiSim.ui.renderAdSlot(els.adSlot, machine.name);
     PachiSim.ui.renderAffiliateSection(els.affiliateSection, machine.relatedProducts || []);
@@ -290,6 +319,10 @@
     // 一撃（連チャン）が終わって通常へ戻る瞬間だけ、リール/保留の代わりに
     // 連チャン数・獲得出玉をまとめたRESULT表示を出す。次のアクション開始時に隠す。
     function showResultPanel(renchan, balls) {
+      // 一撃の締めくくりなので速度に関係なく鳴らす。
+      // ST・時短が当たらずに終わった瞬間は「終了」の音と必ず同時になるので、
+      // その分だけ後ろへずらして、重ならずに続けて聞こえるようにする。
+      PachiSim.soundPlayer.play("result", EXHAUSTED_SOUND_SEC);
       els.resultRenchan.textContent = PachiSim.format.number(renchan);
       els.resultBalls.textContent = PachiSim.format.number(balls);
       els.resultPanel.hidden = false;
@@ -553,6 +586,7 @@
                   ? PachiSim.holdOmens.pickPattern(upcomingRoll.hit)
                   : null;
               nextUpcomingIndex += 1;
+              playSound("slide");
               holdQueue.emphasizeFirst(
                 !roll.hit,
                 refillPattern,
@@ -680,6 +714,9 @@
           streakId: currentStreakId,
         });
 
+        // 通常の消化では、リールが揃った瞬間（reelDisplayのsettle）に既に鳴らしている。
+        // 「当たりまで」はリール演出を通らないので、ここで鳴らす。
+        if (viaSkip) PachiSim.soundPlayer.play("hit");
         showResultEffect({
           line1: `大当たり＜${outcome.rounds}R獲得＞${outcome.resultNote ? `（${outcome.resultNote}）` : ""}`,
           line2,
@@ -687,6 +724,7 @@
           nextEmphasis,
         });
       } else {
+        PachiSim.soundPlayer.play("exhausted"); // 滅多に鳴らないので速度に関係なく鳴らす
         showResultEffect({
           line1: outcome.resultLabel || `${fromState.label}終了`,
           line2,
@@ -729,6 +767,9 @@
     }
 
     els.actionButton.addEventListener("click", () => {
+      // ブラウザは「ユーザー操作の中でしか音を出せない」制限を持つ。
+      // このサイトはSTARTを押して遊ぶので、その最初のタップで解錠する。
+      PachiSim.soundPlayer.unlock();
       if (isAnimating && !isPaused) {
         // 抽選中 -> その場で一時停止する（結果を先読み・スキップしない）
         if (activePlayback) activePlayback.pause();
@@ -768,6 +809,8 @@
         if (activePlayback) activePlayback.setSpeed(currentSpeedMode());
       });
     });
+
+    PachiSim.ui.soundToggle.init(els.soundToggle, els.soundHint);
 
     els.resetButton.addEventListener("click", () => {
       if (isAnimating && !isPaused) return; // 実際にティック中は誤操作防止のためブロック

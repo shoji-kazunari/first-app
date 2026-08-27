@@ -59,7 +59,16 @@ PachiSim.ui.ReelDisplay = (function () {
       this._pos[pos] = { viewport, strip, currentIndex: 0 };
     });
     this._timers = [];
+    // 演出の節目を外へ知らせるフック（効果音を鳴らすのに使う）。
+    // 鳴らすかどうかの判断は呼ぶ側に任せ、ここは「今この瞬間だ」と伝えるだけにする。
+    // 発生する節目: "spin"(回り出す) / "stop"(1つ止まる) / "reach"(テンパイ) /
+    // "settle"(結果が出そろう。第2引数に揃ったかどうか)
+    this.onEvent = null;
   }
+
+  ReelDisplay.prototype._emit = function (name, matched) {
+    if (this.onEvent) this.onEvent(name, matched);
+  };
 
   ReelDisplay.prototype._schedule = function (fn, delay) {
     const t = setTimeout(fn, delay);
@@ -163,25 +172,31 @@ PachiSim.ui.ReelDisplay = (function () {
   ReelDisplay.prototype.play = function (plan, timing, onDone) {
     this._clearTimers();
     this.startSpin();
+    this._emit("spin");
 
     const snapDuration = (delay) => Math.max(40, Math.min(280, Math.round(delay * 0.75)));
 
     this._schedule(() => {
       this.stopAt("left", plan.leftDigit, snapDuration(timing.leftDelay));
+      this._emit("stop");
 
       this._schedule(() => {
         this.stopAt("right", plan.rightDigit, snapDuration(timing.rightDelay));
+        this._emit("stop");
 
         if (plan.reach) {
           const reachTotal = timing.reachStepDelays.reduce((a, b) => a + b, 0);
           this.stopAt("middle", plan.finalMiddleDigit, reachTotal);
+          this._emit("reach");
           this._schedule(() => {
             if (plan.match) this._setHitGlow(true); // 3つ揃った（大当たり）ときだけ枠を光らせる
+            this._emit("settle", !!plan.match);
             if (onDone) onDone();
           }, reachTotal);
         } else {
           this._schedule(() => {
             this.stopAt("middle", plan.middleDigit, snapDuration(timing.middleDelay));
+            this._emit("settle", false); // リーチにならなかった時点でハズレ確定
             if (onDone) onDone();
           }, timing.middleDelay);
         }
