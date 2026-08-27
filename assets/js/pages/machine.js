@@ -336,9 +336,19 @@
       renderDataLampLive();
     }
 
+    // 「次回：〜」を目立たせるかどうか。通常・時短へ戻るときはただの案内だが、
+    // RUSH・STへ行くときはこれから期待できる場所なので強調する。
+    // 状態名は機種ごとにまちまち（「ST（インパクトモード）」「シンフォギアチャンス」）
+    // なので、名前ではなく状態データのthemeで判定する。
+    const CALM_NEXT_THEMES = ["normal", "chance"];
+    function shouldEmphasizeNext(state) {
+      return CALM_NEXT_THEMES.indexOf(state.theme) < 0;
+    }
+
     // line1: 「大当たり＜4R獲得＞」のようなメイン結果、line2: 「次回：最終決戦」のような行き先
-    function showResultEffect({ line1, line2, kind }) {
+    function showResultEffect({ line1, line2, kind, nextEmphasis }) {
       els.effectArea.dataset.kind = kind;
+      els.effectArea.dataset.nextEmphasis = nextEmphasis ? "on" : "off";
       els.effectArea.innerHTML = `
         <p class="effect-area__title">${line1}</p>
         ${line2 ? `<p class="effect-area__sub">${line2}</p>` : ""}
@@ -649,6 +659,7 @@
       session.streak = streakResult.streak;
 
       const line2 = `次回：${toState.label}`;
+      const nextEmphasis = shouldEmphasizeNext(toState);
 
       // 当たったらそこで回転数は仕切り直し。当たらずに終わった分は次の状態へ繰り越す。
       spinsCarriedOver = outcome.type === "hit" ? 0 : spinsSinceLastHit;
@@ -673,12 +684,14 @@
           line1: `大当たり＜${outcome.rounds}R獲得＞${outcome.resultNote ? `（${outcome.resultNote}）` : ""}`,
           line2,
           kind: "hit",
+          nextEmphasis,
         });
       } else {
         showResultEffect({
           line1: outcome.resultLabel || `${fromState.label}終了`,
           line2,
           kind: "exhausted",
+          nextEmphasis,
         });
       }
 

@@ -11,6 +11,8 @@
   --color-accent-strong: #f3dfb0;
   --color-plus: #6fd98f;
   --color-minus: #ff8686;
+  /* アクセント(#f3dfb0)より彩度の高い黄色。並べたときに一段目立たせたい文字に使う */
+  --color-highlight: #ffd75e;
 
   --theme-normal: #2a2f3a;
   --theme-chance: #5a3a1f;

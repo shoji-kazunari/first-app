@@ -685,6 +685,14 @@
   color: var(--color-text-muted);
 }
 
+/* 行き先がRUSH・STのときの「次回：〜」。通常・時短へ戻るときはただの案内だが、
+   ここはこれから期待できる場所なので、黄色く・大きくして目に留まるようにする */
+.effect-area[data-next-emphasis="on"] .effect-area__sub {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--color-highlight);
+}
+
 @keyframes result-pop {
   from {
     transform: scale(0.7);
