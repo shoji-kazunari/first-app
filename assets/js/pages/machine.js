@@ -67,8 +67,13 @@
     let speedModeIndex = 0;
     let isAnimating = false;
     let isPaused = false; // STOPでその場停止中かどうか
-    let liveCount = 0; // countUp表示中の一時カウント
+    let liveCount = 0; // 前回の大当たりからの通算回転数（countUp表示・データランプの「現在」列）
     let liveRemaining = null; // countDown表示中の一時カウント
+    // 当たらずに終わったST・時短で消化した回転数の繰り越し。
+    // 実機のデータカウンタと同じく、回転数は「前回の大当たりから次の大当たりまで」を
+    // 通しで数える。157回転のSTが当たらずに終わったら、その後の通常は158回転目から
+    // 始まる（0に戻らない）。大当たりを引いた時点で0へ戻す。
+    let spinsCarriedOver = 0;
     let activePlayback = null; // 実行中のplayback制御（pause/resumeで使用）
     let pendingStart = null; // 保留チャージ中にSTOPされた場合、再開時に実行する消化開始処理
     let currentStreakId = null; // 進行中の「一撃」を識別するID（データランプの連チャンまとめ用）
@@ -252,8 +257,10 @@
       renderDataLampLive();
     }
 
+    // 状態が変わった（＝次のアクションを始める）ときの表示初期値。
+    // 回転数は0ではなく繰り越し分から始める。残り回数はその状態の規定回数から。
     function resetLiveCountersForState(state) {
-      liveCount = 0;
+      liveCount = spinsCarriedOver;
       liveRemaining = state.maxAttempts;
     }
 
@@ -440,7 +447,8 @@
       let nextUpcomingIndex = 4;
 
       function updateLiveDisplay(roll) {
-        liveCount = roll.index;
+        // 回転数は繰り越し分から続けて数える。残り回数はこの状態の中だけの数なので繰り越さない。
+        liveCount = spinsCarriedOver + roll.index;
         liveRemaining = state.maxAttempts == null ? null : state.maxAttempts - roll.index;
         els.spinCounter.textContent = spinCounterText(state);
         els.investmentDisplay.innerHTML = investmentDisplayText(
@@ -559,12 +567,15 @@
     function finishAction(result, fromState, viaSkip) {
       const outcome = result.outcome;
       const toState = machine.states[outcome.nextStateId];
+      // 前回の大当たりからの通算回転数。当たればこの数がその大当たりの回転数になり、
+      // 当たらずに終わればそのまま次の状態へ繰り越す。
+      const spinsSinceLastHit = spinsCarriedOver + outcome.attempts;
 
       // 「当たりまで」の一発ジャンプで終わった場合、1回転ずつのupdateLiveDisplayを
       // 経由していないので、回転数表示が初期値のまま(0回転など)取り残されてしまう。
       // ここで実際の消化回数(outcome.attempts)をもとに直接反映してから凍結する。
       if (viaSkip) {
-        liveCount = outcome.attempts;
+        liveCount = spinsSinceLastHit;
         liveRemaining = fromState.maxAttempts == null ? null : fromState.maxAttempts - outcome.attempts;
         els.spinCounter.textContent = spinCounterText(fromState);
         holdQueue.reset();
@@ -608,13 +619,17 @@
 
       const line2 = `次回：${toState.label}`;
 
+      // 当たったらそこで回転数は仕切り直し。当たらずに終わった分は次の状態へ繰り越す。
+      spinsCarriedOver = outcome.type === "hit" ? 0 : spinsSinceLastHit;
+
       if (outcome.type === "hit") {
         stats.totalHitCount += 1;
         stats.totalBalls += outcome.balls;
         if (fromState.isBaseState) stats.initialHitCount += 1;
 
         historyEntries = PachiSim.historyStore.append(slug, dateKey, historyEntries, {
-          spins: outcome.attempts,
+          // データランプに残す回転数も、ST・時短の分を含めた通算にする
+          spins: spinsSinceLastHit,
           rounds: outcome.rounds,
           context: fromState.isBaseState ? "normal" : "rush",
           streakId: currentStreakId,
@@ -716,6 +731,7 @@
       historyEntries = PachiSim.historyStore.reset(slug, dateKey);
       session = PachiSim.engine.createSession(machine);
       currentStreakId = null;
+      spinsCarriedOver = 0;
       showIdleEffect();
       hideResultPanel();
       holdQueue.reset();
