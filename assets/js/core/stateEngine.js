@@ -15,7 +15,9 @@
 //       mode: "countUp" | "countDown", // 回転数表示の方式
 //       maxAttempts: number|null,      // countDownの場合は最大抽選回数。countUpはnull
 //       probability: number,           // 1回転あたりの当選確率
-//       actionLabel: "START"|"JUDGEMENT", // この状態で最初に押すボタンの表示
+//       actionLabel: "START",          // この状態で最初に押すボタンの表示。
+//                                      // 状態ごとに変えられるが、今は全状態"START"で統一している
+//                                      // （通常かRUSHかをボタンの文字で当てる演出は未実装のため）
 //       theme: "normal"|"chance"|"rush"|string, // 背景テーマ（自由に拡張可）
 //       accruesInvestment: boolean,    // この状態の回転数を投資額に計上するか
 //       isBaseState: boolean,          // 「通常」相当（一撃/連チャンの起点）か

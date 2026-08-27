@@ -55,6 +55,10 @@ PachiSim.ui.HoldQueue = (function () {
   function HoldQueue(containerEl) {
     this.el = containerEl;
     this._timers = [];
+    // 保留が1つ貯まるたびに呼ばれるフック（呼び出し側が代入する）。
+    // 実機では始動口へ入れた時点で玉が減るので、玉の消費はここを合図にする
+    // （消化＝大台へ進む時ではない）。初期チャージの4個も1個ずつ呼ばれる。
+    this.onCharge = null;
     this.el.innerHTML = `
       <div class="hold-slot hold-slot--big" data-slot="big"><span class="hold-base"></span></div>
       <div class="hold-slot hold-slot--small" data-slot="1"><span class="hold-base"></span></div>
@@ -273,6 +277,7 @@ PachiSim.ui.HoldQueue = (function () {
       this.smallSlots[i].appendChild(ball);
       this._applyColorForPosition(ball, SLOT_POSITION_KEYS[i]);
       this.queue.push(ball);
+      if (this.onCharge) this.onCharge();
       const isLast = i === SMALL_SLOT_COUNT - 1;
       if (isLast) {
         this._playEnter(ball, () => {
@@ -296,6 +301,7 @@ PachiSim.ui.HoldQueue = (function () {
     this.smallSlots[slotIndex].appendChild(ball);
     this._applyColorForPosition(ball, SLOT_POSITION_KEYS[slotIndex]);
     this.queue.push(ball);
+    if (this.onCharge) this.onCharge();
     // 落下はスライドより短く。スライドと同じ長さにすると、上から入ってくる動きが
     // もたついて見える。
     this._playEnter(

@@ -108,7 +108,7 @@ PachiSim.machineRegistry.register({
       mode: "countDown",
       maxAttempts: 157,
       probability: 1 / 99.6,
-      actionLabel: "JUDGEMENT",
+      actionLabel: "START",
       theme: "rush",
       accruesInvestment: false,
       isBaseState: false,

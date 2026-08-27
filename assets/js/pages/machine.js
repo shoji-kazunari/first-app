@@ -77,6 +77,10 @@
     // 直前の大当たりの履歴を、データランプ上でまだ「1回前」へ送っていない状態かどうか。
     // 次の1回転が始まるときにfalseへ戻し、そこで初めてスライドしたように見せる。
     let historyRevealPending = false;
+    // 今回のアクションで貯まった保留の数。玉の消費は「保留が貯まった時点」で
+    // 反映したいので、持ち玉表示はこの数を使う（消化した回転数ではない）。
+    // アクションが終わったらstats.totalNormalSpinsへ実回転数が加算されるので0へ戻す。
+    let chargedThisAction = 0;
     let activePlayback = null; // 実行中のplayback制御（pause/resumeで使用）
     let pendingStart = null; // 保留チャージ中にSTOPされた場合、再開時に実行する消化開始処理
     let currentStreakId = null; // 進行中の「一撃」を識別するID（データランプの連チャンまとめ用）
@@ -86,6 +90,15 @@
     const sessionTag = Math.random().toString(36).slice(2, 8);
 
     const holdQueue = new PachiSim.ui.HoldQueue(els.holdQueueEl);
+    // 保留が1つ貯まるたびに玉を1回転分消費する。実機と同じく始動口へ入れた時点で
+    // 減らしたいので、消化（大台へ進む）時ではなくここで引く。
+    // 電サポ中（accruesInvestment:false）の保留は玉が戻ってくるので消費しない。
+    holdQueue.onCharge = () => {
+      const state = machine.states[session.stateId];
+      if (!state || !state.accruesInvestment) return;
+      chargedThisAction += 1;
+      els.investmentDisplay.innerHTML = investmentDisplayText(chargedThisAction);
+    };
     const reelDisplay = new PachiSim.ui.ReelDisplay(els.reelDisplayEl);
     const maxRounds = Math.max(...Object.keys(machine.payoutTable).map(Number));
 
@@ -239,7 +252,8 @@
         els.simulationArea.dataset.theme = state.theme;
         els.spinCounter.textContent = spinCounterText(state);
       }
-      els.investmentDisplay.innerHTML = investmentDisplayText(null);
+      // アクション中は、貯まった保留の分だけ差し引いた値のままにする
+      els.investmentDisplay.innerHTML = investmentDisplayText(chargedThisAction);
       if (!isAnimating) {
         els.actionButton.textContent = state.actionLabel;
         els.actionButton.dataset.mode = "action";
@@ -444,6 +458,7 @@
       reelDisplay.reset();
       // ここで前回の大当たりがデータランプの「1回前」へスライドする
       historyRevealPending = false;
+      chargedThisAction = 0;
 
       const state = machine.states[session.stateId];
       resetLiveCountersForState(state);
@@ -462,9 +477,9 @@
         liveCount = spinsCarriedOver + roll.index;
         liveRemaining = state.maxAttempts == null ? null : state.maxAttempts - roll.index;
         els.spinCounter.textContent = spinCounterText(state);
-        els.investmentDisplay.innerHTML = investmentDisplayText(
-          state.accruesInvestment ? roll.index : null
-        );
+        // 玉の消費は保留が貯まった時点でholdQueue.onChargeが反映済み。
+        // ここでは消化した回転数ではなく、その貯まった数をそのまま使う。
+        els.investmentDisplay.innerHTML = investmentDisplayText(chargedThisAction);
         renderDataLampLive();
       }
 
@@ -607,6 +622,11 @@
       if (fromState.accruesInvestment) {
         stats.totalNormalSpins += outcome.attempts;
       }
+      // 集計は実際に回した回転数で行うので、貯まった保留の仮の数はここで手放す。
+      // 消化されずに残った保留（当たった時点の待機列）の分だけ表示が先行していたのが、
+      // ここで実回転数ベースへ揃う。差は最大でも保留3個分で、大当たり出玉の加算と
+      // 同じ描画で吸収されるため目には見えない。
+      chargedThisAction = 0;
 
       if (fromState.isBaseState) {
         streakSeq += 1;
@@ -747,6 +767,7 @@
       currentStreakId = null;
       spinsCarriedOver = 0;
       historyRevealPending = false;
+      chargedThisAction = 0;
       showIdleEffect();
       hideResultPanel();
       holdQueue.reset();
