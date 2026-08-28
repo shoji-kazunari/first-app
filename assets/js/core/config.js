@@ -7,6 +7,12 @@ PachiSim.config = {
   siteTitle: "パチンコシミュレーター",
   siteTagline: "スペックをボタンで疑似体験するシミュレーター",
 
+  // Google Analytics 4 の測定ID（G-から始まる文字列）。
+  // 空のままなら計測は一切行われない（タグも読み込まれない）ので、
+  // 準備ができたらここにIDを1行入れるだけで全ページで有効になる。
+  // 計測を止めたくなったら、ここを空文字に戻せば止まる。
+  analyticsMeasurementId: "",
+
   // 等価交換の仮レート。将来機種ごとに上書きできるよう、
   // 参照側は必ず machine.yenPerBall ?? config.yenPerBall のように使うこと。
   yenPerBall: 4,

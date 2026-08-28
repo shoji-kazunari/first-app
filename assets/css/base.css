@@ -302,6 +302,88 @@ button {
   line-height: 1.7;
 }
 
+/* 免責文とページ間リンクをひとまとめにする。TOPは.page（flex+gap）の直下、
+   機種ページは<main>の中と、置かれる場所の都合が違うため、ここで包んでおかないと
+   免責文とリンクの間隔がページによって変わってしまう */
+.page-footer {
+  display: block;
+}
+
+/* 免責文の下に置くページ間リンク（プライバシーポリシーなど）。
+   本文の邪魔にならないよう、免責文と同じ小ささ・同じ色にとどめる */
+.footer-links {
+  margin: var(--space-2) 0 0;
+  font-size: 0.72rem;
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.footer-links a {
+  color: var(--color-text-muted);
+}
+
+.footer-links a:hover {
+  color: var(--color-accent);
+}
+
+.back-to-top {
+  text-align: center;
+}
+
+.back-to-top a {
+  display: inline-block;
+  text-decoration: none;
+}
+
+/* プライバシーポリシーのような、読ませることが目的の文章ページ。
+   シミュレーター画面と違って行間を広めに取る */
+.policy-title {
+  font-size: 1.05rem;
+  color: var(--color-accent-strong);
+  margin: 0 0 var(--space-4);
+}
+
+.policy-section p {
+  font-size: 0.82rem;
+  line-height: 1.9;
+  margin: 0 0 var(--space-3);
+}
+
+.policy-section p:last-child {
+  margin-bottom: 0;
+}
+
+.policy-section strong {
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+.policy-list {
+  margin: 0 0 var(--space-3);
+  padding-left: 1.2em;
+  font-size: 0.82rem;
+  line-height: 1.9;
+  /* 全体のulリセットでlist-style:noneにしているが、文章ページの箇条書きは
+     項目の区切りが見えないと読みにくいので、ここだけ点を戻す */
+  list-style: disc;
+}
+
+.policy-links {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.policy-links a {
+  color: var(--color-accent);
+  font-size: 0.8rem;
+}
+
+.policy-updated {
+  color: var(--color-text-muted);
+}
+
 /* 運営ログイン用の控えめなウィジェット。通常のプレイヤーの目に留まりすぎない
    よう、リンクのような見た目にとどめる（削除ボタンの実際の権限はFirestoreの
    セキュリティルール側で強制するので、ここは見た目だけの配慮でよい）。 */

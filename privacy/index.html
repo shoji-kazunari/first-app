@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>プライバシーポリシー | パチンコシミュレーター</title>
+  <meta name="description" content="本サイトが取得する情報と、その利用目的・停止方法についてのご案内です。">
+  <link rel="canonical" href="/privacy/">
+  <link rel="stylesheet" href="../assets/css/base.css">
+</head>
+<body>
+  <div class="page">
+    <header class="site-header">
+      <a href="../index.html" id="siteTitle" class="site-header__title" style="text-decoration:none;"></a>
+    </header>
+
+    <nav class="breadcrumb" aria-label="パンくずリスト">
+      <a href="../index.html">TOP</a>
+      <span>&gt;</span>
+      <span>プライバシーポリシー</span>
+    </nav>
+
+    <main>
+      <h2 class="policy-title">プライバシーポリシー</h2>
+
+      <section class="card policy-section">
+        <h3 class="card__heading">アクセス解析について</h3>
+        <p>
+          本サイトでは、サイトの利用状況を把握して改善に役立てるため、Googleが提供する
+          アクセス解析ツール「Google アナリティクス」を使用しています。
+        </p>
+        <p>Google アナリティクスは、Cookieを用いて次のような情報を収集します。</p>
+        <ul class="policy-list">
+          <li>閲覧したページと、その滞在時間</li>
+          <li>どこから本サイトに来たか（検索・リンク元など）</li>
+          <li>ご利用の端末・ブラウザの種類</li>
+          <li>おおよその地域（国・都市レベル）</li>
+        </ul>
+        <p>
+          これらの情報は匿名で収集されており、氏名・メールアドレスなど個人を特定できる情報を
+          本サイトからGoogleへ送信することはありません。収集された情報はGoogleへ送信され、
+          同社のプライバシーポリシーに基づいて管理されます。
+        </p>
+        <p class="policy-links">
+          <a href="https://policies.google.com/privacy?hl=ja" target="_blank" rel="noopener noreferrer">Googleのプライバシーポリシー</a>
+          <a href="https://policies.google.com/technologies/partner-sites?hl=ja" target="_blank" rel="noopener noreferrer">Googleが情報を使用する仕組み</a>
+        </p>
+      </section>
+
+      <section class="card policy-section">
+        <h3 class="card__heading">アクセス解析を停止したい場合</h3>
+        <p>次のいずれかの方法で、収集を停止できます。停止しても本サイトの機能はそのままご利用いただけます。</p>
+        <ul class="policy-list">
+          <li>ご利用のブラウザの設定でCookieを無効にする</li>
+          <li>Googleが配布しているオプトアウト用のブラウザアドオンを導入する</li>
+        </ul>
+        <p class="policy-links">
+          <a href="https://tools.google.com/dlpage/gaoptout?hl=ja" target="_blank" rel="noopener noreferrer">Google アナリティクス オプトアウト アドオン</a>
+        </p>
+      </section>
+
+      <section class="card policy-section">
+        <h3 class="card__heading">本サイトが保存する情報</h3>
+        <p>
+          <strong>本日の成績・大当たり履歴・抽選速度などの設定</strong>は、お使いの端末のブラウザ内
+          （ローカルストレージ）にのみ保存され、外部へ送信されることはありません。ブラウザの
+          データを消去すると、これらも一緒に消えます。
+        </p>
+        <p>
+          <strong>出玉ランキングに掲載される記録</strong>（機種名・出玉数・連チャン数・記録日時）は、
+          全員が同じランキングを見られるようにするため、Google Firebase上のデータベースに
+          保存され、他の訪問者にも表示されます。氏名やメールアドレスなど、個人を特定できる
+          情報は含まれません。
+        </p>
+      </section>
+
+      <section class="card policy-section">
+        <h3 class="card__heading">広告・アフィリエイトについて</h3>
+        <p>
+          本サイトでは将来的に広告およびアフィリエイトプログラムを利用する場合があります。
+          その際は配信事業者がCookieを使用して広告を配信することがありますが、その場合も
+          個人を特定できる情報が本サイトから提供されることはありません。
+        </p>
+      </section>
+
+      <section class="card policy-section">
+        <h3 class="card__heading">免責事項</h3>
+        <p>
+          本サイトはパチンコの公開スペックをもとにした疑似シミュレーションです。実機の演出・画像・
+          音源は使用していません。表示される結果は乱数による試行であり、実際の遊技結果や収支を
+          保証するものではありません。
+        </p>
+      </section>
+
+      <section class="card policy-section">
+        <h3 class="card__heading">改定について</h3>
+        <p>
+          本ポリシーの内容は、必要に応じて予告なく変更することがあります。変更後の内容は
+          本ページに掲載した時点から適用されます。
+        </p>
+        <p class="policy-updated">最終更新日：2026年8月28日</p>
+      </section>
+
+      <p class="back-to-top"><a href="../index.html" class="btn btn-secondary">トップにもどる</a></p>
+    </main>
+  </div>
+
+  <script src="../assets/js/core/config.js"></script>
+  <script src="../assets/js/core/analytics.js"></script>
+  <script>
+    document.getElementById("siteTitle").textContent = PachiSim.config.siteTitle;
+  </script>
+</body>
+</html>

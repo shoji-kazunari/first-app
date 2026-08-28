@@ -775,15 +775,6 @@
   color: var(--color-accent-strong);
 }
 
-.back-to-top {
-  text-align: center;
-}
-
-.back-to-top a {
-  display: inline-block;
-  text-decoration: none;
-}
-
 .machine-error {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
