@@ -17,7 +17,7 @@ PachiSim.config = {
   // 空のままなら計測は一切行われない（タグも読み込まれない）ので、
   // 準備ができたらここにIDを1行入れるだけで全ページで有効になる。
   // 計測を止めたくなったら、ここを空文字に戻せば止まる。
-  analyticsMeasurementId: "",
+  analyticsMeasurementId: "G-QGS0BQJY5N",
 
   // 等価交換の仮レート。将来機種ごとに上書きできるよう、
   // 参照側は必ず machine.yenPerBall ?? config.yenPerBall のように使うこと。

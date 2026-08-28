@@ -22,6 +22,12 @@
 
   <!-- テスト対象の本体スクリプト（機種ページと同じ依存関係） -->
   <script src="../assets/js/core/config.js"></script>
+  <script>
+    // テストを流すたびに実際のアクセス解析へ記録が残ってしまわないよう、
+    // analytics.jsを読み込む前に測定IDを空にしておく。
+    // 「IDが空ならタグを読み込まない」という仕組みそのものは analytics.tests.js で検証する。
+    PachiSim.config.analyticsMeasurementId = "";
+  </script>
   <script src="../assets/js/core/kana.js"></script>
   <script src="../assets/js/core/rng.js"></script>
   <script src="../assets/js/core/format.js"></script>

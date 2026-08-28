@@ -21,11 +21,14 @@
     assertEqual(tagsIn(doc).length, 0, "タグが差し込まれている");
   });
 
-  test("解析: configの測定IDが空のあいだは、引数なしで呼んでも読み込まない", () => {
-    // 実運用でIDを入れるまでの状態。ページには置いたままでも送信は起きない。
-    assertEqual(PachiSim.config.analyticsMeasurementId, "", "テスト用のconfigにIDが入っている");
+  test("解析: 測定IDが空なら、引数なしで呼んでも読み込まない", () => {
+    // このテストページは、実際のアクセス解析へ記録が残らないよう
+    // index.html側で測定IDを空にしてからanalytics.jsを読み込んでいる。
+    // その「空なら送信しない」という仕組みが効いていることをここで確かめる
+    // （効いていなければ、テストを流すたびに解析データが汚れる）。
+    assertEqual(PachiSim.config.analyticsMeasurementId, "", "テストページで空にできていない");
     assertEqual(PachiSim.analytics.load(), false);
-    assertEqual(tagsIn(document).length, 0, "実ページにタグが差し込まれている");
+    assertEqual(tagsIn(document).length, 0, "テストページにタグが差し込まれている");
   });
 
   test("解析: 測定IDを渡すと、そのIDでタグを1つ読み込む", () => {
