@@ -365,7 +365,7 @@
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
   transform: translateY(0) scale(1);
   opacity: 1;
-  /* 「早い」速度は1回転わずか160ms程度しかなく、これより長い遷移だと
+  /* 「速い」速度は1回転わずか160ms程度しかなく、これより長い遷移だと
      次の回転の演出が始まってもまだ前の保留の動きが終わっておらず、
      別々の動きなのに繋がって見えてしまう。どの速度でも1回転の中で
      収まるよう、短めのdurationにしている。 */
@@ -741,14 +741,30 @@
   color: #ffbdbd;
 }
 
-/* 速度選択: 「普通/早い/当たりまで」を3つ並べ、選択中がひと目でわかるようにする。
+/* 速度選択: 「普通/速い/当たりまで」を3つ並べ、選択中がひと目でわかるようにする。
    スマホでの連打切り替えは画面のピンチズーム操作と衝突しやすいため、
-   トグル式ではなく直接選べる並列ボタンにしている。 */
-.speed-toggle {
+   トグル式ではなく直接選べる並列ボタンにしている。
+   何を選ぶボタンなのか一見して分かりづらいという指摘があったため、
+   左に「速度変更」の見出しを添える。 */
+.speed-toggle-row {
   display: flex;
+  align-items: center;
   gap: var(--space-2);
   width: 100%;
   max-width: 320px;
+}
+
+.speed-toggle-row__label {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.speed-toggle {
+  display: flex;
+  gap: var(--space-2);
+  flex: 1;
+  min-width: 0;
 }
 
 .speed-toggle__btn {

@@ -443,6 +443,7 @@
         },
         setSpeed: (newSpeedMode) => {
           if (stopped) return;
+          const wasInstant = isInstant();
           currentSpeedMode = newSpeedMode;
           if (isInstant()) {
             // 「当たりまで」へ切り替えた場合は、そこから先を一気にジャンプする
@@ -452,8 +453,27 @@
               clearTimeout(timer);
               timer = setTimeout(() => finish(true), 420);
             }
+            return;
           }
-          // それ以外の速度切り替えは、次にスケジュールされるタイマーから
+          if (wasInstant) {
+            // 「当たりまで」から抜けた場合、予約済みの一気ジャンプ（一時停止中に
+            // 予約しただけのpendingJumpToEndも含む）を取り消し、通常の1回転ずつの
+            // 消化に戻す。ここで取り消さないと、後から別の速度に変えても
+            // 直前に仕込んだジャンプタイマーがそのまま発火し、当たりまで飛び
+            // 続けてしまう。
+            pendingJumpToEnd = false;
+            if (!paused) {
+              clearTimeout(timer);
+              const split = tickSplit();
+              if (phase === "emphasize") {
+                timer = setTimeout(stepEmphasize, split.emphasizeMs);
+              } else {
+                timer = setTimeout(stepResolve, split.resolveMs);
+              }
+            }
+            return;
+          }
+          // instant以外同士の速度切り替えは、次にスケジュールされるタイマーから
           // tickSplit()経由で自動的に新しいテンポが反映される
         },
       };
