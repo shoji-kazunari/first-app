@@ -469,3 +469,57 @@
     );
   });
 })();
+
+// 転落式の演出ルール（リーチを作らない）。
+// 転落式のRUSHは超短縮変動で、リーチになった時点で当たりか転落かが決まる。
+// 「リーチ中のドキドキ」が存在しないので、リーチ演出そのものを出さない。
+(function () {
+  const { test, assertEqual, assertTrue } = PachiSimTest;
+  const noReach = { noReach: true };
+
+  test("転落式の演出: 大当たりはリーチを挟まずに3つ揃う", () => {
+    const r = PachiSim.reelOmens.decide(true, false, 10, 10, PachiSim.rng.createSeededRng(1), noReach);
+    assertEqual(r.reach, false, "リーチを作ってはいけない");
+    assertEqual(r.match, true, "大当たりなのに揃っていない");
+    assertTrue(
+      r.leftDigit === r.rightDigit && r.rightDigit === r.middleDigit,
+      `3つとも同じ数字でない: ${r.leftDigit}/${r.middleDigit}/${r.rightDigit}`
+    );
+  });
+
+  test("転落式の演出: ハズレはリーチにならず、左右も揃わない", () => {
+    for (let i = 0; i < 50; i++) {
+      const r = PachiSim.reelOmens.decide(false, false, null, 10, PachiSim.rng.createSeededRng(i), noReach);
+      assertEqual(r.reach, false, `${i}回目にリーチが出た`);
+      assertEqual(r.match, false);
+      assertTrue(r.leftDigit !== r.rightDigit, `${i}回目に左右が揃った（リーチに見えてしまう）`);
+    }
+  });
+
+  test("転落式の演出: 色保留でもリーチにならない", () => {
+    // 通常は色保留のハズレを必ず特殊リーチにするが、転落式ではそれも作らない
+    for (let i = 0; i < 30; i++) {
+      const r = PachiSim.reelOmens.decide(false, true, null, 10, PachiSim.rng.createSeededRng(i), noReach);
+      assertEqual(r.reach, false, `${i}回目に色保留でリーチが出た`);
+    }
+  });
+
+  test("演出ルール: 転落式でない状態は今までどおりリーチになる", () => {
+    // noReachを渡さない既存の呼び出しが変わっていないことの確認
+    const hit = PachiSim.reelOmens.decide(true, false, 10, 10, PachiSim.rng.createSeededRng(1));
+    assertEqual(hit.reach, true);
+    assertEqual(hit.match, true);
+    const colored = PachiSim.reelOmens.decide(false, true, null, 10, PachiSim.rng.createSeededRng(1));
+    assertEqual(colored.reach, true, "色保留のハズレは特殊リーチのままであるべき");
+    assertEqual(colored.match, false);
+  });
+
+  test("転落式の判定: ユニコーンのRUSHだけがonFallを持つ", () => {
+    // machine.jsは「その状態がonFallを持つか」で演出を切り替えている。
+    // 通常時は普通の1/319.7のゲームなので、リーチも色保留もそのまま出す。
+    const uc = PachiSim.machineRegistry.getBySlug("pf-gundam-uc");
+    assertTrue(!!uc, "ユニコーンが登録されていない");
+    assertTrue(!uc.states.normal.onFall, "通常時にonFallが付いている");
+    assertTrue(!!uc.states.rush.onFall, "RUSHにonFallが無い");
+  });
+})();

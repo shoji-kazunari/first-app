@@ -513,6 +513,12 @@
         renderDataLampLive();
       }
 
+      // その状態が転落式か（onFallを持つか）。転落式のRUSHは超短縮変動で、
+      // リーチになった時点で当たりか転落かが決まってしまい「リーチ中のドキドキ」が
+      // 存在しない。そのためリーチ演出と保留の色変化予告を出さない。
+      // 機種データに専用の設定を足さなくていいよう、onFallの有無から判断している。
+      const isFallState = !!state.onFall;
+
       // リーチ演出（数字リール）: 保留拡大と並行して再生する、機種共通の演出。
       // 実際の抽選結果には一切影響しない。「当たりまで」は既存どおり演出なしで飛ぶ。
       //
@@ -529,7 +535,8 @@
           isColored,
           rounds,
           maxRounds,
-          PachiSim.rng.createDefaultRng()
+          PachiSim.rng.createDefaultRng(),
+          { noReach: isFallState }
         );
 
         let timing;
@@ -567,9 +574,11 @@
               // 色保留が同時に複数出ると、どれが何を示しているのか分かりづらいので、
               // 既に色保留（途中から色が付くものも含む）が残っている間は、
               // 補充する保留に色を割り当てない。演出だけの話なので抽選結果は変わらない。
+              // 転落式では色保留も出さない。次が当たりか転落かしかない状態で
+              // 「そろそろ来そう」と煽っても、示せるものが無い。
               const upcomingRoll = result.rolls[nextUpcomingIndex];
               const refillPattern =
-                upcomingRoll && !holdQueue.hasColoredPattern()
+                !isFallState && upcomingRoll && !holdQueue.hasColoredPattern()
                   ? PachiSim.holdOmens.pickPattern(upcomingRoll.hit)
                   : null;
               nextUpcomingIndex += 1;

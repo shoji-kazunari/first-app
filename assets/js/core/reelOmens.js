@@ -10,6 +10,12 @@
 //     残りは左右含め毎回バラバラに止まる「基本のハズレ演出」。
 //   ・リーチの数字が奇数のときは、大当たりに繋がりやすい（大当たりリーチの数字選択で
 //     奇数を偶数の2倍の重みにすることで表現している）。
+//
+// 【例外: 転落式（options.noReach）】
+// 転落抽選型のRUSHは超短縮変動で、リーチになった時点で当たりか転落かが決まる。
+// 「リーチがかかって、ドキドキしながら中央が近づく」という時間そのものが無い。
+// そこでこの状態ではリーチ演出を作らず、3つとも短く止める。
+// 大当たりのときだけ3つ揃い（リーチの間を挟まずに揃う）、それ以外はバラけて終わる。
 window.PachiSim = window.PachiSim || {};
 
 PachiSim.reelOmens = (function () {
@@ -64,7 +70,23 @@ PachiSim.reelOmens = (function () {
   // isColored: このホールドが保留色予告で色付きだったか
   // rounds / maxRounds: 大当たり時、7を出してよいか判定するための獲得R数と機種の最大R数
   // rng: 0以上1未満の乱数を返す関数
-  function decide(isHit, isColored, rounds, maxRounds, rng) {
+  // options.noReach: 転落式の状態で立てる。リーチを一切作らない（上のコメント参照）
+  function decide(isHit, isColored, rounds, maxRounds, rng, options) {
+    const noReach = !!(options && options.noReach);
+
+    if (isHit && noReach) {
+      // リーチの間を挟まずに3つ揃える。中央も同じ数字を短く止めるだけ
+      const candidates = rounds != null && rounds === maxRounds ? ALL_DIGITS : NON_SEVEN;
+      const digit = weightedDigit(rng, candidates, 2, 1);
+      return {
+        reach: false,
+        match: true,
+        leftDigit: digit,
+        rightDigit: digit,
+        middleDigit: digit,
+      };
+    }
+
     if (isHit) {
       const candidates = rounds != null && rounds === maxRounds ? ALL_DIGITS : NON_SEVEN;
       const digit = weightedDigit(rng, candidates, 2, 1);
@@ -78,7 +100,9 @@ PachiSim.reelOmens = (function () {
       };
     }
 
-    const forcedReach = isColored || rng() < 0.03;
+    // 転落式では、色保留による特殊リーチも作らない（そもそも色保留を出さないが、
+    // 出したとしてもリーチにはしない）
+    const forcedReach = !noReach && (isColored || rng() < 0.03);
     if (forcedReach) {
       const digit = weightedDigit(rng, NON_SEVEN, 1, 1);
       // 行き過ぎて止まる場合は、必ずリーチ数字の「次の数字」で止める（7はスキップ）

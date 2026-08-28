@@ -182,6 +182,9 @@ PachiSim.ui.ReelDisplay = (function () {
         } else {
           this._schedule(() => {
             this.stopAt("middle", plan.middleDigit, snapDuration(timing.middleDelay));
+            // 通常はリーチにならなかった時点でハズレだが、転落式（noReach）では
+            // リーチを挟まずに3つ揃うことがあるので、planの判定に従う
+            if (plan.match) this._setHitGlow(true);
             if (onDone) onDone();
           }, timing.middleDelay);
         }
