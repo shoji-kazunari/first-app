@@ -7,6 +7,12 @@ PachiSim.config = {
   siteTitle: "パチンコシミュレーター",
   siteTagline: "スペックをボタンで疑似体験するシミュレーター",
 
+  // 公開先のURL（末尾のスラッシュは付けない）。
+  // 各ページのcanonical（検索エンジンに伝える正式なURL）をここから組み立てる。
+  // 独自ドメインに移すときは、この1行を書き換えて
+  // `node tools/build-machine-pages.js` を実行すれば全ページに反映される。
+  siteBaseUrl: "https://shoji-kazunari.github.io/first-app",
+
   // Google Analytics 4 の測定ID（G-から始まる文字列）。
   // 空のままなら計測は一切行われない（タグも読み込まれない）ので、
   // 準備ができたらここにIDを1行入れるだけで全ページで有効になる。

@@ -63,3 +63,22 @@
     }
   });
 })();
+
+// 公開先URLの設定。canonical（検索エンジンに伝える正式なURL）をここから組み立てるので、
+// 値が壊れていると全ページのcanonicalが一斉におかしくなる。
+// 組み立て自体は tools/build-machine-pages.js が行い、生成漏れは --check が見張る。
+(function () {
+  const { test, assertTrue } = PachiSimTest;
+
+  test("公開先URL: httpから始まる絶対URLになっている", () => {
+    const base = PachiSim.config.siteBaseUrl;
+    assertTrue(/^https?:\/\/[^/]+/.test(base), `絶対URLでない: ${base}`);
+  });
+
+  test("公開先URL: 末尾にスラッシュを付けない", () => {
+    // 付いていると「.../first-app//privacy/」のようにスラッシュが重なる。
+    // 生成側でも念のため落としているが、設定としては付けない約束にしておく。
+    const base = PachiSim.config.siteBaseUrl;
+    assertTrue(!base.endsWith("/"), `末尾にスラッシュが付いている: ${base}`);
+  });
+})();

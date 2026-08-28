@@ -9,6 +9,12 @@
 // これで機種の追加は「assets/js/data/machines/<slug>.js を書いて、このスクリプトを
 // 実行する」の2手で済む。
 //
+// 各ページのcanonical（検索エンジンに伝える正式なURL）も、ここでまとめて
+// config.siteBaseUrl から組み立て直す。ページごとに手書きしていると、公開先が
+// サブパス配下(/first-app/)であることを忘れて実在しないURLを宣言してしまうため
+// （実際に一度そうなっていた）。独自ドメインへ移すときも、configの1行を直して
+// このスクリプトを流せば全ページが揃う。
+//
 // 使い方:
 //   node tools/build-machine-pages.js          生成して書き込む
 //   node tools/build-machine-pages.js --check  生成物とファイルの差分を報告するだけ（書き込まない）
@@ -27,6 +33,11 @@ const TEMPLATE_PATH = path.join(__dirname, "machine-page.template.html");
 const TOP_PAGE_PATH = path.join(ROOT, "index.html");
 const TOP_MARKER_START = "<!-- machines:start -->";
 const TOP_MARKER_END = "<!-- machines:end -->";
+
+// 雛形から作らない手書きのページ。canonicalの貼り直しだけここで面倒を見る。
+const STATIC_PAGES = ["index.html", path.join("privacy", "index.html")];
+
+const CANONICAL_PATTERN = /<link rel="canonical" href="[^"]*">/;
 
 // 機種データファイルはブラウザ用に書かれている（windowとPachiSim.machineRegistryが
 // 前提）。同じ形の入れ物を用意して、そのまま読み込ませる。
@@ -55,7 +66,11 @@ function loadSite() {
     .sort()
     .forEach((f) => run(path.join(MACHINE_DATA_DIR, f)));
 
-  return { machines, siteTitle: context.PachiSim.config.siteTitle };
+  return {
+    machines,
+    siteTitle: context.PachiSim.config.siteTitle,
+    siteBaseUrl: context.PachiSim.config.siteBaseUrl,
+  };
 }
 
 // meta descriptionは、その機種の「通常以外の状態」の名前から組み立てる。
@@ -70,12 +85,34 @@ function describeMachine(machine) {
   )}をボタン操作で疑似体験できます。`;
 }
 
-function renderPage(template, machine, siteTitle) {
+// そのファイルが公開されたときのURL。ディレクトリ内のindex.htmlは、
+// ファイル名を出さずにディレクトリのURLで参照されるので末尾はスラッシュにする。
+//   index.html                     -> <base>/
+//   privacy/index.html             -> <base>/privacy/
+//   machines/<slug>/index.html     -> <base>/machines/<slug>/
+function canonicalUrlFor(relativePath, siteBaseUrl) {
+  // configに末尾スラッシュ付きで書かれても「//privacy/」にならないようにする
+  const base = siteBaseUrl.replace(/\/+$/, "");
+  const dir = path.dirname(relativePath).split(path.sep).join("/");
+  return dir === "." ? `${base}/` : `${base}/${dir}/`;
+}
+
+// 雛形から作らない手書きページ用。canonicalの行を丸ごと差し替える。
+// （雛形から作るページは{{CANONICAL}}で埋めるので、こちらは通らない）
+// canonicalの行が無いページは、そのまま（何も足さない）。
+function withCanonical(html, relativePath, siteBaseUrl) {
+  if (!CANONICAL_PATTERN.test(html)) return html;
+  const url = canonicalUrlFor(relativePath, siteBaseUrl);
+  return html.replace(CANONICAL_PATTERN, `<link rel="canonical" href="${url}">`);
+}
+
+function renderPage(template, machine, siteTitle, canonicalUrl) {
   return template
     .split("{{SLUG}}").join(machine.slug)
     .split("{{NAME}}").join(machine.name)
     .split("{{MAKER}}").join(machine.manufacturer.name)
     .split("{{SITE_TITLE}}").join(siteTitle)
+    .split("{{CANONICAL}}").join(canonicalUrl)
     .split("{{DESCRIPTION}}").join(describeMachine(machine));
 }
 
@@ -104,20 +141,32 @@ function renderTopPage(currentHtml, machines) {
 
 function main() {
   const checkOnly = process.argv.includes("--check");
-  const { machines, siteTitle } = loadSite();
+  const { machines, siteTitle, siteBaseUrl } = loadSite();
   const template = fs.readFileSync(TEMPLATE_PATH, "utf8");
 
-  const outputs = machines.map((machine) => ({
-    label: machine.name,
-    filePath: path.join(ROOT, "machines", machine.slug, "index.html"),
-    content: renderPage(template, machine, siteTitle),
-  }));
+  const outputs = machines.map((machine) => {
+    const relativePath = path.join("machines", machine.slug, "index.html");
+    return {
+      label: machine.name,
+      filePath: path.join(ROOT, relativePath),
+      content: renderPage(template, machine, siteTitle, canonicalUrlFor(relativePath, siteBaseUrl)),
+    };
+  });
 
   const topHtml = fs.readFileSync(TOP_PAGE_PATH, "utf8");
   outputs.push({
-    label: "TOP（機種データの読み込み行）",
+    label: "TOP（機種データの読み込み行・canonical）",
     filePath: TOP_PAGE_PATH,
-    content: renderTopPage(topHtml, machines),
+    content: withCanonical(renderTopPage(topHtml, machines), "index.html", siteBaseUrl),
+  });
+
+  STATIC_PAGES.filter((rel) => rel !== "index.html").forEach((rel) => {
+    const filePath = path.join(ROOT, rel);
+    outputs.push({
+      label: `${rel}（canonical）`,
+      filePath,
+      content: withCanonical(fs.readFileSync(filePath, "utf8"), rel, siteBaseUrl),
+    });
   });
 
   let changed = 0;
