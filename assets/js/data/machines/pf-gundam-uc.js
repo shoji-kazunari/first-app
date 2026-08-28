@@ -1,4 +1,4 @@
-// 第3号機: PF機動戦士ガンダムユニコーン（SANKYO 1/319.7 転落抽選型）
+// 第3号機: Pフィーバー機動戦士ガンダムユニコーン（SANKYO 1/319.7 転落抽選型）
 //
 // 情報源: 1geki.jp（https://1geki.jp/pachinko/p_gundamuc/1/）。
 // 実行環境のネットワークポリシーで1geki.jpへ到達できなかったため、依頼者に
@@ -45,14 +45,15 @@
 // 【入れなかった項目】
 // 導入年・カテゴリは、もらったスクリーンショットに写っておらず確認できなかったため
 // 書いていない（どちらも画面表示には使われていない）。
-// 正式名称の表記ゆれ（「PF」と「Pフィーバー」）も未確認。
+// 正式名称は依頼者に確認して「Pフィーバー機動戦士ガンダムユニコーン」とした
+// （「PF機動戦士ガンダムユニコーン」の表記も見かけるのでaliasesに入れてある）。
 window.PachiSim = window.PachiSim || {};
 
 PachiSim.machineRegistry.register({
   id: "pf-gundam-uc",
   slug: "pf-gundam-uc",
-  name: "PF機動戦士ガンダムユニコーン",
-  nameKana: "ぴーえふきどうせんしがんだむゆにこーん",
+  name: "Pフィーバー機動戦士ガンダムユニコーン",
+  nameKana: "ぴーふぃーばーきどうせんしがんだむゆにこーん",
   aliases: [
     "ユニコーン",
     "ガンダムユニコーン",
@@ -60,6 +61,7 @@ PachiSim.machineRegistry.register({
     "ガンダムUC",
     "UC",
     "ユニコーン319",
+    "PF機動戦士ガンダムユニコーン",
   ],
   manufacturer: { id: "sankyo", name: "SANKYO" },
 
