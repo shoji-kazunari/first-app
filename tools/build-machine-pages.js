@@ -31,6 +31,7 @@ const ROOT = path.resolve(__dirname, "..");
 const MACHINE_DATA_DIR = path.join(ROOT, "assets", "js", "data", "machines");
 const TEMPLATE_PATH = path.join(__dirname, "machine-page.template.html");
 const TOP_PAGE_PATH = path.join(ROOT, "index.html");
+const TEST_PAGE_PATH = path.join(ROOT, "tests", "index.html");
 const TOP_MARKER_START = "<!-- machines:start -->";
 const TOP_MARKER_END = "<!-- machines:end -->";
 
@@ -116,18 +117,23 @@ function renderPage(template, machine, siteTitle, canonicalUrl) {
     .split("{{DESCRIPTION}}").join(describeMachine(machine));
 }
 
-function renderTopPage(currentHtml, machines) {
+// マーカーで囲まれた機種データの読み込み行を差し替える。
+// TOPとテストページの両方で使う。テストページも対象にしているのは、
+// tests/machines.tests.js が「登録済みの全機種」を横断して検査する作りのため。
+// 読み込み行が手書きだと、機種を足してもテストの対象から漏れて気づけない。
+// srcPrefix: そのページから見たassetsまでの相対パス
+function renderMachineScripts(currentHtml, machines, srcPrefix, label) {
   const startIdx = currentHtml.indexOf(TOP_MARKER_START);
   const endIdx = currentHtml.indexOf(TOP_MARKER_END);
   if (startIdx < 0 || endIdx < 0) {
     throw new Error(
-      `index.html に ${TOP_MARKER_START} / ${TOP_MARKER_END} が見つかりません。` +
+      `${label} に ${TOP_MARKER_START} / ${TOP_MARKER_END} が見つかりません。` +
         "機種データの読み込み行をこのコメントで囲んでください。"
     );
   }
   const indent = "  ";
   const lines = machines.map(
-    (m) => `${indent}<script src="assets/js/data/machines/${m.slug}.js"></script>`
+    (m) => `${indent}<script src="${srcPrefix}assets/js/data/machines/${m.slug}.js"></script>`
   );
   return (
     currentHtml.slice(0, startIdx + TOP_MARKER_START.length) +
@@ -157,7 +163,18 @@ function main() {
   outputs.push({
     label: "TOP（機種データの読み込み行・canonical）",
     filePath: TOP_PAGE_PATH,
-    content: withCanonical(renderTopPage(topHtml, machines), "index.html", siteBaseUrl),
+    content: withCanonical(
+      renderMachineScripts(topHtml, machines, "", "index.html"),
+      "index.html",
+      siteBaseUrl
+    ),
+  });
+
+  const testHtml = fs.readFileSync(TEST_PAGE_PATH, "utf8");
+  outputs.push({
+    label: "テストページ（機種データの読み込み行）",
+    filePath: TEST_PAGE_PATH,
+    content: renderMachineScripts(testHtml, machines, "../", "tests/index.html"),
   });
 
   STATIC_PAGES.filter((rel) => rel !== "index.html").forEach((rel) => {
