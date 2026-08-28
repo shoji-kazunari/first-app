@@ -93,6 +93,24 @@ PachiSim.machineValidator = (function () {
       }
     }
 
+    // 転落抽選（任意）。RUSHが「規定回数」ではなく「転落を引くまで」で終わる機種で使う。
+    // ここが壊れていると、その状態が永久に終わらないか、遷移先が無くて落ちる。
+    if (state.onFall != null) {
+      const fall = state.onFall;
+      if (typeof fall !== "object") {
+        errors.push(`${where}.onFall: オブジェクトでない`);
+      } else {
+        if (typeof fall.probability !== "number" || !(fall.probability > 0) || fall.probability > 1) {
+          errors.push(
+            `${where}.onFall: probabilityが0より大きく1以下でない（${fall.probability}）`
+          );
+        }
+        if (!machine.states[fall.nextState]) {
+          errors.push(`${where}.onFall: nextState "${fall.nextState}" が存在しない`);
+        }
+      }
+    }
+
     const onHit = state.onHit;
     if (!onHit) {
       errors.push(`${where}: onHitが無い`);

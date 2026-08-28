@@ -30,6 +30,15 @@
 //       // 同じラウンド数でも文脈によって出玉が変わる機種（例: 通常大当たりと特別大当たりが
 //       // 同じ10Rでも出玉が違う）を表現するための上書き値。
 //       onExhausted: { nextState, tag } | null, // countDownで抽選回数を使い切った時の遷移（countUpはnull）
+//       onFall: { probability, nextState, tag, resultLabel } | null,
+//         // 「転落抽選型」のRUSH向け（任意）。回転数で終わるのではなく、大当たりとは別の
+//         // 抽選（転落小当り）を引いた時点で電サポが終わる機種を表現する。
+//         // 例: ユニコーン … RUSH中は「次の大当たり(約1/41.1)か転落小当り(約1/153.7)を
+//         // 引くまでループ」で、規定回数という概念がない。
+//         // 大当たりを外した回転でのみ抽選する（同じ回転で両方成立させない）。
+//         // 引いた時のoutcomeはonExhaustedと同じ type:"exhausted" にする。
+//         // 「当たらずにその状態が終わった」点は時短・ST切れと同じで、回転数の繰り越しや
+//         // データランプの扱いを分ける理由がないため。
 //     }
 //   },
 //   distributionTables: { [tableId]: [{rounds, weight}, ...] },
@@ -64,8 +73,15 @@ PachiSim.engine = (function () {
     const rolls = [];
     for (let i = 1; i <= cap; i++) {
       const hit = PachiSim.rng.bernoulli(rng, state.probability);
-      rolls.push({ index: i, hit });
-      if (hit) break;
+      if (hit) {
+        rolls.push({ index: i, hit: true, fell: false });
+        break;
+      }
+      // 転落抽選は大当たりを外した回転でのみ行う。実機は1回の抽選で
+      // 大当たり・転落・ハズレのいずれかに決まるので、両方成立させない。
+      const fell = !!state.onFall && PachiSim.rng.bernoulli(rng, state.onFall.probability);
+      rolls.push({ index: i, hit: false, fell });
+      if (fell) break;
     }
 
     const lastRoll = rolls[rolls.length - 1];
@@ -102,13 +118,22 @@ PachiSim.engine = (function () {
         resultNote,
       };
     } else {
-      const ex = state.onExhausted;
+      // 転落で終わった場合も「当たらずにその状態が終わった」ことに変わりはないので、
+      // 遷移先の情報の出どころだけを差し替えて同じ形のoutcomeにする。
+      const ex = lastRoll.fell ? state.onFall : state.onExhausted;
+      if (!ex) {
+        throw new Error(
+          `状態「${state.label}」が当たりも転落もしないまま上限（${cap}回転）に達しました。` +
+            "countUpの状態にはonFallか、上限に達したときの遷移先が必要です。"
+        );
+      }
       outcome = {
         type: "exhausted",
         attempts,
         nextStateId: ex.nextState,
         tag: ex.tag || null,
         resultLabel: ex.resultLabel || null,
+        viaFall: !!lastRoll.fell,
       };
     }
 

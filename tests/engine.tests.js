@@ -372,3 +372,100 @@
     assertEqual(result.outcome.resultLabel, "時短終了");
   });
 })();
+
+// 転落抽選型（onFall）のテスト。
+// 「規定回数で終わる」のではなく「転落を引いた時点で終わる」RUSHを表現できるか。
+// ユニコーンのように、RUSHが次の大当たりか転落小当りを引くまでループする機種で使う。
+(function () {
+  const { test, assertEqual, assertTrue } = PachiSimTest;
+
+  // 大当たり1/2・転落1/4の、検証しやすい作りの機種を組み立てる。
+  // rngは1回転につき「大当たり判定→（外れたら）転落判定」の順に消費される。
+  const fallMachine = {
+    id: "t", slug: "t", name: "転落テスト機", nameKana: "てすと", aliases: [],
+    manufacturer: { id: "m", name: "テスト" },
+    spinsPer1000Yen: 18, baseStateId: "normal", rules: ["テスト"],
+    payoutTable: { 10: 1500 },
+    states: {
+      normal: {
+        id: "normal", label: "通常", mode: "countUp", maxAttempts: null,
+        probability: 1 / 2, actionLabel: "START", theme: "normal",
+        accruesInvestment: true, isBaseState: true, isRushEntry: false,
+        onHit: { outcomes: [{ weight: 1, rounds: 10, nextState: "rush", tag: "toRush" }] },
+        onExhausted: null,
+      },
+      rush: {
+        id: "rush", label: "RUSH", mode: "countUp", maxAttempts: null,
+        probability: 1 / 2, actionLabel: "START", theme: "rush",
+        accruesInvestment: false, isBaseState: false, isRushEntry: true,
+        onHit: { outcomes: [{ weight: 1, rounds: 10, nextState: "rush", tag: "loop" }] },
+        onExhausted: null,
+        onFall: { probability: 1 / 4, nextState: "normal", tag: "fell", resultLabel: "転落" },
+      },
+    },
+  };
+
+  test("engine(転落): 転落を引くとRUSHが終わり通常へ戻る", () => {
+    // 1回転目: 大当たり外れ(0.9) → 転落抽選 当たり(0.1) で終了
+    const session = { stateId: "rush", remaining: null, streak: null };
+    const rng = PachiSim.rng.createScriptedRng([0.9, 0.1]);
+    const r = PachiSim.engine.resolveAction(session, fallMachine, rng);
+    assertEqual(r.outcome.type, "exhausted", "転落は「当たらずに終わった」扱いにする");
+    assertEqual(r.outcome.viaFall, true);
+    assertEqual(r.outcome.attempts, 1);
+    assertEqual(r.outcome.nextStateId, "normal");
+    assertEqual(r.outcome.resultLabel, "転落");
+  });
+
+  test("engine(転落): 転落を引かなければRUSHは続く（回数制限が無い）", () => {
+    // 3回転ぶん「大当たり外れ・転落も外れ」を並べ、4回転目に大当たり
+    const session = { stateId: "rush", remaining: null, streak: null };
+    const rng = PachiSim.rng.createScriptedRng([0.9, 0.9, 0.9, 0.9, 0.9, 0.9, 0.1, 0.0]);
+    const r = PachiSim.engine.resolveAction(session, fallMachine, rng);
+    assertEqual(r.outcome.type, "hit");
+    assertEqual(r.outcome.attempts, 4, "転落しなければ規定回数で打ち切られない");
+    assertEqual(r.outcome.nextStateId, "rush");
+    assertEqual(r.outcome.balls, 1500);
+  });
+
+  test("engine(転落): 大当たりと転落は同じ回転で同時に成立しない", () => {
+    // 大当たり当選(0.1)なら、その回転で転落抽選は行われない。
+    // 行われていれば次の0.1を消費して転落扱いになってしまう。
+    const session = { stateId: "rush", remaining: null, streak: null };
+    const rng = PachiSim.rng.createScriptedRng([0.1, 0.1, 0.0]);
+    const r = PachiSim.engine.resolveAction(session, fallMachine, rng);
+    assertEqual(r.outcome.type, "hit");
+    assertEqual(r.outcome.attempts, 1);
+    assertTrue(!r.outcome.viaFall, "大当たりなのに転落扱いになっている");
+  });
+
+  test("engine(転落): 転落した回転もrollsに残る（演出が最後まで再生できる）", () => {
+    const session = { stateId: "rush", remaining: null, streak: null };
+    const rng = PachiSim.rng.createScriptedRng([0.9, 0.9, 0.9, 0.1]);
+    const r = PachiSim.engine.resolveAction(session, fallMachine, rng);
+    assertEqual(r.rolls.length, 2);
+    assertEqual(r.rolls[0].fell, false);
+    assertEqual(r.rolls[1].fell, true);
+    assertEqual(r.rolls[1].hit, false);
+  });
+
+  test("検証: onFallのnextStateが存在しないと弾かれる", () => {
+    const broken = JSON.parse(JSON.stringify(fallMachine));
+    broken.states.rush.onFall = { probability: 1 / 4, nextState: "nowhere" };
+    const errors = PachiSim.machineValidator.validate(broken);
+    assertTrue(
+      errors.some((e) => e.indexOf("onFall") >= 0 && e.indexOf("nowhere") >= 0),
+      `onFallのnextState未存在が検出されていない: ${errors.join(" / ")}`
+    );
+  });
+
+  test("検証: onFallのprobabilityが範囲外だと弾かれる", () => {
+    const broken = JSON.parse(JSON.stringify(fallMachine));
+    broken.states.rush.onFall = { probability: 153.7, nextState: "normal" }; // 1/153.7のつもり
+    const errors = PachiSim.machineValidator.validate(broken);
+    assertTrue(
+      errors.some((e) => e.indexOf("onFall") >= 0 && e.indexOf("probability") >= 0),
+      `onFallのprobability範囲外が検出されていない: ${errors.join(" / ")}`
+    );
+  });
+})();
