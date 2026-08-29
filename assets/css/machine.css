@@ -211,10 +211,11 @@
   color: var(--color-minus);
 }
 
-.reset-button-row {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: var(--space-2);
+/* シミュレーション画面・投資目安・操作ボタンはひと続きのまとまりとして見せたいので、
+   セクション間の標準の間隔（main > * + *）より詰める */
+.investment-display,
+.action-row {
+  margin-top: var(--space-3);
 }
 
 /* 通常の.btnの約半分のサイズ（リセットボタンなど、控えめに置きたい操作用） */

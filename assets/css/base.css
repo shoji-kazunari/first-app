@@ -141,6 +141,20 @@ button {
   margin-bottom: var(--space-3);
 }
 
+/* 見出しの右端に小さな操作ボタンを置きたいカード用（データランプのリセットなど）。
+   下の余白は行が持つので、中の見出しからは外す */
+.card__heading-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.card__heading-row .card__heading {
+  margin-bottom: 0;
+}
+
 /* 一撃出玉ランキング（機種別・全体全期間・全体本日、共通の見た目） */
 .ranking-list__empty {
   color: var(--color-text-muted);
@@ -294,6 +308,13 @@ button {
   text-decoration: none;
   font-size: 0.85rem;
   background: var(--color-surface-raised);
+}
+
+/* <main>の中に並ぶブロックの間隔。.pageはflexのgapで空くが、<main>の中は
+   これまで0だったため、カードどうしが接していた（速度ボタンと成績枠が
+   くっついて見えていたのはこれが原因）。機種ページとプライバシーポリシーの両方に効く */
+main > * + * {
+  margin-top: var(--space-5);
 }
 
 .disclaimer {
