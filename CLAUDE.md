@@ -1,7 +1,9 @@
 # パチンコシミュレーター
 
 公開スペックをもとに、初当たり・連チャン・出玉をボタン操作で疑似体験できるサイト。
-GitHub Pages（静的ホスティング）で `https://shoji-kazunari.github.io/first-app/` に公開している。
+GitHub Pages（静的ホスティング）で独自ドメイン `https://gijipachi.jp/` に公開している。
+配信ドメインはリポジトリ直下の `CNAME`、canonicalは `config.js` の `siteBaseUrl` が決める。
+ドメインを変えるときは両方を必ず揃えること（`tools/README.md` に手順）。
 
 ## 作りの前提
 

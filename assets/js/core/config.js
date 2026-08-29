@@ -11,7 +11,13 @@ PachiSim.config = {
   // 各ページのcanonical（検索エンジンに伝える正式なURL）をここから組み立てる。
   // 独自ドメインに移すときは、この1行を書き換えて
   // `node tools/build-machine-pages.js` を実行すれば全ページに反映される。
-  siteBaseUrl: "https://shoji-kazunari.github.io/first-app",
+  //
+  // このドメインは、リポジトリ直下の CNAME ファイルと必ず同じにすること。
+  // CNAMEはGitHub Pagesが「どのドメインで配信するか」を決めるファイル、
+  // ここは「検索エンジンにどのURLだと伝えるか」の設定で、別々に効く。
+  // 食い違うと、配信は新ドメインなのにcanonicalだけ旧URLを指す状態になり、
+  // 検索結果が旧URLのまま据え置かれる（表示は正常なので気づけない）。
+  siteBaseUrl: "https://gijipachi.jp",
 
   // Google Analytics 4 の測定ID（G-から始まる文字列）。
   // 空のままなら計測は一切行われない（タグも読み込まれない）ので、

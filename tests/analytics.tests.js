@@ -79,7 +79,7 @@
   });
 
   test("公開先URL: 末尾にスラッシュを付けない", () => {
-    // 付いていると「.../first-app//privacy/」のようにスラッシュが重なる。
+    // 付いていると「https://gijipachi.jp//privacy/」のようにスラッシュが重なる。
     // 生成側でも念のため落としているが、設定としては付けない約束にしておく。
     const base = PachiSim.config.siteBaseUrl;
     assertTrue(!base.endsWith("/"), `末尾にスラッシュが付いている: ${base}`);
