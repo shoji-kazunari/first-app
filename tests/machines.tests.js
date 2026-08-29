@@ -288,3 +288,41 @@
     );
   });
 })();
+
+// 画面に出す「現在の抽選確率」の元になる実効確率。
+// judgmentGateを持つ状態を素通りさせると、リーチ後の当選率(例:0.25)を
+// 1回転あたりの確率として出してしまい、1/4のような桁違いの数字になる。
+(function () {
+  const { test, assertEqual, assertTrue } = PachiSimTest;
+
+  test("実効確率: judgmentGateが無ければ、その状態の確率そのまま", () => {
+    const state = { probability: 1 / 319 };
+    assertEqual(PachiSim.engine.effectiveHitProbability(state), 1 / 319);
+  });
+
+  test("実効確率: judgmentGateがあれば、掛け合わせた1回転あたりの確率になる", () => {
+    const state = { probability: 0.25, judgmentGate: { probability: 1 / 11.6 } };
+    const got = PachiSim.engine.effectiveHitProbability(state);
+    assertTrue(Math.abs(got - 0.25 / 11.6) < 1e-12, `期待 ${0.25 / 11.6} / 実際 ${got}`);
+    // 1/4ではなく1/46.4であること（表示の桁が変わるので直接確かめる）
+    assertEqual(PachiSim.format.probabilityFraction(got), "1/46.4");
+  });
+
+  test("実効確率: 全機種の全状態が、1回転あたりとして妥当な範囲に収まる", () => {
+    // 0より大きく1以下。judgmentGateの掛け忘れがあると、ここは通っても
+    // 上のテストで気づける。こちらは新機種を足したときの網羅チェック。
+    PachiSim.machineRegistry.getAll().forEach((machine) => {
+      Object.values(machine.states).forEach((state) => {
+        const p = PachiSim.engine.effectiveHitProbability(state);
+        assertTrue(p > 0 && p <= 1, `${machine.name} / ${state.label}: ${p}`);
+        // judgmentGateを持つ状態は、必ず素の確率より小さくなる
+        if (state.judgmentGate) {
+          assertTrue(
+            p < state.probability,
+            `${machine.name} / ${state.label}: 掛け合わせが効いていない`
+          );
+        }
+      });
+    });
+  });
+})();

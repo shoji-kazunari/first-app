@@ -246,8 +246,14 @@
     // （1つしかないときにラベルを付けても情報が増えないため）。
     // カッコは付けない。状態名自体が「ST（インパクトモード）」のようにカッコを
     // 含むことがあり、その下にもカッコが並ぶと読みづらいため。
+    // 機種をまたいで見比べる数字なので、どの状態でも必ず「1回転あたり」に揃える。
+    // judgmentGateを持つ状態は1回転がそのまま当落判定ではないため、
+    // state.probabilityをそのまま出すと実際よりはるかに当たりやすく見える
+    // （琴子のご褒美RUSHが1/4と表示されていた）。換算はengine側に置いてある。
     function stateProbabilityText(state) {
-      const hit = PachiSim.format.probabilityFraction(state.probability);
+      const hit = PachiSim.format.probabilityFraction(
+        PachiSim.engine.effectiveHitProbability(state)
+      );
       if (!state.onFall) return hit;
       const fall = PachiSim.format.probabilityFraction(state.onFall.probability);
       return `大当り ${hit}　転落 ${fall}`;

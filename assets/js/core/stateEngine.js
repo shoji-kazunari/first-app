@@ -308,5 +308,17 @@ PachiSim.engine = (function () {
     };
   }
 
-  return { createSession, resolveAction };
+  // その状態の「1回転あたり当たる確率」。
+  //
+  // 多くの状態は1回転がそのまま1回の当落判定なので state.probability と同じ。
+  // judgmentGateを持つ状態は2段構えで、まずリーチが発生するかを引き、発生した回だけ
+  // 当否を引く。このとき state.probability は「リーチが発生した場合の」当選率なので、
+  // そのまま1回転あたりの確率として扱うと、実際よりはるかに当たりやすい数字になる。
+  // 画面表示や機種間の比較には、必ずこちらを使うこと。
+  function effectiveHitProbability(state) {
+    const gate = state.judgmentGate ? state.judgmentGate.probability : 1;
+    return state.probability * gate;
+  }
+
+  return { createSession, resolveAction, effectiveHitProbability };
 })();
