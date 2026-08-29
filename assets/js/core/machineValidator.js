@@ -150,6 +150,11 @@ PachiSim.machineValidator = (function () {
         if (!machine.states[fall.nextState]) {
           errors.push(`${where}.onFall: nextState "${fall.nextState}" が存在しない`);
         }
+        if (fall.residualAttempts != null && !isPositiveInteger(fall.residualAttempts)) {
+          errors.push(
+            `${where}.onFall: residualAttemptsが正の整数でない（${fall.residualAttempts}）`
+          );
+        }
       }
     }
 

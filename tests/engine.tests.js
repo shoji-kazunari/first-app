@@ -620,6 +620,54 @@
       `onFallのprobability範囲外が検出されていない: ${errors.join(" / ")}`
     );
   });
+
+  // 残保留（onFall.residualAttempts）のテスト。転落を引いた瞬間に確定させず、
+  // 「既に始動口に入っていた分」として追加でN回だけ当落を見る（転落の再抽選はしない）。
+  const fallMachineWithResidual = JSON.parse(JSON.stringify(fallMachine));
+  fallMachineWithResidual.states.rush.onFall.residualAttempts = 2;
+
+  test("engine(残保留): 転落を引いても、残保留のどこかで当たれば引き戻されて継続する", () => {
+    // 1回転目: 大当たり外れ(0.9)→転落成立(0.1)。残保留1回目でいきなり当たる(0.1)
+    const session = { stateId: "rush", remaining: null, streak: null };
+    const rng = PachiSim.rng.createScriptedRng([0.9, 0.1, 0.1]);
+    const r = PachiSim.engine.resolveAction(session, fallMachineWithResidual, rng);
+    assertEqual(r.outcome.type, "hit", "残保留で当たったのに転落確定になっている");
+    assertEqual(r.outcome.nextStateId, "rush");
+    assertEqual(r.outcome.attempts, 2);
+    assertEqual(r.rolls.length, 2);
+    assertEqual(r.rolls[1].residual, true);
+  });
+
+  test("engine(残保留): 残保留も全部外れて、初めて転落が確定する", () => {
+    const session = { stateId: "rush", remaining: null, streak: null };
+    const rng = PachiSim.rng.createScriptedRng([0.9, 0.1, 0.9, 0.9]);
+    const r = PachiSim.engine.resolveAction(session, fallMachineWithResidual, rng);
+    assertEqual(r.outcome.type, "exhausted");
+    assertEqual(r.outcome.viaFall, true);
+    assertEqual(r.outcome.nextStateId, "normal");
+    assertEqual(r.outcome.attempts, 3, "転落候補1回+残保留2回=3回転");
+    assertEqual(r.rolls.length, 3);
+    assertEqual(r.rolls[2].fell, true, "残保留の最後で転落確定になるべき");
+  });
+
+  test("engine(残保留): residualAttempts省略時は今までどおり即座に転落確定する", () => {
+    // fallMachine（residualAttempts無し）で従来どおりの動作を回帰確認
+    const session = { stateId: "rush", remaining: null, streak: null };
+    const rng = PachiSim.rng.createScriptedRng([0.9, 0.1]);
+    const r = PachiSim.engine.resolveAction(session, fallMachine, rng);
+    assertEqual(r.outcome.type, "exhausted");
+    assertEqual(r.rolls.length, 1);
+  });
+
+  test("検証: onFallのresidualAttemptsが正の整数でないと弾かれる", () => {
+    const broken = JSON.parse(JSON.stringify(fallMachine));
+    broken.states.rush.onFall.residualAttempts = 0;
+    const errors = PachiSim.machineValidator.validate(broken);
+    assertTrue(
+      errors.some((e) => e.indexOf("onFall") >= 0 && e.indexOf("residualAttempts") >= 0),
+      `residualAttemptsの不正値が検出されていない: ${errors.join(" / ")}`
+    );
+  });
 })();
 
 // 転落式の演出ルール（リーチを作らない）。

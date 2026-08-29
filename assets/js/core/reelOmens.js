@@ -105,13 +105,17 @@ PachiSim.reelOmens = (function () {
       };
     }
 
-    // 転落式では、色保留による特殊リーチも作らない（そもそも色保留を出さないが、
-    // 出したとしてもリーチにはしない）
-    const forcedReach = noReach
-      ? false
-      : forceReachForMiss != null
-      ? forceReachForMiss
-      : isColored || rng() < 0.03;
+    // forceReachForMissを明示的に指定した場合は、それが最優先（noReachより優先）。
+    // 転落式（noReach）で「転落候補〜確定」の回だけ強制的にリーチにしたい、という
+    // 呼び出し側の意図をnoReachで打ち消してしまわないため。
+    // 未指定の場合、転落式では色保留による特殊リーチも作らない（そもそも
+    // 色保留を出さないが、出したとしてもリーチにはしない）。
+    const forcedReach =
+      forceReachForMiss != null
+        ? forceReachForMiss
+        : noReach
+        ? false
+        : isColored || rng() < 0.03;
     if (forcedReach) {
       const digit = weightedDigit(rng, NON_SEVEN, 1, 1);
       // 行き過ぎて止まる場合は、必ずリーチ数字の「次の数字」で止める（7はスキップ）

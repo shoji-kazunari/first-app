@@ -555,12 +555,26 @@
       function playReelFor(roll) {
         if (speedMode.id === "instant") return undefined;
 
-        const SETTLE_MS = 250;
+        // 数字が止まりきった後に結果を見せておく間。「普通」のように1回転の予算が
+        // 大きい速度ではそのまま250msでよいが、「速い」(1回転160ms)だと固定250msだけで
+        // 予算を超えてしまい、速度を切り替えても体感がほぼ変わらなくなってしまうため、
+        // 予算に応じて縮める（tickMsの3割を上限に）。
+        const SETTLE_MS = Math.min(250, Math.round(speedMode.tickMs * 0.3));
         const isColored = holdQueue.isFirstColored();
         const rounds = roll.hit ? result.outcome.rounds : null;
         // judgmentGateを持つ状態（虚構推理のご褒美RUSH系）は、素通りの回に絶対リーチを
         // 出さず、当落ジャッジが発生した回（roll.judged）だけリーチにする。
-        const forceReachForMiss = roll.judged !== undefined ? roll.judged : undefined;
+        // 転落式（onFall）は、転落候補が出てから確定するまでの回（pendingFall/residual/
+        // fell）を「リーチ→外れ」で見せる。ここが普通のハズレと同じ見た目だと、
+        // 「残保留を確認している最中」であることも「今まさに転落が確定した瞬間」で
+        // あることも画面から一切伝わらず、当該保留がただ消えて止まったように
+        // 見えてしまうため。
+        const forceReachForMiss =
+          roll.judged !== undefined
+            ? roll.judged
+            : isFallState
+            ? !!(roll.fell || roll.pendingFall || roll.residual)
+            : undefined;
         const plan = PachiSim.reelOmens.decide(
           roll.hit,
           isColored,

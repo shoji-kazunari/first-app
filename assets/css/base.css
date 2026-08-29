@@ -169,16 +169,42 @@ button {
   flex-direction: column;
 }
 
+/* 出玉の桁数・機種名の長さは記録ごとにバラバラで、1行のflex-wrapに任せると
+   折り返し位置がバラバラになり順位表として見づらくなる。1行目(順位+出玉)・
+   2行目(機種名+日時)の2段に固定し、機種名は省略記号で1行に収めることで、
+   どの行も同じ形に揃うようにする。 */
 .ranking-list__item {
   display: flex;
-  align-items: center;
-  gap: var(--space-2);
+  flex-direction: column;
+  gap: 2px;
   padding: var(--space-2) 0;
   border-bottom: 1px solid var(--color-border);
 }
 
+.ranking-list__row1 {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.ranking-list__row2 {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding-left: 2.9em; /* rankの幅(2.5em)+gap分だけ字下げして、出玉の頭と揃える */
+  min-width: 0;
+}
+
 .ranking-list__item:last-child {
   border-bottom: none;
+}
+
+/* .ranking-list__item自体にdisplay:flexを指定しているため、それだけだと
+   [hidden]属性のUAデフォルト（display:none）が打ち消されてしまう。
+   「もっと見る」で隠すはずの2位以降が、常に全部表示されたままになるバグになるため、
+   明示的に上書きする（reel-display等で踏んだのと同じパターン）。 */
+.ranking-list__item[hidden] {
+  display: none;
 }
 
 .ranking-list__rank {
@@ -188,32 +214,35 @@ button {
   flex-shrink: 0;
 }
 
-.ranking-list__entry {
-  flex: 1;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--space-2);
-  min-width: 0;
-}
-
 .ranking-list__balls {
   font-weight: 700;
   color: var(--color-accent-strong);
+  /* 数字の桁がバラバラでも縦に揃って見えるよう、等幅数字にする */
+  font-variant-numeric: tabular-nums;
 }
 
 .ranking-list__machine {
+  flex: 1;
+  min-width: 0;
   font-size: 0.85rem;
-  color: var(--color-text);
+  color: var(--color-text-muted);
+  /* 長い機種名で2位以降の行だけ折り返し位置がズレるのを防ぐため、
+     はみ出す分は省略記号で1行に収める */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .ranking-list__date {
+  flex-shrink: 0;
   font-size: 0.78rem;
   color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
 }
 
 .ranking-list__delete {
   flex-shrink: 0;
+  margin-left: auto; /* row1内で右端に寄せる（rank+ballsの後にスペースが空いても） */
   width: 24px;
   height: 24px;
   border-radius: 50%;

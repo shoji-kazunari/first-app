@@ -46,13 +46,15 @@ PachiSim.ui.renderRankingList = function (containerEl, entries, options) {
         <li class="ranking-list__item${isExtra ? " ranking-list__item--extra" : ""}"${
         isExtra ? " hidden" : ""
       }>
-          <span class="ranking-list__rank">${rank}位</span>
-          <span class="ranking-list__entry">
+          <div class="ranking-list__row1">
+            <span class="ranking-list__rank">${rank}位</span>
             <span class="ranking-list__balls">${PachiSim.format.ball(e.balls)}</span>
+            ${deleteBtn}
+          </div>
+          <div class="ranking-list__row2">
             ${machinePart}
             <span class="ranking-list__date">${dateLabel}</span>
-          </span>
-          ${deleteBtn}
+          </div>
         </li>
       `;
     })

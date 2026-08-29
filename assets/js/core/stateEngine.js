@@ -64,7 +64,7 @@
 //       // ballsを上乗せするループボーナス（例:「13%で+1500個」を外すまで繰り返す）。
 //       // 安全上限として最大200回で打ち切る。
 //       onExhausted: { nextState, tag } | null, // countDownで抽選回数を使い切った時の遷移（countUpはnull）
-//       onFall: { probability, nextState, tag, resultLabel } | null,
+//       onFall: { probability, nextState, tag, resultLabel, residualAttempts? } | null,
 //         // 「転落抽選型」のRUSH向け（任意）。回転数で終わるのではなく、大当たりとは別の
 //         // 抽選（転落小当り）を引いた時点で電サポが終わる機種を表現する。
 //         // 例: ユニコーン … RUSH中は「次の大当たり(約1/41.1)か転落小当り(約1/153.7)を
@@ -73,6 +73,13 @@
 //         // 引いた時のoutcomeはonExhaustedと同じ type:"exhausted" にする。
 //         // 「当たらずにその状態が終わった」点は時短・ST切れと同じで、回転数の繰り越しや
 //         // データランプの扱いを分ける理由がないため。
+//         //
+//         // residualAttempts（任意、正の整数）: 転落を引いた瞬間に始動口へ既に入って
+//         // いた分（残保留）として、転落を確定させる前に追加でN回だけ「当たりかどうか」を
+//         // 見る（転落の再抽選はしない）。1回でも当たれば引き戻されてRUSH継続、全部外れて
+//         // 初めて転落が確定する。公表の継続率が単純な「大当り/(大当り+転落)」の比率だけでは
+//         // 説明できず、残保留の引き戻し分だけ上乗せされている機種で使う。省略時は0
+//         // （転落＝即座に確定、残保留による引き戻しなし）。
 //     }
 //   },
 //   distributionTables: { [tableId]: [{rounds, weight}, ...] },
@@ -96,9 +103,15 @@ PachiSim.engine = (function () {
   // 1回のボタン押下（START/JUDGEMENT）に対応する抽選を、
   // 「当選」または「規定回数消化」まで一括で解決する。
   // 戻り値のrollsはUI側がアニメーション再生するための1回転ごとの結果:
-  // { index, hit, judged?, remainingStock? }。judged/remainingStockはstockMode状態の
-  // 回転にだけ付き、judgmentGateがある場合は「素通り(judged:false)」の回も含まれる
-  // （このときhitは常にfalseで、remainingStockは減らない）。
+  // { index, hit, judged?, remainingStock?, fell?, pendingFall?, residual? }。
+  // judged/remainingStockはstockMode状態の回転にだけ付き、judgmentGateがある場合は
+  // 「素通り(judged:false)」の回も含まれる（このときhitは常にfalseで、
+  // remainingStockは減らない）。
+  // fell/pendingFall/residualはonFall状態にだけ付く: fell:trueはその回で転落が
+  // 確定したことを示す。pendingFall:trueは「転落候補は出たが残保留の判定が残っている」
+  // 回（まだ確定していない）。residual:trueはその残保留判定そのものの回（当落どちらも
+  // ありうる）。UI側はfell/pendingFall/residualのいずれかが立っている回をまとめて
+  // 「転落が絡む緊張感のある回」として扱うとよい（machine.jsのforceReachForMiss参照）。
   function resolveAction(session, machine, rng) {
     const state = machine.states[session.stateId];
     if (!state) {
@@ -138,7 +151,9 @@ PachiSim.engine = (function () {
       }
     } else {
       cap = state.maxAttempts == null ? PachiSim.config.maxSimulatedSpins : state.maxAttempts;
-      for (let i = 1; i <= cap; i++) {
+      let i = 0;
+      while (i < cap) {
+        i++;
         const hit = PachiSim.rng.bernoulli(rng, state.probability);
         if (hit) {
           rolls.push({ index: i, hit: true, fell: false });
@@ -146,9 +161,32 @@ PachiSim.engine = (function () {
         }
         // 転落抽選は大当たりを外した回転でのみ行う。実機は1回の抽選で
         // 大当たり・転落・ハズレのいずれかに決まるので、両方成立させない。
-        const fell = !!state.onFall && PachiSim.rng.bernoulli(rng, state.onFall.probability);
-        rolls.push({ index: i, hit: false, fell });
-        if (fell) break;
+        const fellCandidate = !!state.onFall && PachiSim.rng.bernoulli(rng, state.onFall.probability);
+        if (!fellCandidate) {
+          rolls.push({ index: i, hit: false, fell: false });
+          continue;
+        }
+        // onFall.residualAttempts（任意）: 転落を引いた瞬間に始動口へ既に入っていた分
+        // （残保留）として、転落を確定させる前に追加でN回だけ「当たりかどうか」を見る
+        // （転落の再抽選はしない。1回でも当たれば引き戻されてRUSH継続、全部外れて
+        // 初めて転落が確定する）。公表の継続率が単純な大当り/転落の比率だけでは
+        // 説明できない機種（残保留の引き戻し分だけ継続率が上乗せされる）向け。
+        const residualN = (state.onFall && state.onFall.residualAttempts) || 0;
+        // pendingFall: 「転落候補が出た（まだ残保留の判定が残っている）」ことをUI側が
+        // 見分けられるようにする印。fell:falseのままだと普通のハズレと区別が付かず、
+        // 「残保留を確認している最中」であることが画面から一切伝わらないため。
+        rolls.push({ index: i, hit: false, fell: residualN === 0, pendingFall: residualN > 0 });
+        if (residualN === 0) break;
+        for (let r = 0; r < residualN; r++) {
+          i++;
+          const residualHit = PachiSim.rng.bernoulli(rng, state.probability);
+          if (residualHit) {
+            rolls.push({ index: i, hit: true, fell: false, residual: true });
+            break;
+          }
+          rolls.push({ index: i, hit: false, fell: r === residualN - 1, residual: true });
+        }
+        break;
       }
     }
 
