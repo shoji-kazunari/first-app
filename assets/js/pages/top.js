@@ -75,8 +75,13 @@
   }
 
   // period: "allTime"|"today" - 空表示時の文言だけ変える
-  // 削除ボタン（onDelete/onClearAll）は運営ログイン中のみ表示する。実際の削除権限は
+  // 削除ボタン（onDelete）は運営ログイン中のみ表示する。実際の削除権限は
   // Firestore側のセキュリティルールで強制されるので、これはあくまで見た目の制御。
+  //
+  // このランキングは全機種横断の集計なので、あえて「全て削除」は用意しない
+  // （どこかの機種の記録がおかしいと思って押したら、無関係な他機種の記録まで
+  // まとめて消えてしまう事故があったため）。全削除したい場合は、その機種の
+  // ページ（machine.jsのrenderMachineRanking）から機種単位で行う。
   async function renderRankingSection(container, period) {
     if (window.PachiSim.fb) await PachiSim.fb.ready;
     const isAdmin = window.PachiSim.fb && PachiSim.fb.isAdmin();
@@ -87,12 +92,6 @@
       onDelete: isAdmin
         ? async (id) => {
             await PachiSim.rankingService.removeEntry(id);
-            renderRankingSection(container, period);
-          }
-        : null,
-      onClearAll: isAdmin
-        ? async () => {
-            await PachiSim.rankingService.clearScope(period);
             renderRankingSection(container, period);
           }
         : null,
