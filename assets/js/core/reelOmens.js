@@ -71,8 +71,13 @@ PachiSim.reelOmens = (function () {
   // rounds / maxRounds: 大当たり時、7を出してよいか判定するための獲得R数と機種の最大R数
   // rng: 0以上1未満の乱数を返す関数
   // options.noReach: 転落式の状態で立てる。リーチを一切作らない（上のコメント参照）
+  // options.forceReachForMiss（任意）: ハズレ時のリーチ発生をtrue/falseで強制したい
+  // 機種用（例: 虚構推理のご褒美RUSHのように「当落ジャッジが発生した回だけリーチになり、
+  // 素通りの回は絶対にリーチにならない」という機種固有ルール）。noReachとは独立で、
+  // 両方指定した場合はnoReachが優先される。省略時はisColored/3%抽選の通常ロジックのまま。
   function decide(isHit, isColored, rounds, maxRounds, rng, options) {
     const noReach = !!(options && options.noReach);
+    const forceReachForMiss = options && options.forceReachForMiss != null ? options.forceReachForMiss : null;
 
     if (isHit && noReach) {
       // リーチの間を挟まずに3つ揃える。中央も同じ数字を短く止めるだけ
@@ -102,7 +107,11 @@ PachiSim.reelOmens = (function () {
 
     // 転落式では、色保留による特殊リーチも作らない（そもそも色保留を出さないが、
     // 出したとしてもリーチにはしない）
-    const forcedReach = !noReach && (isColored || rng() < 0.03);
+    const forcedReach = noReach
+      ? false
+      : forceReachForMiss != null
+      ? forceReachForMiss
+      : isColored || rng() < 0.03;
     if (forcedReach) {
       const digit = weightedDigit(rng, NON_SEVEN, 1, 1);
       // 行き過ぎて止まる場合は、必ずリーチ数字の「次の数字」で止める（7はスキップ）

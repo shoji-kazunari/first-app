@@ -93,10 +93,19 @@
   test("machines: 全機種のどの状態からでも抽選が解決できる", () => {
     // 状態ごとにエンジンを回し、当たり／消化しきりのどちらでも
     // 例外を出さずにoutcomeと次の状態が決まることを確かめる。
+    // stockMode状態は固定のmaxAttemptsを持たないので、テスト用に適当な正のストック数
+    // （STOCK_FOR_TEST）をここで補って渡す。
+    const STOCK_FOR_TEST = 4;
     machines.forEach((m) => {
       Object.keys(m.states).forEach((stateId) => {
         const state = m.states[stateId];
-        const session = { stateId, remaining: state.maxAttempts, streak: null };
+        const cap = state.stockMode ? STOCK_FOR_TEST : state.maxAttempts;
+        const session = {
+          stateId,
+          remaining: state.maxAttempts,
+          stock: state.stockMode ? STOCK_FOR_TEST : null,
+          streak: null,
+        };
 
         // 必ず1回転目で当たる乱数
         const hit = PachiSim.engine.resolveAction(session, m, () => 0);
@@ -112,13 +121,26 @@
 
         // countDownは、全部外したときの遷移先も確かめる
         if (state.mode === "countDown") {
-          const missSession = { stateId, remaining: state.maxAttempts, streak: null };
-          const miss = PachiSim.engine.resolveAction(missSession, m, () => 0.999999);
+          const missSession = {
+            stateId,
+            remaining: state.maxAttempts,
+            stock: state.stockMode ? STOCK_FOR_TEST : null,
+            streak: null,
+          };
+          // judgmentGate付きの状態は「ゲート抽選→(開いた時だけ)当落抽選」の2段構えなので、
+          // 定数rngだと素通り判定に固定されてしまい永遠にストックが減らない。
+          // ゲートは必ず開き、当落は必ずハズレる値を交互に返すスクリプトにする。
+          const missRng = state.judgmentGate
+            ? PachiSim.rng.createScriptedRng(
+                Array.from({ length: cap * 2 }, (_, i) => (i % 2 === 0 ? 0.001 : 0.999999))
+              )
+            : () => 0.999999;
+          const miss = PachiSim.engine.resolveAction(missSession, m, missRng);
           assertEqual(miss.outcome.type, "exhausted", `${m.slug}/${stateId}: 消化しきりにならない`);
           assertEqual(
             miss.outcome.attempts,
-            state.maxAttempts,
-            `${m.slug}/${stateId}: 消化回数がmaxAttemptsと違う`
+            cap,
+            `${m.slug}/${stateId}: 消化回数が規定回数（またはストック数）と違う`
           );
           assertTrue(
             !!m.states[miss.outcome.nextStateId],

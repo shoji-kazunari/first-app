@@ -219,7 +219,10 @@
         return `${PachiSim.format.number(liveCount)}回転`;
       }
       const remaining = liveRemaining == null ? state.maxAttempts : liveRemaining;
-      return `残り${remaining}回`;
+      // remainingLabel（任意）: 「残り」の直後に挟みたい名称（例:「残りお願い玉4個」）。
+      // remainingUnit（任意）: 「回」以外の単位で見せたい状態用。どちらも指定が無い
+      // 機種は今まで通り「残り○回」になる。
+      return `残り${state.remainingLabel || ""}${remaining}${state.remainingUnit || "回"}`;
     }
 
     // 抽選が実際に進行中（ポーズしていない）の間だけ、速度・リセットボタンをロックする。
@@ -298,10 +301,11 @@
     }
 
     // 状態が変わった（＝次のアクションを始める）ときの表示初期値。
-    // 回転数は0ではなく繰り越し分から始める。残り回数はその状態の規定回数から。
+    // 回転数は0ではなく繰り越し分から始める。残り回数はその状態の規定回数から
+    // （stockMode状態は固定回数を持たないので、前の状態から持ち越したsession.stockを使う）。
     function resetLiveCountersForState(state) {
       liveCount = spinsCarriedOver;
-      liveRemaining = state.maxAttempts;
+      liveRemaining = state.stockMode ? session.stock : state.maxAttempts;
     }
 
     // 一撃（連チャン）が終わって通常へ戻る瞬間だけ、リール/保留の代わりに
@@ -522,7 +526,14 @@
       function updateLiveDisplay(roll) {
         // 回転数は繰り越し分から続けて数える。残り回数はこの状態の中だけの数なので繰り越さない。
         liveCount = spinsCarriedOver + roll.index;
-        liveRemaining = state.maxAttempts == null ? null : state.maxAttempts - roll.index;
+        // stockMode状態は素通りの回転がありうるため、回転数からの引き算では残りストックを
+        // 正しく求められない。roll.remainingStock（エンジン側で計算済み）があればそちらを使う。
+        liveRemaining =
+          roll.remainingStock !== undefined
+            ? roll.remainingStock
+            : result.cap == null
+            ? null
+            : result.cap - roll.index;
         els.spinCounter.textContent = spinCounterText(state);
         // 玉の消費は保留が貯まった時点でholdQueue.onChargeが反映済み。
         // ここでは消化した回転数ではなく、その貯まった数をそのまま使う。
@@ -547,13 +558,16 @@
         const SETTLE_MS = 250;
         const isColored = holdQueue.isFirstColored();
         const rounds = roll.hit ? result.outcome.rounds : null;
+        // judgmentGateを持つ状態（虚構推理のご褒美RUSH系）は、素通りの回に絶対リーチを
+        // 出さず、当落ジャッジが発生した回（roll.judged）だけリーチにする。
+        const forceReachForMiss = roll.judged !== undefined ? roll.judged : undefined;
         const plan = PachiSim.reelOmens.decide(
           roll.hit,
           isColored,
           rounds,
           maxRounds,
           PachiSim.rng.createDefaultRng(),
-          { noReach: isFallState }
+          { noReach: isFallState, forceReachForMiss }
         );
 
         let timing;
@@ -593,9 +607,10 @@
               // 補充する保留に色を割り当てない。演出だけの話なので抽選結果は変わらない。
               // 転落式では色保留も出さない。次が当たりか転落かしかない状態で
               // 「そろそろ来そう」と煽っても、示せるものが無い。
+              // stockMode状態（お願い玉制のRUSH）も同様に色変化予告そのものを出さない。
               const upcomingRoll = result.rolls[nextUpcomingIndex];
               const refillPattern =
-                !isFallState && upcomingRoll && !holdQueue.hasColoredPattern()
+                !isFallState && !state.stockMode && upcomingRoll && !holdQueue.hasColoredPattern()
                   ? PachiSim.holdOmens.pickPattern(upcomingRoll.hit)
                   : null;
               nextUpcomingIndex += 1;
@@ -658,7 +673,13 @@
       // ここで実際の消化回数(outcome.attempts)をもとに直接反映してから凍結する。
       if (viaSkip) {
         liveCount = spinsSinceLastHit;
-        liveRemaining = fromState.maxAttempts == null ? null : fromState.maxAttempts - outcome.attempts;
+        const lastRoll = result.rolls[result.rolls.length - 1];
+        liveRemaining =
+          lastRoll.remainingStock !== undefined
+            ? lastRoll.remainingStock
+            : result.cap == null
+            ? null
+            : result.cap - outcome.attempts;
         els.spinCounter.textContent = spinCounterText(fromState);
         holdQueue.reset();
         if (outcome.type === "hit") {

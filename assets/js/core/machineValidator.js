@@ -55,6 +55,24 @@ PachiSim.machineValidator = (function () {
     }
     if (!machine.states[outcome.nextState]) {
       errors.push(`${where}: nextState "${outcome.nextState}" が存在しない`);
+    } else if (machine.states[outcome.nextState].stockMode) {
+      // 遷移先がストック制の状態なら、次のストックの決め方（持ち越し+付与 or 固定値）が必須。
+      // 無いとエンジン側でnextStock=0にフォールバックし、即座に規定消化扱いになってしまう。
+      if (outcome.stockAdd == null && outcome.stockSet == null) {
+        errors.push(
+          `${where}: 遷移先"${outcome.nextState}"はstockModeだが、stockAdd/stockSetが両方とも無い`
+        );
+      }
+    }
+    if (outcome.bonusLoop != null) {
+      if (!isPositiveNumber(outcome.bonusLoop.probability) || outcome.bonusLoop.probability > 1) {
+        errors.push(
+          `${where}.bonusLoop: probabilityが0より大きく1以下でない（${outcome.bonusLoop.probability}）`
+        );
+      }
+      if (!isPositiveNumber(outcome.bonusLoop.balls)) {
+        errors.push(`${where}.bonusLoop: ballsが正の数でない（${outcome.bonusLoop.balls}）`);
+      }
     }
   }
 
@@ -79,11 +97,35 @@ PachiSim.machineValidator = (function () {
       if (state.maxAttempts != null) {
         errors.push(`${where}: countUpなのにmaxAttemptsがnullでない（${state.maxAttempts}）`);
       }
-    } else if (state.mode === "countDown") {
-      if (!isPositiveInteger(state.maxAttempts)) {
-        errors.push(`${where}: countDownのmaxAttemptsが正の整数でない（${state.maxAttempts}）`);
+      if (state.stockMode) {
+        errors.push(`${where}: countUpとstockModeは同時に指定できない`);
       }
-      // 規定回数を使い切ったときの行き先が無いと、消化しきった瞬間に落ちる
+      if (state.judgmentGate) {
+        errors.push(`${where}: judgmentGateはstockMode専用（countUpには指定できない）`);
+      }
+    } else if (state.mode === "countDown") {
+      if (state.stockMode) {
+        // stockModeは固定回数を持たず、毎回session.stock（前の状態からの持ち越し）で決まる
+        if (state.maxAttempts != null) {
+          errors.push(`${where}: stockModeなのにmaxAttemptsがnullでない（${state.maxAttempts}）`);
+        }
+        if (
+          state.judgmentGate != null &&
+          (!isPositiveNumber(state.judgmentGate.probability) || state.judgmentGate.probability > 1)
+        ) {
+          errors.push(
+            `${where}.judgmentGate: probabilityが0より大きく1以下でない（${state.judgmentGate.probability}）`
+          );
+        }
+      } else {
+        if (state.judgmentGate) {
+          errors.push(`${where}: judgmentGateはstockMode専用`);
+        }
+        if (!isPositiveInteger(state.maxAttempts)) {
+          errors.push(`${where}: countDownのmaxAttemptsが正の整数でない（${state.maxAttempts}）`);
+        }
+      }
+      // 規定回数（またはストック）を使い切ったときの行き先が無いと、消化しきった瞬間に落ちる
       if (!state.onExhausted) {
         errors.push(`${where}: countDownなのにonExhaustedが無い`);
       } else if (!machine.states[state.onExhausted.nextState]) {
@@ -125,6 +167,28 @@ PachiSim.machineValidator = (function () {
         validateOutcome(machine, o, `${where}.onHit.outcomes[${i}]`, errors);
       });
       checkWeightSum(onHit.outcomes, `${where}.onHit.outcomes`, errors);
+    } else if (onHit.stockOutcomes) {
+      if (!state.stockMode) {
+        errors.push(`${where}: stockOutcomesを使うにはstockMode:trueが必要`);
+      }
+      if (!Array.isArray(onHit.stockOutcomes) || onHit.stockOutcomes.length === 0) {
+        errors.push(`${where}.onHit.stockOutcomes: 空の配列`);
+        return;
+      }
+      onHit.stockOutcomes.forEach((bucket, bi) => {
+        const bucketWhere = `${where}.onHit.stockOutcomes[${bi}]`;
+        if (bucket.minStock == null && bucket.maxStock == null) {
+          errors.push(`${bucketWhere}: minStock/maxStockが両方とも無い（全ストック域を拾えない）`);
+        }
+        if (!Array.isArray(bucket.outcomes) || bucket.outcomes.length === 0) {
+          errors.push(`${bucketWhere}.outcomes: 空の配列`);
+          return;
+        }
+        bucket.outcomes.forEach((o, i) => {
+          validateOutcome(machine, o, `${bucketWhere}.outcomes[${i}]`, errors);
+        });
+        checkWeightSum(bucket.outcomes, `${bucketWhere}.outcomes`, errors);
+      });
     } else if (onHit.distributionTable) {
       const table = machine.distributionTables && machine.distributionTables[onHit.distributionTable];
       if (!Array.isArray(table) || table.length === 0) {
@@ -149,7 +213,7 @@ PachiSim.machineValidator = (function () {
       });
       checkWeightSum(table, `distributionTables.${onHit.distributionTable}`, errors);
     } else {
-      errors.push(`${where}.onHit: outcomesもdistributionTableも無い`);
+      errors.push(`${where}.onHit: outcomes・stockOutcomes・distributionTableのいずれも無い`);
     }
   }
 

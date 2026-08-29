@@ -4,6 +4,7 @@
   const { test, assertEqual, assertTrue } = PachiSimTest;
   const machine = PachiSim.machineRegistry.getBySlug("cr-fever-symphogear");
   const machine2 = PachiSim.machineRegistry.getBySlug("eva17-hajimari");
+  const machine3 = PachiSim.machineRegistry.getBySlug("e-kyokousuiri");
 
   test("machine data: シンフォギアが登録されている", () => {
     assertTrue(!!machine, "machine not registered");
@@ -370,6 +371,157 @@
     assertEqual(result.outcome.attempts, 100);
     assertEqual(result.outcome.nextStateId, "normal");
     assertEqual(result.outcome.resultLabel, "時短終了");
+  });
+
+  // 3号機目（e虚構推理）: stateEngine.jsに新設したstockMode（固定回数を持たず、
+  // 当たるたびに増減する「お願い玉」のような可変ストックを消化するcountDown状態）と
+  // onHit.stockOutcomes（残りストック数によって当たり時の振り分け表そのものが
+  // 変わる仕組み）の検証。
+  test("machine data: e虚構推理が登録されている", () => {
+    assertTrue(!!machine3, "machine3 not registered");
+  });
+
+  test("engine(虚構推理): 通常1発目で当たり(50.5%側)→鋼人攻略戦へ", () => {
+    const session = PachiSim.engine.createSession(machine3);
+    const rng = PachiSim.rng.createScriptedRng([0.001, 0.001]);
+    const result = PachiSim.engine.resolveAction(session, machine3, rng);
+    assertEqual(result.outcome.type, "hit");
+    assertEqual(result.outcome.rounds, 2);
+    assertEqual(result.outcome.balls, 300);
+    assertEqual(result.outcome.nextStateId, "koujin");
+  });
+
+  test("engine(虚構推理): 鋼人攻略戦で当たり(50%側)→琴子のご褒美RUSHへ。stockSetで初期ストック4個", () => {
+    const session = { stateId: "koujin", stock: null, streak: null };
+    const rng = PachiSim.rng.createScriptedRng([0.001, 0.999]);
+    const result = PachiSim.engine.resolveAction(session, machine3, rng);
+    assertEqual(result.outcome.rounds, 10);
+    assertEqual(result.outcome.balls, 1500);
+    assertEqual(result.outcome.nextStateId, "kotokoRush");
+    assertEqual(result.newSession.stock, 4, "stockSet:4なので持ち越し計算をせず4になるべき");
+  });
+
+  // 虚構推理のkotokoRush/uraGohobiRushはjudgmentGateつき。1回転ごとに
+  // [ゲート抽選, (ゲートが開いた場合のみ)当落抽選, (当たった場合のみ)weightedPick]の順で
+  // rngを消費する。以下のテストはすべて「ゲートは毎回必ず開く」(rng=0.001)前提で書き、
+  // ゲート自体の抽選ロジックの検証は別テストで行う。
+
+  test("engine(虚構推理): 琴子のご褒美RUSH・残り2個以下は100%継続。持ち越し+4個で加算される", () => {
+    // stock=2で1発目に当選 → 消化前の残りストックは2（≤2バケット）。
+    // 当たり自体で1個消費するので、当選前時点の残り(2-0=2)がバケット判定に使われる。
+    const session = { stateId: "kotokoRush", stock: 2, streak: null };
+    const rng = PachiSim.rng.createScriptedRng([0.001 /* gate */, 0.001 /* hit */, 0.5 /* pick */]);
+    const result = PachiSim.engine.resolveAction(session, machine3, rng);
+    assertEqual(result.outcome.rounds, 10);
+    assertEqual(result.outcome.balls, 1500);
+    assertEqual(result.outcome.nextStateId, "kotokoRush");
+    assertEqual(
+      result.newSession.stock,
+      6,
+      "持ち越し(2、当たり自体は消費しない)+付与4個=6になるべき（stockAdd:4）"
+    );
+  });
+
+  test("engine(虚構推理): 琴子のご褒美RUSH・残り3個以上は82%で継続（3000個・ストック4個固定）", () => {
+    const session = { stateId: "kotokoRush", stock: 5, streak: null };
+    const rng = PachiSim.rng.createScriptedRng([0.001 /* gate */, 0.001 /* hit */, 0.001 /* 82%側 */]);
+    const result = PachiSim.engine.resolveAction(session, machine3, rng);
+    assertEqual(result.outcome.balls, 3000);
+    assertEqual(result.outcome.nextStateId, "kotokoRush");
+    assertEqual(result.newSession.stock, 4, "stockSet:4なので持ち越しは関係なく4固定になるべき");
+  });
+
+  test("engine(虚構推理): 琴子のご褒美RUSH・残り3個以上の18%はVストック化し裏ご褒美RUSHへ。持ち越しは無視されstockSetの4個になる", () => {
+    const session = { stateId: "kotokoRush", stock: 7, streak: null };
+    const rng = PachiSim.rng.createScriptedRng([0.001 /* gate */, 0.001 /* hit */, 0.999 /* 18%側 */]);
+    const result = PachiSim.engine.resolveAction(session, machine3, rng);
+    assertEqual(result.outcome.nextStateId, "uraGohobiRush");
+    assertEqual(result.outcome.resultNote, "Vストック");
+    assertEqual(
+      result.newSession.stock,
+      4,
+      "stockSet:4なので、持ち越し分(7)は使わずちょうど4になるべき"
+    );
+  });
+
+  test("engine(虚構推理): 琴子のご褒美RUSHは、ゲートが開くたびにハズレるとお願い玉が1個ずつ減り、0個で終了し通常へ", () => {
+    const session = { stateId: "kotokoRush", stock: 4, streak: null };
+    // [ゲート開, ハズレ] を4セット（4個消費）
+    const rng = PachiSim.rng.createScriptedRng(new Array(8).fill(0).map((_, i) => (i % 2 === 0 ? 0.001 : 0.9)));
+    const result = PachiSim.engine.resolveAction(session, machine3, rng);
+    assertEqual(result.outcome.type, "exhausted");
+    assertEqual(result.outcome.attempts, 4, "ゲートが毎回開く前提なら4回転で0個になるはず");
+    assertEqual(result.outcome.nextStateId, "normal");
+    assertEqual(result.outcome.resultLabel, "琴子のご褒美RUSH終了");
+  });
+
+  test("engine(虚構推理): 琴子のご褒美RUSHは、ゲートが開かない回転はお願い玉を消費しない（素通り）", () => {
+    // ゲートが3回連続で開かず（消費なし・remainingStockは4のまま）→
+    // 4回目でようやく開いてハズレ（3に減る）→5回目でゲートが開いて当たり、で終わらせる
+    // （rngは使い切ると最後の値を繰り返すだけになり無限ループの元になるため、
+    // 必ず当たりか消化しきりで終わる長さぴったりのスクリプトにすること）。
+    const session = { stateId: "kotokoRush", stock: 4, streak: null };
+    const rng = PachiSim.rng.createScriptedRng([
+      0.9, // 1回目: ゲート閉（素通り）
+      0.9, // 2回目: ゲート閉（素通り）
+      0.9, // 3回目: ゲート閉（素通り）
+      0.001, // 4回目: ゲート開
+      0.9, // 4回目: ハズレ → 残り3
+      0.001, // 5回目: ゲート開
+      0.001, // 5回目: 当たり
+      0.001, // stockOutcomesのweightedPick（残り3なので≥3バケット、82%側を選ぶ）
+    ]);
+    const result = PachiSim.engine.resolveAction(session, machine3, rng);
+    assertEqual(result.rolls.length, 5, "素通り3回+ハズレ1回+当たり1回=5回転");
+    assertEqual(result.rolls[0].remainingStock, 4, "1回目は素通りなので4のまま");
+    assertEqual(result.rolls[1].remainingStock, 4, "2回目も素通りなので4のまま");
+    assertEqual(result.rolls[2].remainingStock, 4, "3回目も素通りなので4のまま");
+    assertEqual(result.rolls[3].remainingStock, 3, "4回目でゲートが開きハズレたので3に減る");
+    assertEqual(result.outcome.type, "hit");
+    assertEqual(result.newSession.stock, 4, "stockSet:4なので持ち越しは関係なく4固定になるべき");
+  });
+
+  test("engine(虚構推理): 裏モードで当たり(87%側)→裏ご褒美RUSHへ。stockSetで初期ストック4個", () => {
+    const session = { stateId: "uraMode", stock: null, streak: null };
+    const rng = PachiSim.rng.createScriptedRng([0.001, 0.001]);
+    const result = PachiSim.engine.resolveAction(session, machine3, rng);
+    assertEqual(result.outcome.balls, 3000);
+    assertEqual(result.outcome.nextStateId, "uraGohobiRush");
+    assertEqual(result.newSession.stock, 4);
+  });
+
+  test("engine(虚構推理): 裏ご褒美RUSHは継続時もストック4個固定（持ち越し無し）", () => {
+    const session = { stateId: "uraGohobiRush", stock: 6, streak: null };
+    const rng = PachiSim.rng.createScriptedRng([0.001 /* gate */, 0.001 /* hit */, 0.001 /* 87%側 */]);
+    const result = PachiSim.engine.resolveAction(session, machine3, rng);
+    assertEqual(result.outcome.balls, 3000);
+    assertEqual(result.outcome.nextStateId, "uraGohobiRush");
+    assertEqual(result.newSession.stock, 4, "stockSet:4なので持ち越しは関係なく4固定になるべき");
+  });
+
+  test("engine(虚構推理): 裏ご褒美RUSHの13%側は、成功する限り+1500個を繰り返し上乗せする", () => {
+    const session = { stateId: "uraGohobiRush", stock: 4, streak: null };
+    const rng = PachiSim.rng.createScriptedRng([
+      0.001, // gate開
+      0.001, // 当たり
+      0.999, // weightedPick→13%側（4500個）
+      0.001, // bonusLoop 1回目: 成功 → +1500
+      0.001, // bonusLoop 2回目: 成功 → +1500
+      0.999, // bonusLoop 3回目: 失敗 → ここで打ち止め
+    ]);
+    const result = PachiSim.engine.resolveAction(session, machine3, rng);
+    assertEqual(result.outcome.balls, 4500 + 1500 + 1500, "4500に2回分の上乗せで7500になるべき");
+    assertEqual(result.newSession.stock, 4);
+  });
+
+  test("engine(虚構推理): 裏ご褒美RUSHは、ゲートが開くたびにハズレるとお願い玉が1個ずつ減り、0個で終了し通常へ", () => {
+    const session = { stateId: "uraGohobiRush", stock: 3, streak: null };
+    const rng = PachiSim.rng.createScriptedRng(new Array(6).fill(0).map((_, i) => (i % 2 === 0 ? 0.001 : 0.9)));
+    const result = PachiSim.engine.resolveAction(session, machine3, rng);
+    assertEqual(result.outcome.type, "exhausted");
+    assertEqual(result.outcome.attempts, 3);
+    assertEqual(result.outcome.nextStateId, "normal");
+    assertEqual(result.outcome.resultLabel, "裏ご褒美RUSH終了");
   });
 })();
 
