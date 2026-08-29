@@ -5,6 +5,9 @@
   --color-surface: #171a21;
   --color-surface-raised: #1f232c;
   --color-border: rgba(255, 255, 255, 0.08);
+  /* 押せるものの輪郭。--color-borderは仕切り線用で薄すぎ、
+     ボタンやリンクの縁に使うと「押せる部品」に見えない */
+  --color-border-interactive: rgba(255, 255, 255, 0.18);
   --color-text: #f2f3f5;
   --color-text-muted: #9aa0ab;
   --color-accent: #d4af7a;

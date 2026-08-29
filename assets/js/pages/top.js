@@ -37,7 +37,7 @@
           .map(
             (m) => `
               <li>
-                <a href="${machineHref(m)}">
+                <a class="machine-link" href="${machineHref(m)}">
                   <span class="search-results__name">${m.name}</span>
                   <span class="search-results__maker">${m.manufacturer.name}</span>
                 </a>
@@ -63,7 +63,7 @@
               ${group.machines
                 .map(
                   (m) => `
-                    <li><a href="${machineHref(m)}">${m.name}</a></li>
+                    <li><a class="machine-link" href="${machineHref(m)}">${m.name}</a></li>
                   `
                 )
                 .join("")}
