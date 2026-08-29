@@ -279,6 +279,18 @@
   color: var(--color-accent-strong);
 }
 
+/* 今いる状態の当たり確率。状態名より一段落とす（主役は状態名の方）。
+   状態名が長い機種（「ST（インパクトモード）」など）で横に並べると
+   狭い画面で溢れるので、確率だけ次の行に置く */
+.sim-state__prob {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-accent);
+}
+
 .spin-counter {
   font-size: 2.4rem;
   font-weight: 700;

@@ -22,6 +22,7 @@
       statsGrid: $("statsGrid"),
       resetButton: $("resetButton"),
       currentStateLabel: $("currentStateLabel"),
+      currentStateProbability: $("currentStateProbability"),
       spinCounter: $("spinCounter"),
       investmentDisplay: $("investmentDisplay"),
       simulationArea: $("simulationArea"),
@@ -249,6 +250,12 @@
       const state = machine.states[session.stateId];
       if (!freezeStateDisplay) {
         els.currentStateLabel.textContent = state.label;
+        // 今どの確率で抽選しているかを、状態名と一緒に出す。
+        // 状態名を凍結している間（大当たり直後）は確率も一緒に凍結させたいので、
+        // 同じifの中で更新する。
+        els.currentStateProbability.textContent = `（${PachiSim.format.probabilityFraction(
+          state.probability
+        )}）`;
         els.simulationArea.dataset.theme = state.theme;
         els.spinCounter.textContent = spinCounterText(state);
       }
