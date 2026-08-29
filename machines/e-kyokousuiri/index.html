@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>e虚構推理（大一商会） | パチンコシミュレーター</title>
   <meta name="description" content="e虚構推理のスペックをもとに、初当たり・鋼人攻略戦・裏モード・琴子のご褒美RUSH・裏ご褒美RUSHをボタン操作で疑似体験できます。">
-  <link rel="canonical" href="/machines/e-kyokousuiri/">
+  <link rel="canonical" href="https://shoji-kazunari.github.io/first-app/machines/e-kyokousuiri/">
   <link rel="stylesheet" href="../../assets/css/base.css">
   <link rel="stylesheet" href="../../assets/css/machine.css">
 </head>
@@ -42,11 +42,11 @@
       </section>
 
       <section class="card" aria-label="データランプ">
-        <h3 class="card__heading">データランプ</h3>
-        <div id="dataLamp"></div>
-        <div class="reset-button-row">
+        <div class="card__heading-row">
+          <h3 class="card__heading">データランプ</h3>
           <button id="resetButton" class="btn btn-secondary btn-small" type="button">リセット</button>
         </div>
+        <div id="dataLamp"></div>
       </section>
 
       <section class="simulation-area" id="simulationArea" data-theme="normal" aria-live="polite">
@@ -54,6 +54,7 @@
           <p class="sim-state">
             <span class="sim-state__label">現在の状態</span><br>
             <span id="currentStateLabel" class="sim-state__value">通常</span>
+            <span id="currentStateProbability" class="sim-state__prob"></span>
           </p>
           <p id="spinCounter" class="spin-counter">0回転</p>
           <hr class="sim-divider">
@@ -103,9 +104,12 @@
 
       <div id="adminAuthBar" class="admin-auth-bar"></div>
 
-      <p class="disclaimer">
-        本サイトはパチンコの確率をもとにした疑似シミュレーションです。実際の遊技結果や収支を保証するものではありません。
-      </p>
+      <footer class="page-footer">
+        <p class="disclaimer">
+          本サイトはパチンコの確率をもとにした疑似シミュレーションです。実際の遊技結果や収支を保証するものではありません。
+        </p>
+        <p class="footer-links"><a href="../../privacy/">プライバシーポリシー</a></p>
+      </footer>
 
       <p class="back-to-top"><a href="../../index.html" class="btn btn-secondary">トップにもどる</a></p>
     </main>
@@ -113,6 +117,7 @@
 
   <script type="module" src="../../assets/js/core/firebase.js"></script>
   <script src="../../assets/js/core/config.js"></script>
+  <script src="../../assets/js/core/analytics.js"></script>
   <script src="../../assets/js/core/kana.js"></script>
   <script src="../../assets/js/core/rng.js"></script>
   <script src="../../assets/js/core/format.js"></script>
