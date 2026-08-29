@@ -240,6 +240,19 @@
       });
     }
 
+    // 今どの確率で抽選しているかの表示。
+    // 転落式の状態は「当たりを引くか転落を引くか」の勝負なので、両方出さないと
+    // 今の状況が読めない。数字が2つ並ぶときだけラベルを付ける
+    // （1つしかないときにラベルを付けても情報が増えないため）。
+    // カッコは付けない。状態名自体が「ST（インパクトモード）」のようにカッコを
+    // 含むことがあり、その下にもカッコが並ぶと読みづらいため。
+    function stateProbabilityText(state) {
+      const hit = PachiSim.format.probabilityFraction(state.probability);
+      if (!state.onFall) return hit;
+      const fall = PachiSim.format.probabilityFraction(state.onFall.probability);
+      return `大当り ${hit}　転落 ${fall}`;
+    }
+
     // freezeStateDisplay: trueの間は「現在の状態」表示（状態名・背景テーマ・回転数）を
     // 更新しない。大当たり直後、session.stateIdは既に次の状態へ切り替わっているが、
     // 上部表示は「今までいた状態で何回転で当たったか」がわかるようそのまま残す
@@ -250,12 +263,9 @@
       const state = machine.states[session.stateId];
       if (!freezeStateDisplay) {
         els.currentStateLabel.textContent = state.label;
-        // 今どの確率で抽選しているかを、状態名と一緒に出す。
         // 状態名を凍結している間（大当たり直後）は確率も一緒に凍結させたいので、
         // 同じifの中で更新する。
-        els.currentStateProbability.textContent = `（${PachiSim.format.probabilityFraction(
-          state.probability
-        )}）`;
+        els.currentStateProbability.textContent = stateProbabilityText(state);
         els.simulationArea.dataset.theme = state.theme;
         els.spinCounter.textContent = spinCounterText(state);
       }
