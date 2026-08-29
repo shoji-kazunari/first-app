@@ -95,20 +95,12 @@ button {
   padding-top: var(--space-3);
 }
 
-.site-header__title {
-  font-size: 1.4rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  background: linear-gradient(180deg, var(--color-accent-strong) 0%, var(--color-accent) 60%, #a97e3f 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.site-header__tagline {
-  margin-top: var(--space-1);
-  font-size: 0.8rem;
-  color: var(--color-text-muted);
+.site-header__logo {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  height: auto;
+  margin: 0 auto;
 }
 
 .breadcrumb {

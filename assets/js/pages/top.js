@@ -101,8 +101,6 @@
 
   async function init() {
     const els = {
-      siteTitle: $("siteTitle"),
-      siteTagline: $("siteTagline"),
       searchInput: $("searchInput"),
       searchResults: $("searchResults"),
       manufacturerList: $("manufacturerList"),
@@ -111,8 +109,6 @@
       adminAuthBar: $("adminAuthBar"),
     };
 
-    els.siteTitle.textContent = PachiSim.config.siteTitle;
-    els.siteTagline.textContent = PachiSim.config.siteTagline;
     document.title = PachiSim.config.siteTitle;
 
     const machines = PachiSim.machineRegistry.getAll();

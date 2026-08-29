@@ -14,7 +14,6 @@
     const machine = PachiSim.machineRegistry.getBySlug(slug);
 
     const els = {
-      siteTitle: $("siteTitle"),
       machineName: $("machineName"),
       manufacturerName: $("manufacturerName"),
       rulesList: $("rulesList"),
@@ -41,8 +40,6 @@
       adminAuthBar: $("adminAuthBar"),
       errorBox: $("machineError"),
     };
-
-    els.siteTitle.textContent = PachiSim.config.siteTitle;
 
     if (!machine) {
       els.errorBox.hidden = false;

@@ -1,11 +1,11 @@
 // サイト全体の共通設定。
 // サイトタイトルを変更したい場合はここ(siteTitle)だけを書き換えれば
-// TOPページ・各機種ページの表示に反映される。
+// ブラウザタブ・ホーム画面追加時の名前に反映される
+// （見た目のロゴ画像は assets/img/logo-gijipachi.jpg を直接差し替える）。
 window.PachiSim = window.PachiSim || {};
 
 PachiSim.config = {
-  siteTitle: "パチンコシミュレーター",
-  siteTagline: "スペックをボタンで疑似体験するシミュレーター",
+  siteTitle: "ギジパチ！",
 
   // 公開先のURL（末尾のスラッシュは付けない）。
   // 各ページのcanonical（検索エンジンに伝える正式なURL）をここから組み立てる。
