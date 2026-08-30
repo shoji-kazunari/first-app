@@ -138,6 +138,12 @@ button {
   margin-bottom: var(--space-3);
 }
 
+/* 見出しに機種名などの値を差し込む箇所用。uppercaseの親に入っていても、
+   機種名先頭の英字（例:「eフィーバー」の e）まで大文字化されないようにする */
+.heading-value {
+  text-transform: none;
+}
+
 /* 見出しの右端に小さな操作ボタンを置きたいカード用（データランプのリセットなど）。
    下の余白は行が持つので、中の見出しからは外す */
 .card__heading-row {

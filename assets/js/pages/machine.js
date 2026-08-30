@@ -81,6 +81,11 @@
     let chargedThisAction = 0;
     let activePlayback = null; // 実行中のplayback制御（pause/resumeで使用）
     let pendingStart = null; // 保留チャージ中にSTOPされた場合、再開時に実行する消化開始処理
+    // 当たった数字が揃った直後、通常へ戻ってRESULT（連チャン数・出玉まとめ）を出す
+    // 直前で止めている間の{renchan, balls}。揃った瞬間にRESULTへ差し替わると
+    // 「当たったこと」を確認する間もないため、ボタンを押すまで待つ
+    // （finishAction/action button クリックハンドラ参照）。
+    let pendingResultPanel = null;
     let currentStreakId = null; // 進行中の「一撃」を識別するID（データランプの連チャンまとめ用）
     let streakSeq = 0;
     // Date.now()だけだと同一ミリ秒内の連続実行でID衝突する可能性があるため、
@@ -379,12 +384,14 @@
       return CALM_NEXT_THEMES.indexOf(state.theme) < 0;
     }
 
-    // line1: 「大当たり＜4R獲得＞」のようなメイン結果、line2: 「次回：最終決戦」のような行き先
-    function showResultEffect({ line1, line2, kind, nextEmphasis }) {
+    // line1: 「大当たり＜4R獲得＞」のようなメイン結果、ballsLine: 「+1,500玉」のような
+    // 今回の獲得出玉（当たり以外では省略）、line2: 「次回：最終決戦」のような行き先
+    function showResultEffect({ line1, ballsLine, line2, kind, nextEmphasis }) {
       els.effectArea.dataset.kind = kind;
       els.effectArea.dataset.nextEmphasis = nextEmphasis ? "on" : "off";
       els.effectArea.innerHTML = `
         <p class="effect-area__title">${line1}</p>
+        ${ballsLine ? `<p class="effect-area__balls">${ballsLine}</p>` : ""}
         ${line2 ? `<p class="effect-area__sub">${line2}</p>` : ""}
       `;
     }
@@ -529,7 +536,6 @@
 
       const rng = PachiSim.rng.createDefaultRng();
       const result = PachiSim.engine.resolveAction(session, machine, rng);
-      const speedMode = currentSpeedMode();
 
       renderCurrentState();
       renderDataLampLive();
@@ -566,6 +572,12 @@
       // 「1保留の消化＝1つの演出が完結する」感覚を出すため、数字が止まりきった後に
       // SETTLE_MS分だけ結果を見せる間を必ず取ってから、次の保留の消化（バースト/シフト）へ進む。
       function playReelFor(roll) {
+        // STOP中に速度を変えてから再開した場合にも追従するよう、
+        // handleAction開始時点ではなくここで毎回いまの速度を読み直す
+        // （以前はhandleAction冒頭で一度だけ読んだ値を使っていたため、
+        // 「普通」で回してSTOP→「速い」に変えても、リールの止め方だけ
+        // 「普通」のまま反映されないバグがあった）。
+        const speedMode = currentSpeedMode();
         if (speedMode.id === "instant") return undefined;
 
         // 数字が止まりきった後に結果を見せておく間。「普通」のように1回転の予算が
@@ -597,21 +609,28 @@
           { noReach: isFallState, forceReachForMiss }
         );
 
+        // 「速い」は左右→中の細切れ停止が目まぐるしいとの指摘を受け、「速い」限定で
+        // 停止をまとめる。リーチ無しは3つとも同時停止、リーチ有りは左右だけ同時停止
+        // にし、中リール（reachStepDelaysの減速）は速度を問わず今まで通り。
+        const isFastMode = speedMode.id === "fast";
+
         let timing;
         let reelResolveMs;
         if (plan.reach) {
           const reachStepDelays = [200, 350, 600];
           const leftDelay = 250;
-          const rightDelay = 250;
+          const rightDelay = isFastMode ? 0 : 250;
           timing = { leftDelay, rightDelay, reachStepDelays };
           reelResolveMs = leftDelay + rightDelay + reachStepDelays.reduce((a, b) => a + b, 0);
         } else {
           const base = computeTickSplit(speedMode).emphasizeMs;
-          timing = {
-            leftDelay: Math.round(base * 0.35),
-            rightDelay: Math.round(base * 0.35),
-            middleDelay: Math.round(base * 0.3),
-          };
+          timing = isFastMode
+            ? { leftDelay: base, rightDelay: 0, middleDelay: 0 }
+            : {
+                leftDelay: Math.round(base * 0.35),
+                rightDelay: Math.round(base * 0.35),
+                middleDelay: Math.round(base * 0.3),
+              };
           reelResolveMs = base;
         }
 
@@ -767,15 +786,18 @@
         // 次の1回転が始まってから（renderDataLampLiveのコメント参照）
         historyRevealPending = true;
         historyEntries = PachiSim.historyStore.append(slug, dateKey, historyEntries, {
-          // データランプに残す回転数も、ST・時短の分を含めた通算にする
+          // データランプに残す回転数も、ST・時短の分を含めた通算にする。
+          // ラウンドはdisplayRounds（省略時はroundsと同じ）を使い、「10R×3」のような
+          // 複数ブロック連続の当たりは実機のデータカウンターと同じく合計R（30）で見せる。
           spins: spinsSinceLastHit,
-          rounds: outcome.rounds,
+          rounds: outcome.displayRounds,
           context: fromState.isBaseState ? "normal" : "rush",
           streakId: currentStreakId,
         });
 
         showResultEffect({
-          line1: `大当たり＜${outcome.rounds}R獲得＞${outcome.resultNote ? `（${outcome.resultNote}）` : ""}`,
+          line1: `大当たり＜${outcome.displayRounds}R獲得＞${outcome.resultNote ? `（${outcome.resultNote}）` : ""}`,
+          ballsLine: `+${PachiSim.format.ball(outcome.balls)}`,
           line2,
           kind: "hit",
           nextEmphasis,
@@ -802,14 +824,7 @@
         // 虚構推理の裏モードがこれにあたる。2R・300玉を得たあと左打ちで20回転
         // 回して外れると、玉を減らし続けた末に「1連 300玉獲得」が出る。
         // 20回転前の当たりを、負けた直後に祝う形になってしまう。
-        //
-        // 当たった瞬間に通常へ戻る構成（ユニコーンの電サポなし当たり）は対象外。
-        // あちらはRESULTがその当たり自体と同時に出るので、食い違いは起きない。
-        // 記録側（本日の成績・出玉ランキング）はどちらもこれまでどおり残す。
         const endedByLeftHandMiss = outcome.type !== "hit" && fromState.accruesInvestment;
-        if (!endedByLeftHandMiss) {
-          showResultPanel(renchan, balls);
-        }
         // Firestoreへの書き込みが実際に終わってから再取得したいので、
         // 再描画は完了後に行う（失敗してもプレイ自体は止めない）。
         PachiSim.rankingService
@@ -823,6 +838,29 @@
           })
           .then(() => renderMachineRanking())
           .catch(() => {});
+
+        if (!endedByLeftHandMiss && outcome.type === "hit") {
+          // 数字が揃った瞬間にRESULT（連チャン数・出玉まとめ）へ差し替わると、
+          // 当たった（数字が揃った）ことを確認する間もなく消えてしまう。揃った
+          // リールを見せたまま止め、ボタンを「RESULT」に変えて、押されてから
+          // showResultPanelへ切り替える（actionButtonのクリックハンドラ参照）。
+          // データ・統計・ランキング送信はここで確定済みなので、見た目の
+          // 切り替えだけを待たせている。
+          pendingResultPanel = { renchan, balls };
+          els.actionButton.textContent = "RESULT";
+          els.actionButton.dataset.mode = "result";
+          PachiSim.statsStore.save(slug, stats);
+          // isAnimatingはtrueのまま維持する。renderCurrentStateは
+          // isAnimating中はactionButtonの表示を上書きしないので、
+          // 上で設定した「RESULT」表示がそのまま保たれる
+          // （速度・リセットボタンも当たりの余韻の間はロックされたままになる）。
+          renderAll({ freezeStateDisplay: true });
+          return;
+        }
+
+        if (!endedByLeftHandMiss) {
+          showResultPanel(renchan, balls);
+        }
       }
 
       PachiSim.statsStore.save(slug, stats);
@@ -837,6 +875,18 @@
     }
 
     els.actionButton.addEventListener("click", () => {
+      if (pendingResultPanel) {
+        // 揃った数字を確認してもらったあとの「RESULT」タップ。
+        // ここでようやくRESULT（連チャン数・出玉まとめ）へ切り替える。
+        const { renchan, balls } = pendingResultPanel;
+        pendingResultPanel = null;
+        showResultPanel(renchan, balls);
+        isAnimating = false;
+        isPaused = false;
+        activePlayback = null;
+        renderAll({ freezeStateDisplay: true });
+        return;
+      }
       if (isAnimating && !isPaused) {
         // 抽選中 -> その場で一時停止する（結果を先読み・スキップしない）
         if (activePlayback) activePlayback.pause();

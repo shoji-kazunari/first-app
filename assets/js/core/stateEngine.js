@@ -42,7 +42,7 @@
 //       isBaseState: boolean,          // 「通常」相当（一撃/連チャンの起点）か
 //       isRushEntry: boolean,          // RUSH突入回数としてカウントする状態か
 //       onHit: (
-//         { outcomes: [{weight, rounds, nextState, tag, balls?, resultNote?, stockAdd?, stockSet?, bonusLoop?}, ...] }
+//         { outcomes: [{weight, rounds, nextState, tag, balls?, displayRounds?, resultNote?, stockAdd?, stockSet?, bonusLoop?}, ...] }
 //         | { distributionTable: "tableId", nextState, tag }    // 別テーブル参照 + 遷移先固定
 //         | { stockOutcomes: [{minStock?, maxStock?, whenUnlimited?, outcomes: [...同上の形]}, ...] } // stockMode状態専用。
 //           // 当たった瞬間の残りストック数（今回消化した分は含まず、それより前の外れで
@@ -52,6 +52,13 @@
 //       // balls（任意）: 指定があればpayoutTable[rounds]の代わりにこちらを使う。
 //       // 同じラウンド数でも文脈によって出玉が変わる機種（例: 通常大当たりと特別大当たりが
 //       // 同じ10Rでも出玉が違う）を表現するための上書き値。
+//       //
+//       // displayRounds（任意）: データランプ・演出欄の「○R獲得」表示にだけ使う値。
+//       // 省略時はroundsをそのまま使う。roundsは7が出せる最大R（reelOmens.decideの
+//       // maxRounds判定）とpayoutTable参照の両方に使われる内部値なので、「10R×3」の
+//       // ように複数ブロックを連続消化する当たりでも、roundsはブロック単位(10)の
+//       // ままにして7の出し分けロジックへの影響を避け、実際にプレイヤーが目にする
+//       // 合計R数（30）だけをdisplayRoundsで別に持たせる。
 //       //
 //       // stockAdd/stockSet（任意、遷移先がstockMode:trueの状態のときだけ意味を持つ）:
 //       // 当たった瞬間に残っていたストック（今回消化した分を差し引いた残り）を
@@ -199,11 +206,12 @@ PachiSim.engine = (function () {
 
     let outcome;
     if (lastRoll.hit) {
-      let rounds, nextStateId, tag, ballsOverride, stockAdd, stockSet, stockUnlimited, bonusLoop;
+      let rounds, displayRounds, nextStateId, tag, ballsOverride, stockAdd, stockSet, stockUnlimited, bonusLoop;
       let resultNote;
       if (state.onHit.outcomes) {
         const picked = PachiSim.rng.weightedPick(rng, state.onHit.outcomes);
         rounds = picked.rounds;
+        displayRounds = picked.displayRounds != null ? picked.displayRounds : rounds;
         nextStateId = picked.nextState;
         tag = picked.tag || null;
         resultNote = picked.resultNote || null;
@@ -238,6 +246,7 @@ PachiSim.engine = (function () {
         }
         const picked = PachiSim.rng.weightedPick(rng, bucket.outcomes);
         rounds = picked.rounds;
+        displayRounds = picked.displayRounds != null ? picked.displayRounds : rounds;
         nextStateId = picked.nextState;
         tag = picked.tag || null;
         resultNote = picked.resultNote || null;
@@ -250,6 +259,7 @@ PachiSim.engine = (function () {
         const table = machine.distributionTables[state.onHit.distributionTable];
         const picked = PachiSim.rng.weightedPick(rng, table);
         rounds = picked.rounds;
+        displayRounds = picked.displayRounds != null ? picked.displayRounds : rounds;
         nextStateId = state.onHit.nextState;
         tag = state.onHit.tag || null;
         resultNote = state.onHit.resultNote || null;
@@ -273,6 +283,7 @@ PachiSim.engine = (function () {
         type: "hit",
         attempts,
         rounds,
+        displayRounds,
         balls,
         nextStateId,
         tag,

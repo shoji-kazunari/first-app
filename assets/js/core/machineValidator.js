@@ -53,6 +53,10 @@ PachiSim.machineValidator = (function () {
         `${where}: ${outcome.rounds}Rの出玉が決まらない（payoutTableに${outcome.rounds}が無く、balls指定も無い）`
       );
     }
+    // displayRounds（任意）: データランプ・演出欄の表示にだけ使う合計R数（詳細はstateEngine.js参照）。
+    if (outcome.displayRounds != null && !isPositiveInteger(outcome.displayRounds)) {
+      errors.push(`${where}: displayRoundsが正の整数でない（${outcome.displayRounds}）`);
+    }
     if (!machine.states[outcome.nextState]) {
       errors.push(`${where}: nextState "${outcome.nextState}" が存在しない`);
     } else if (machine.states[outcome.nextState].stockMode) {
