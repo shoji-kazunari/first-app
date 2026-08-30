@@ -825,19 +825,24 @@
         // 回して外れると、玉を減らし続けた末に「1連 300玉獲得」が出る。
         // 20回転前の当たりを、負けた直後に祝う形になってしまう。
         const endedByLeftHandMiss = outcome.type !== "hit" && fromState.accruesInvestment;
-        // Firestoreへの書き込みが実際に終わってから再取得したいので、
-        // 再描画は完了後に行う（失敗してもプレイ自体は止めない）。
-        PachiSim.rankingService
-          .submitResult({
-            machineSlug: slug,
-            machineName: machine.name,
-            manufacturerName: machine.manufacturer.name,
-            balls,
-            renchan,
-            achievedAt: new Date().toISOString(),
-          })
-          .then(() => renderMachineRanking())
-          .catch(() => {});
+        // 運営ログイン中の自分のプレイは、動作確認用であって実際の記録ではないため
+        // ランキングに送らない（自分のプレイでランキングが荒れるのを防ぐ）。
+        const isAdminPlaying = !!(window.PachiSim.fb && PachiSim.fb.isAdmin());
+        if (!isAdminPlaying) {
+          // Firestoreへの書き込みが実際に終わってから再取得したいので、
+          // 再描画は完了後に行う（失敗してもプレイ自体は止めない）。
+          PachiSim.rankingService
+            .submitResult({
+              machineSlug: slug,
+              machineName: machine.name,
+              manufacturerName: machine.manufacturer.name,
+              balls,
+              renchan,
+              achievedAt: new Date().toISOString(),
+            })
+            .then(() => renderMachineRanking())
+            .catch(() => {});
+        }
 
         if (!endedByLeftHandMiss && outcome.type === "hit") {
           // 数字が揃った瞬間にRESULT（連チャン数・出玉まとめ）へ差し替わると、
