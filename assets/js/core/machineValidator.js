@@ -58,10 +58,27 @@ PachiSim.machineValidator = (function () {
     } else if (machine.states[outcome.nextState].stockMode) {
       // 遷移先がストック制の状態なら、次のストックの決め方（持ち越し+付与 or 固定値）が必須。
       // 無いとエンジン側でnextStock=0にフォールバックし、即座に規定消化扱いになってしまう。
-      if (outcome.stockAdd == null && outcome.stockSet == null) {
+      if (outcome.stockAdd == null && outcome.stockSet == null && !outcome.stockUnlimited) {
         errors.push(
-          `${where}: 遷移先"${outcome.nextState}"はstockModeだが、stockAdd/stockSetが両方とも無い`
+          `${where}: 遷移先"${outcome.nextState}"はstockModeだが、stockAdd/stockSet/stockUnlimitedがどれも無い`
         );
+      }
+      // 無制限を配るなら、遷移先に「無制限中に使う表」が要る。
+      // 無い場合、無制限は数として常に最大のminStockに当てはまり、そこが再び無制限を
+      // 配る表なら永久に終わらない（平均連チャンが1000回超という形で表面化する）。
+      if (outcome.stockUnlimited) {
+        const target = machine.states[outcome.nextState];
+        const buckets = (target.onHit && target.onHit.stockOutcomes) || null;
+        if (!buckets) {
+          errors.push(
+            `${where}: stockUnlimitedの遷移先"${outcome.nextState}"にstockOutcomesが無い（無制限中の振り分けを決められない）`
+          );
+        } else if (!buckets.some((b) => b.whenUnlimited)) {
+          errors.push(
+            `${where}: stockUnlimitedの遷移先"${outcome.nextState}"にwhenUnlimitedの表が無い。` +
+              "無制限中の当たりがまた無制限を配り、RUSHが終わらなくなる"
+          );
+        }
       }
     }
     if (outcome.bonusLoop != null) {
@@ -182,8 +199,13 @@ PachiSim.machineValidator = (function () {
       }
       onHit.stockOutcomes.forEach((bucket, bi) => {
         const bucketWhere = `${where}.onHit.stockOutcomes[${bi}]`;
-        if (bucket.minStock == null && bucket.maxStock == null) {
+        if (bucket.minStock == null && bucket.maxStock == null && !bucket.whenUnlimited) {
           errors.push(`${bucketWhere}: minStock/maxStockが両方とも無い（全ストック域を拾えない）`);
+        }
+        if (bucket.whenUnlimited && (bucket.minStock != null || bucket.maxStock != null)) {
+          errors.push(
+            `${bucketWhere}: whenUnlimitedの表にminStock/maxStockは指定できない（無制限は数の範囲で判定しない）`
+          );
         }
         if (!Array.isArray(bucket.outcomes) || bucket.outcomes.length === 0) {
           errors.push(`${bucketWhere}.outcomes: 空の配列`);

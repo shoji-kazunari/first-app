@@ -44,7 +44,7 @@
 //       onHit: (
 //         { outcomes: [{weight, rounds, nextState, tag, balls?, resultNote?, stockAdd?, stockSet?, bonusLoop?}, ...] }
 //         | { distributionTable: "tableId", nextState, tag }    // 別テーブル参照 + 遷移先固定
-//         | { stockOutcomes: [{minStock?, maxStock?, outcomes: [...同上の形]}, ...] } // stockMode状態専用。
+//         | { stockOutcomes: [{minStock?, maxStock?, whenUnlimited?, outcomes: [...同上の形]}, ...] } // stockMode状態専用。
 //           // 当たった瞬間の残りストック数（今回消化した分は含まず、それより前の外れで
 //           // 減った分だけを反映した値）がminStock/maxStockの範囲に収まる最初のバケットの
 //           // outcomesを使う。範囲が重ならないよう機種データ側で気を付けること。
@@ -57,7 +57,11 @@
 //       // 当たった瞬間に残っていたストック（今回消化した分を差し引いた残り）を
 //       // どう次のストックに変換するかを指定する。どちらか一方だけを指定する。
 //       //   stockAdd: N   → 次のストック = 残りストック + N（同じRUSH内で「持ち越し+付与」）
-//       //   stockSet: N   → 次のストック = N（残りを引き継がず固定値で始める。他の状態/
+//       //   stockUnlimited: true → 次のストック = 無制限。次の当たりを引くまで減らない。
+      //                   これを配る表と、無制限中に使う表(whenUnlimited)は必ず分けること。
+      //                   同じ表を使い回すと、無制限中の当たりがまた無制限を配って終わらなくなる
+      //                   （machineValidatorが読み込み時に弾く）。
+      //   stockSet: N   → 次のストック = N（残りを引き継がず固定値で始める。他の状態/
 //       //                    他のストックプールへ乗り換わる場合など）
 //       //
 //       // bonusLoop（任意）: {probability, balls}。当選確定後、成功する限り繰り返し
@@ -195,7 +199,7 @@ PachiSim.engine = (function () {
 
     let outcome;
     if (lastRoll.hit) {
-      let rounds, nextStateId, tag, ballsOverride, stockAdd, stockSet, bonusLoop;
+      let rounds, nextStateId, tag, ballsOverride, stockAdd, stockSet, stockUnlimited, bonusLoop;
       let resultNote;
       if (state.onHit.outcomes) {
         const picked = PachiSim.rng.weightedPick(rng, state.onHit.outcomes);
@@ -206,17 +210,32 @@ PachiSim.engine = (function () {
         ballsOverride = picked.balls;
         stockAdd = picked.stockAdd;
         stockSet = picked.stockSet;
+        stockUnlimited = picked.stockUnlimited;
         bonusLoop = picked.bonusLoop;
       } else if (state.onHit.stockOutcomes) {
         // ストック制の状態で、残りストック数（今回の当たり自体は消費しない。それより前の
         // 判定済みの外れで既に減った分だけを反映した値）によって、当たり時の振り分け
         // テーブルそのものが変わる（例: 残り2個以下と3個以上で別表）。
         const stockBeforeThisAttempt = lastRoll.remainingStock;
-        const bucket = state.onHit.stockOutcomes.find(
-          (b) =>
-            (b.minStock == null || stockBeforeThisAttempt >= b.minStock) &&
-            (b.maxStock == null || stockBeforeThisAttempt <= b.maxStock)
+        // 無制限（Infinity）のときは、minStock/maxStockの表ではなくwhenUnlimitedの表を使う。
+        // 無制限は数として比べると常に「3個以上」に当たってしまい、そこが再び無制限を
+        // 配る表だと永久に終わらなくなるため、別の表として明示的に分ける。
+        const unlimited = !isFinite(stockBeforeThisAttempt);
+        const bucket = state.onHit.stockOutcomes.find((b) =>
+          b.whenUnlimited
+            ? unlimited
+            : !unlimited &&
+              (b.minStock == null || stockBeforeThisAttempt >= b.minStock) &&
+              (b.maxStock == null || stockBeforeThisAttempt <= b.maxStock)
         );
+        if (!bucket) {
+          throw new Error(
+            `状態「${state.label}」で、残りストック${
+              unlimited ? "無制限" : stockBeforeThisAttempt + "個"
+            }に当てはまる振り分け表がありません。` +
+              "stockOutcomesの範囲指定に抜けがあります。"
+          );
+        }
         const picked = PachiSim.rng.weightedPick(rng, bucket.outcomes);
         rounds = picked.rounds;
         nextStateId = picked.nextState;
@@ -225,6 +244,7 @@ PachiSim.engine = (function () {
         ballsOverride = picked.balls;
         stockAdd = picked.stockAdd;
         stockSet = picked.stockSet;
+        stockUnlimited = picked.stockUnlimited;
         bonusLoop = picked.bonusLoop;
       } else {
         const table = machine.distributionTables[state.onHit.distributionTable];
@@ -236,6 +256,7 @@ PachiSim.engine = (function () {
         ballsOverride = picked.balls;
         stockAdd = picked.stockAdd;
         stockSet = picked.stockSet;
+        stockUnlimited = picked.stockUnlimited;
         bonusLoop = picked.bonusLoop;
       }
       let balls = ballsOverride != null ? ballsOverride : machine.payoutTable[rounds] || 0;
@@ -258,6 +279,7 @@ PachiSim.engine = (function () {
         resultNote,
         stockAdd,
         stockSet,
+        stockUnlimited,
       };
     } else {
       // 転落で終わった場合も「当たらずにその状態が終わった」ことに変わりはないので、
@@ -284,7 +306,10 @@ PachiSim.engine = (function () {
     // stockSet優先。どちらも無ければ0（この組み合わせはmachineValidatorで弾く想定）。
     let nextStock = null;
     if (nextState.stockMode) {
-      if (outcome.stockSet != null) {
+      if (outcome.stockUnlimited) {
+        // 次の当たりまで減らないストック。終わりはonExhaustedではなく当選が決める。
+        nextStock = Infinity;
+      } else if (outcome.stockSet != null) {
         nextStock = outcome.stockSet;
       } else if (outcome.stockAdd != null) {
         nextStock = lastRoll.remainingStock + outcome.stockAdd;

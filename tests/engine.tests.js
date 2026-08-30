@@ -422,16 +422,20 @@
     );
   });
 
-  test("engine(虚構推理): 琴子のご褒美RUSH・残り3個以上は82%で継続（3000個・ストック4個固定）", () => {
+  test("engine(虚構推理): 琴子のご褒美RUSH・残り3個以上は82%で継続（3000個・お願い玉が無制限に）", () => {
     const session = { stateId: "kotokoRush", stock: 5, streak: null };
     const rng = PachiSim.rng.createScriptedRng([0.001 /* gate */, 0.001 /* hit */, 0.001 /* 82%側 */]);
     const result = PachiSim.engine.resolveAction(session, machine3, rng);
     assertEqual(result.outcome.balls, 3000);
     assertEqual(result.outcome.nextStateId, "kotokoRush");
-    assertEqual(result.newSession.stock, 4, "stockSet:4なので持ち越しは関係なく4固定になるべき");
+    assertEqual(
+      result.newSession.stock,
+      Infinity,
+      "残り3個以上での当選は、次のRUSHのお願い玉が無制限になるべき（stockUnlimited）"
+    );
   });
 
-  test("engine(虚構推理): 琴子のご褒美RUSH・残り3個以上の18%はVストック化し裏ご褒美RUSHへ。持ち越しは無視されstockSetの4個になる", () => {
+  test("engine(虚構推理): 琴子のご褒美RUSH・残り3個以上の18%はVストック化し裏ご褒美RUSHへ。こちらも無制限になる", () => {
     const session = { stateId: "kotokoRush", stock: 7, streak: null };
     const rng = PachiSim.rng.createScriptedRng([0.001 /* gate */, 0.001 /* hit */, 0.999 /* 18%側 */]);
     const result = PachiSim.engine.resolveAction(session, machine3, rng);
@@ -439,8 +443,8 @@
     assertEqual(result.outcome.resultNote, "Vストック");
     assertEqual(
       result.newSession.stock,
-      4,
-      "stockSet:4なので、持ち越し分(7)は使わずちょうど4になるべき"
+      Infinity,
+      "裏ご褒美RUSHへ行く側も、残り3個以上での当選なので無制限になるべき"
     );
   });
 
@@ -478,7 +482,11 @@
     assertEqual(result.rolls[2].remainingStock, 4, "3回目も素通りなので4のまま");
     assertEqual(result.rolls[3].remainingStock, 3, "4回目でゲートが開きハズレたので3に減る");
     assertEqual(result.outcome.type, "hit");
-    assertEqual(result.newSession.stock, 4, "stockSet:4なので持ち越しは関係なく4固定になるべき");
+    assertEqual(
+      result.newSession.stock,
+      Infinity,
+      "残り3個で当選したので、次のお願い玉は無制限になるべき"
+    );
   });
 
   test("engine(虚構推理): 裏モードで当たり(87%側)→裏ご褒美RUSHへ。stockSetで初期ストック4個", () => {
@@ -721,5 +729,192 @@
     assertTrue(!!uc, "ユニコーンが登録されていない");
     assertTrue(!uc.states.normal.onFall, "通常時にonFallが付いている");
     assertTrue(!!uc.states.rush.onFall, "RUSHにonFallが無い");
+  });
+})();
+
+// お願い玉の無制限（stockUnlimited / whenUnlimited）。
+// いちばん危ないのは「無制限中の当たりが、また無制限を配ってしまう」形。
+// 無制限は数として常に最大のminStockに当てはまるため、表を分けないとそうなる。
+(function () {
+  const { test, assertEqual, assertTrue } = PachiSimTest;
+  const machine = PachiSim.machineRegistry.getBySlug("e-kyokousuiri");
+
+  test("無制限: ♾️中はお願い玉が減らず、当たるまで回り続ける", () => {
+    const session = { stateId: "kotokoRush", stock: Infinity, streak: null };
+    // ゲート開→ハズレ を3回、そのあとゲート開→当たり
+    const rng = PachiSim.rng.createScriptedRng([
+      0.001, 0.9, 0.001, 0.9, 0.001, 0.9, 0.001, 0.001, 0.001,
+    ]);
+    const result = PachiSim.engine.resolveAction(session, machine, rng);
+    assertEqual(result.outcome.type, "hit");
+    result.rolls.forEach((r, i) => {
+      assertEqual(r.remainingStock, Infinity, `${i + 1}回転目でお願い玉が減っている`);
+    });
+  });
+
+  test("無制限: ♾️中に当たると無制限が終わり、お願い玉4個で再開する", () => {
+    const session = { stateId: "kotokoRush", stock: Infinity, streak: null };
+    const rng = PachiSim.rng.createScriptedRng([0.001 /* ゲート */, 0.001 /* 当たり */, 0.001 /* 82%側 */]);
+    const result = PachiSim.engine.resolveAction(session, machine, rng);
+    assertEqual(
+      result.newSession.stock,
+      4,
+      "ここで4個に戻らないと、連チャンが永久に終わらなくなる"
+    );
+  });
+
+  test("無制限: 有限の残り3個以上と、♾️中とで、別の振り分け表が使われる", () => {
+    const script = [0.001 /* ゲート */, 0.001 /* 当たり */, 0.001 /* 82%側 */];
+    const finite = PachiSim.engine.resolveAction(
+      { stateId: "kotokoRush", stock: 3, streak: null },
+      machine,
+      PachiSim.rng.createScriptedRng(script.slice())
+    );
+    const unlimited = PachiSim.engine.resolveAction(
+      { stateId: "kotokoRush", stock: Infinity, streak: null },
+      machine,
+      PachiSim.rng.createScriptedRng(script.slice())
+    );
+    // 同じ乱数・同じ遷移先でも、次のストックだけが変わる
+    assertEqual(finite.outcome.nextStateId, unlimited.outcome.nextStateId);
+    assertEqual(finite.newSession.stock, Infinity, "残り3個(有限)なら無制限を配る");
+    assertEqual(unlimited.newSession.stock, 4, "♾️中なら4個に戻す");
+  });
+
+  test("無制限: 裏ご褒美RUSHへ行く18%側も無制限になり、その先でも4個に戻る", () => {
+    const toUra = PachiSim.engine.resolveAction(
+      { stateId: "kotokoRush", stock: 3, streak: null },
+      machine,
+      PachiSim.rng.createScriptedRng([0.001, 0.001, 0.999 /* 18%側 */])
+    );
+    assertEqual(toUra.outcome.nextStateId, "uraGohobiRush");
+    assertEqual(toUra.newSession.stock, Infinity);
+
+    const inUra = PachiSim.engine.resolveAction(
+      { stateId: "uraGohobiRush", stock: Infinity, streak: null },
+      machine,
+      PachiSim.rng.createScriptedRng([0.001, 0.001, 0.001])
+    );
+    assertEqual(inUra.newSession.stock, 4, "裏ご褒美RUSHの♾️中も、当たれば4個に戻るべき");
+  });
+
+  test("無制限: RUSHが必ず終わる（永久ループになっていない）", () => {
+    // 無制限を配り続ける作りだと、ここが上限に張り付いて終わらなくなる。
+    const rng = PachiSim.rng.createSeededRng(4242);
+    let longest = 0;
+    for (let t = 0; t < 300; t++) {
+      let session = { stateId: "kotokoRush", stock: 4, streak: null };
+      let chain = 0;
+      while (session.stateId !== "normal" && chain < 500) {
+        const r = PachiSim.engine.resolveAction(session, machine, rng);
+        session = r.newSession;
+        chain++;
+      }
+      if (chain > longest) longest = chain;
+    }
+    assertTrue(longest < 500, `連チャンが上限に張り付いた（${longest}連）。無制限が終わっていない`);
+  });
+})();
+
+// 無制限を配るのに「無制限中の表」が無い機種データを、読み込み時に弾けるか。
+// この作りを間違えると連チャンが終わらなくなるが、動きとしては正常に見えるため
+// 気づけない。検証で強制する。
+(function () {
+  const { test, assertTrue } = PachiSimTest;
+
+  function build(overrides) {
+    return Object.assign(
+      {
+        id: "t",
+        slug: "t",
+        name: "検査用",
+        nameKana: "けんさよう",
+        aliases: [],
+        manufacturer: { id: "m", name: "M" },
+        spinsPer1000Yen: 16,
+        baseStateId: "normal",
+        rules: [],
+        payoutTable: { 10: 1500 },
+        distributionTables: {},
+      },
+      overrides
+    );
+  }
+
+  const rushBase = {
+    id: "rush",
+    label: "RUSH",
+    mode: "countDown",
+    maxAttempts: null,
+    stockMode: true,
+    probability: 0.25,
+    actionLabel: "START",
+    theme: "rush",
+    accruesInvestment: false,
+    isBaseState: false,
+    isRushEntry: true,
+    onExhausted: { nextState: "normal" },
+  };
+
+  const normal = {
+    id: "normal",
+    label: "通常",
+    mode: "countUp",
+    maxAttempts: null,
+    probability: 1 / 319,
+    actionLabel: "START",
+    theme: "normal",
+    accruesInvestment: true,
+    isBaseState: true,
+    isRushEntry: false,
+    onHit: { outcomes: [{ weight: 1, rounds: 10, nextState: "rush", stockSet: 4 }] },
+    onExhausted: null,
+  };
+
+  test("検証: 無制限を配るのにwhenUnlimitedの表が無い機種は弾かれる", () => {
+    const machine = build({
+      states: {
+        normal,
+        rush: Object.assign({}, rushBase, {
+          onHit: {
+            stockOutcomes: [
+              {
+                minStock: 1,
+                outcomes: [{ weight: 1, rounds: 10, nextState: "rush", stockUnlimited: true }],
+              },
+            ],
+          },
+        }),
+      },
+    });
+    const errors = PachiSim.machineValidator.validate(machine);
+    assertTrue(
+      errors.some((e) => e.includes("whenUnlimited")),
+      `無制限中の表が無いことを指摘すべき: ${JSON.stringify(errors)}`
+    );
+  });
+
+  test("検証: whenUnlimitedの表にminStock/maxStockを付けると弾かれる", () => {
+    const machine = build({
+      states: {
+        normal,
+        rush: Object.assign({}, rushBase, {
+          onHit: {
+            stockOutcomes: [
+              {
+                whenUnlimited: true,
+                minStock: 3,
+                outcomes: [{ weight: 1, rounds: 10, nextState: "rush", stockSet: 4 }],
+              },
+            ],
+          },
+        }),
+      },
+    });
+    const errors = PachiSim.machineValidator.validate(machine);
+    assertTrue(
+      errors.some((e) => e.includes("whenUnlimited")),
+      `数の範囲と併用できないことを指摘すべき: ${JSON.stringify(errors)}`
+    );
   });
 })();

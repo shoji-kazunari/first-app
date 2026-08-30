@@ -12,15 +12,27 @@ window.PachiSimTest = (function () {
     }
   }
 
+  // 数値は小数の誤差を許して比べる。ただしInfinity同士は引き算がNaNになり
+  // どんな比較も偽になってしまうので、先に同一値かどうかを見る。
+  function numbersEqual(a, b) {
+    if (Object.is(a, b)) return true; // Infinity同士・-0/0の区別もここで済む
+    if (!isFinite(a) || !isFinite(b)) return false;
+    return Math.abs(a - b) < 1e-9;
+  }
+
+  // JSON.stringifyはInfinityもNaNもnullにしてしまい、失敗の原因が読めなくなる。
+  // 数値はそのまま文字にする。
+  function show(v) {
+    return typeof v === "number" ? String(v) : JSON.stringify(v);
+  }
+
   function assertEqual(actual, expected, label) {
     const ok =
       typeof actual === "number" && typeof expected === "number"
-        ? Math.abs(actual - expected) < 1e-9
+        ? numbersEqual(actual, expected)
         : actual === expected;
     if (!ok) {
-      throw new Error(
-        `${label ? label + ": " : ""}expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`
-      );
+      throw new Error(`${label ? label + ": " : ""}expected ${show(expected)}, got ${show(actual)}`);
     }
   }
 
