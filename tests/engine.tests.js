@@ -918,3 +918,81 @@
     );
   });
 })();
+
+// RESULTパネルを出すかどうかの判断材料。
+// 「左打ちの状態を当たらずに消化しきって一撃が終わったか」で決める。
+// 虚構推理の裏モードがこれにあたり、2R・300玉を得たあと左打ちで20回転回して
+// 外れると、玉を減らし続けた末に「1連 300玉獲得」が出てしまっていた。
+(function () {
+  const { test, assertEqual, assertTrue } = PachiSimTest;
+
+  // machine.js側の判定と同じ式。ここが両者でずれないよう、条件そのものを検査する。
+  const suppressed = (outcome, fromState) => outcome.type !== "hit" && fromState.accruesInvestment;
+
+  const leftHand = { id: "ura", label: "裏モード", accruesInvestment: true };
+  const support = { id: "rush", label: "RUSH", accruesInvestment: false };
+  const normal = { id: "normal", label: "通常", accruesInvestment: true };
+
+  test("RESULT: 左打ちの状態を消化しきって終わった一撃では出さない", () => {
+    assertTrue(suppressed({ type: "exhausted" }, leftHand), "裏モード終了でRESULTが出てしまう");
+  });
+
+  test("RESULT: 電サポの状態を消化しきって終わった一撃では出す", () => {
+    assertEqual(suppressed({ type: "exhausted" }, support), false, "ST・時短終了のRESULTが消えている");
+  });
+
+  test("RESULT: 当たった瞬間に通常へ戻る構成では出す（ユニコーンの電サポなし当たり）", () => {
+    // 当たり自体と同時にRESULTが出るので、負けた直後に祝う食い違いは起きない
+    assertEqual(suppressed({ type: "hit" }, normal), false, "電サポなし当たりのRESULTが消えている");
+  });
+})();
+
+// e虚構推理の裏モードまわり。依頼者の指摘による仕様変更を、機種データ側で固定する。
+(function () {
+  const { test, assertEqual } = PachiSimTest;
+  const machine = PachiSim.machineRegistry.getBySlug("e-kyokousuiri");
+
+  test("虚構推理: 裏モードは左打ちなので、回した分だけ玉が減る", () => {
+    assertEqual(
+      machine.states.uraMode.accruesInvestment,
+      true,
+      "電サポ扱いにすると、左打ちなのに玉が減らなくなる"
+    );
+  });
+
+  test("虚構推理: 電サポの状態は電サポのまま（裏モードの変更が波及していない）", () => {
+    ["koujin", "kotokoRush", "uraGohobiRush"].forEach((id) => {
+      assertEqual(
+        machine.states[id].accruesInvestment,
+        false,
+        `${machine.states[id].label}が左打ち扱いになっている`
+      );
+    });
+  });
+
+  test("虚構推理: デカヘソなので1000円あたり24回転", () => {
+    assertEqual(machine.spinsPer1000Yen, 24);
+  });
+})();
+
+// 他機種に左打ちのまま消化しきる状態が無いこと（今回の変更の影響範囲の確認）。
+(function () {
+  const { test, assertEqual } = PachiSimTest;
+
+  test("RESULTの抑止が効くのは、いまのところ虚構推理の裏モードだけ", () => {
+    const found = [];
+    PachiSim.machineRegistry.getAll().forEach((m) => {
+      Object.values(m.states).forEach((st) => {
+        // 基点状態(通常)以外で、左打ちのまま消化しきる状態
+        if (!st.isBaseState && st.accruesInvestment && st.onExhausted) {
+          found.push(`${m.name} / ${st.label}`);
+        }
+      });
+    });
+    assertEqual(
+      found.join(", "),
+      "e虚構推理 / 裏モード",
+      `想定外の状態にも影響している: ${JSON.stringify(found)}`
+    );
+  });
+})();

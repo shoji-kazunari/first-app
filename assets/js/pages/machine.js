@@ -795,7 +795,21 @@
         stats.maxIkkiBalls = Math.max(stats.maxIkkiBalls, balls);
         stats.maxRenchan = Math.max(stats.maxRenchan, renchan);
         currentStreakId = null;
-        showResultPanel(renchan, balls);
+        // RESULTは、当たりの締めくくりとして出玉と連チャン数を見せるもの。
+        // 左打ちの状態（accruesInvestment:true）を当たらずに消化しきって
+        // 一撃が終わった場合だけは出さない。
+        //
+        // 虚構推理の裏モードがこれにあたる。2R・300玉を得たあと左打ちで20回転
+        // 回して外れると、玉を減らし続けた末に「1連 300玉獲得」が出る。
+        // 20回転前の当たりを、負けた直後に祝う形になってしまう。
+        //
+        // 当たった瞬間に通常へ戻る構成（ユニコーンの電サポなし当たり）は対象外。
+        // あちらはRESULTがその当たり自体と同時に出るので、食い違いは起きない。
+        // 記録側（本日の成績・出玉ランキング）はどちらもこれまでどおり残す。
+        const endedByLeftHandMiss = outcome.type !== "hit" && fromState.accruesInvestment;
+        if (!endedByLeftHandMiss) {
+          showResultPanel(renchan, balls);
+        }
         // Firestoreへの書き込みが実際に終わってから再取得したいので、
         // 再描画は完了後に行う（失敗してもプレイ自体は止めない）。
         PachiSim.rankingService
