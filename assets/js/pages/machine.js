@@ -597,21 +597,28 @@
           { noReach: isFallState, forceReachForMiss }
         );
 
+        // 「速い」は左右→中の細切れ停止が目まぐるしいとの指摘を受け、「速い」限定で
+        // 停止をまとめる。リーチ無しは3つとも同時停止、リーチ有りは左右だけ同時停止
+        // にし、中リール（reachStepDelaysの減速）は速度を問わず今まで通り。
+        const isFastMode = speedMode.id === "fast";
+
         let timing;
         let reelResolveMs;
         if (plan.reach) {
           const reachStepDelays = [200, 350, 600];
           const leftDelay = 250;
-          const rightDelay = 250;
+          const rightDelay = isFastMode ? 0 : 250;
           timing = { leftDelay, rightDelay, reachStepDelays };
           reelResolveMs = leftDelay + rightDelay + reachStepDelays.reduce((a, b) => a + b, 0);
         } else {
           const base = computeTickSplit(speedMode).emphasizeMs;
-          timing = {
-            leftDelay: Math.round(base * 0.35),
-            rightDelay: Math.round(base * 0.35),
-            middleDelay: Math.round(base * 0.3),
-          };
+          timing = isFastMode
+            ? { leftDelay: base, rightDelay: 0, middleDelay: 0 }
+            : {
+                leftDelay: Math.round(base * 0.35),
+                rightDelay: Math.round(base * 0.35),
+                middleDelay: Math.round(base * 0.3),
+              };
           reelResolveMs = base;
         }
 
