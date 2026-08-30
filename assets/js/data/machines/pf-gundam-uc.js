@@ -102,6 +102,7 @@ PachiSim.machineRegistry.register({
           {
             weight: 0.2,
             rounds: 10,
+            displayRounds: 20, // データランプ・演出欄には合計R(10×2)で見せる
             balls: 2800, // 10R大当り×2回ぶんの合計。payoutTable[10]=1400の2回分
             nextState: "rush",
             tag: "toRushDouble",

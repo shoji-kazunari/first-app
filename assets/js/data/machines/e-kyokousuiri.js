@@ -9,6 +9,12 @@
 // 「(約300個)」等の表記も含め、払い出し基準から実獲得基準へ切り替えた
 // （経緯はpf-gundam-uc.jsのコメント参照）。
 //
+// 【10R×2・10R×3はdisplayRoundsで合計R数を見せる】
+// 裏ご褒美RUSH・琴子のご褒美RUSHの「10R×2」「10R×3」パターンは、roundsを
+// ブロック単位の10のまま（7の出し分け判定に使う内部値のため）にし、
+// データランプ・演出欄の「○R獲得」表示だけは合計R数（20/30）で見せたいので、
+// displayRoundsで別に持たせている（詳細はcore/stateEngine.jsのコメント参照）。
+//
 // ヘソ入賞時（特図1・通常時）の大当たり振り分け:
 //   ・2R大当り(実獲得約280個)→鋼人攻略戦(ST36回+残保留)：50.5%
 //   ・2R大当り(実獲得約280個)→裏モード(20回転)：49.5%
@@ -55,19 +61,22 @@ window.PachiSim = window.PachiSim || {};
     {
       weight: 0.87,
       rounds: 10,
+      displayRounds: 20,
       balls: 2800,
       nextState: "uraGohobiRush",
       tag: "uraGohobiContinue",
       stockSet: 4,
+      resultNote: "10R×2",
     },
     {
       weight: 0.13,
       rounds: 10,
+      displayRounds: 30,
       balls: 4200,
       nextState: "uraGohobiRush",
       tag: "uraGohobiContinueMega",
       stockSet: 4,
-      resultNote: "上乗せ",
+      resultNote: "10R×3・上乗せ",
       // 成功する限り13%で+1400個を繰り返し上乗せするループボーナス。
       bonusLoop: { probability: 0.13, balls: 1400 },
     },
@@ -170,19 +179,22 @@ window.PachiSim = window.PachiSim || {};
             {
               weight: 0.87,
               rounds: 10,
+              displayRounds: 20,
               balls: 2800,
               nextState: "uraGohobiRush",
               tag: "uraModeToUraGohobi",
               stockSet: 4,
+              resultNote: "10R×2",
             },
             {
               weight: 0.13,
               rounds: 10,
+              displayRounds: 30,
               balls: 4200,
               nextState: "uraGohobiRush",
               tag: "uraModeToUraGohobiMega",
               stockSet: 4,
-              resultNote: "上乗せ",
+              resultNote: "10R×3・上乗せ",
               bonusLoop: { probability: 0.13, balls: 1400 },
             },
           ],
@@ -234,19 +246,22 @@ window.PachiSim = window.PachiSim || {};
                 {
                   weight: 0.82,
                   rounds: 10,
+                  displayRounds: 20,
                   balls: 2800,
                   nextState: "kotokoRush",
                   tag: "kotokoContinueHigh",
                   stockUnlimited: true,
+                  resultNote: "10R×2",
                 },
                 {
                   weight: 0.18,
                   rounds: 10,
+                  displayRounds: 20,
                   balls: 2800,
                   nextState: "uraGohobiRush",
                   tag: "kotokoToUraGohobi",
                   stockUnlimited: true,
-                  resultNote: "Vストック",
+                  resultNote: "10R×2・Vストック",
                 },
               ],
             },
@@ -258,19 +273,22 @@ window.PachiSim = window.PachiSim || {};
                 {
                   weight: 0.82,
                   rounds: 10,
+                  displayRounds: 20,
                   balls: 2800,
                   nextState: "kotokoRush",
                   tag: "kotokoContinueHigh",
                   stockSet: 4,
+                  resultNote: "10R×2",
                 },
                 {
                   weight: 0.18,
                   rounds: 10,
+                  displayRounds: 20,
                   balls: 2800,
                   nextState: "uraGohobiRush",
                   tag: "kotokoToUraGohobi",
                   stockSet: 4,
-                  resultNote: "Vストック",
+                  resultNote: "10R×2・Vストック",
                 },
               ],
             },

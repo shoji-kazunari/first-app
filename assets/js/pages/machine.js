@@ -786,15 +786,17 @@
         // 次の1回転が始まってから（renderDataLampLiveのコメント参照）
         historyRevealPending = true;
         historyEntries = PachiSim.historyStore.append(slug, dateKey, historyEntries, {
-          // データランプに残す回転数も、ST・時短の分を含めた通算にする
+          // データランプに残す回転数も、ST・時短の分を含めた通算にする。
+          // ラウンドはdisplayRounds（省略時はroundsと同じ）を使い、「10R×3」のような
+          // 複数ブロック連続の当たりは実機のデータカウンターと同じく合計R（30）で見せる。
           spins: spinsSinceLastHit,
-          rounds: outcome.rounds,
+          rounds: outcome.displayRounds,
           context: fromState.isBaseState ? "normal" : "rush",
           streakId: currentStreakId,
         });
 
         showResultEffect({
-          line1: `大当たり＜${outcome.rounds}R獲得＞${outcome.resultNote ? `（${outcome.resultNote}）` : ""}`,
+          line1: `大当たり＜${outcome.displayRounds}R獲得＞${outcome.resultNote ? `（${outcome.resultNote}）` : ""}`,
           ballsLine: `+${PachiSim.format.ball(outcome.balls)}`,
           line2,
           kind: "hit",

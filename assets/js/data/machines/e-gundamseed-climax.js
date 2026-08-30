@@ -39,6 +39,11 @@
 // （経緯はpf-gundam-uc.jsのコメント参照）。上のコメント中の「約1500個」等は
 // スペック表に載っていた払い出し個数の表記のまま残している。
 //
+// 【10R×2・10R×3はdisplayRoundsで合計R数を見せる】
+// roundsはブロック単位の10のまま（7の出し分け判定に使う内部値のため）にし、
+// データランプ・演出欄の「○R獲得」表示だけは合計R数（20/30）で見せたいので、
+// displayRoundsで別に持たせている（詳細はcore/stateEngine.jsのコメント参照）。
+//
 // 導入日: 2026年8月3日。型式名・検定番号はスペック表のとおり（2機種構成:
 // 6P0051 / 610473）。
 window.PachiSim = window.PachiSim || {};
@@ -114,6 +119,7 @@ PachiSim.machineRegistry.register({
           {
             weight: 0.49,
             rounds: 10,
+            displayRounds: 20,
             balls: 2800,
             nextState: "rush",
             tag: "climaxToRush",
@@ -122,6 +128,7 @@ PachiSim.machineRegistry.register({
           {
             weight: 0.51,
             rounds: 10,
+            displayRounds: 30,
             balls: 4200,
             nextState: "climax",
             tag: "climaxContinue",
@@ -153,6 +160,7 @@ PachiSim.machineRegistry.register({
           {
             weight: 0.47,
             rounds: 10,
+            displayRounds: 20,
             balls: 2800,
             nextState: "climax",
             tag: "rushToClimax",
@@ -161,6 +169,7 @@ PachiSim.machineRegistry.register({
           {
             weight: 0.03,
             rounds: 10,
+            displayRounds: 30,
             balls: 4200,
             nextState: "climax",
             tag: "rushToClimaxMega",

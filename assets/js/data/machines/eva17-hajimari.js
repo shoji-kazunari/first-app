@@ -27,6 +27,9 @@
 // 全機種を実獲得基準へ揃えることにしたため、ここも払い出し基準から切り替えた
 // （経緯はpf-gundam-uc.jsのコメント参照）。8Rは「8R×2」「8R×4」で連続消化する
 // 機種のため、balls側は実獲得の1120個を2倍・4倍した2240個・4480個にしてある。
+// roundsはブロック単位の8のまま（7の出し分け判定に使う内部値のため）。
+// データランプ・演出欄には合計R数（16/32）で見せたいので、displayRoundsで
+// 別に持たせている（詳細はcore/stateEngine.jsのコメント参照）。
 window.PachiSim = window.PachiSim || {};
 
 PachiSim.machineRegistry.register({
@@ -95,14 +98,23 @@ PachiSim.machineRegistry.register({
       isRushEntry: false,
       onHit: {
         outcomes: [
-          { weight: 0.995, rounds: 8, balls: 2240, nextState: "st", tag: "chanceToSt" },
+          {
+            weight: 0.995,
+            rounds: 8,
+            displayRounds: 16,
+            balls: 2240,
+            nextState: "st",
+            tag: "chanceToSt",
+            resultNote: "8R×2",
+          },
           {
             weight: 0.005,
             rounds: 8,
+            displayRounds: 32,
             balls: 4480,
             nextState: "st",
             tag: "chanceToStMega",
-            resultNote: "LT成立",
+            resultNote: "8R×4・LT成立",
           },
         ],
       },
@@ -122,14 +134,23 @@ PachiSim.machineRegistry.register({
       isRushEntry: true,
       onHit: {
         outcomes: [
-          { weight: 0.995, rounds: 8, balls: 2240, nextState: "st", tag: "stContinue" },
+          {
+            weight: 0.995,
+            rounds: 8,
+            displayRounds: 16,
+            balls: 2240,
+            nextState: "st",
+            tag: "stContinue",
+            resultNote: "8R×2",
+          },
           {
             weight: 0.005,
             rounds: 8,
+            displayRounds: 32,
             balls: 4480,
             nextState: "st",
             tag: "ltEntry",
-            resultNote: "LT成立",
+            resultNote: "8R×4・LT成立",
           },
         ],
       },
