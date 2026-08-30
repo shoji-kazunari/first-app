@@ -7,7 +7,7 @@ window.PachiSim.ui = window.PachiSim.ui || {};
 PachiSim.ui.renderAdSlot = function (containerEl, label) {
   containerEl.classList.add("ad-slot");
   containerEl.innerHTML = `
-    <p class="ad-slot__label">広告${label ? `（${label}）` : ""}</p>
+    <p class="ad-slot__label">広告${label ? `（<span class="heading-value">${label}</span>）` : ""}</p>
     <p class="ad-slot__placeholder">広告枠（準備中）</p>
   `;
 };
