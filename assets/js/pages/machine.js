@@ -536,7 +536,6 @@
 
       const rng = PachiSim.rng.createDefaultRng();
       const result = PachiSim.engine.resolveAction(session, machine, rng);
-      const speedMode = currentSpeedMode();
 
       renderCurrentState();
       renderDataLampLive();
@@ -573,6 +572,12 @@
       // 「1保留の消化＝1つの演出が完結する」感覚を出すため、数字が止まりきった後に
       // SETTLE_MS分だけ結果を見せる間を必ず取ってから、次の保留の消化（バースト/シフト）へ進む。
       function playReelFor(roll) {
+        // STOP中に速度を変えてから再開した場合にも追従するよう、
+        // handleAction開始時点ではなくここで毎回いまの速度を読み直す
+        // （以前はhandleAction冒頭で一度だけ読んだ値を使っていたため、
+        // 「普通」で回してSTOP→「速い」に変えても、リールの止め方だけ
+        // 「普通」のまま反映されないバグがあった）。
+        const speedMode = currentSpeedMode();
         if (speedMode.id === "instant") return undefined;
 
         // 数字が止まりきった後に結果を見せておく間。「普通」のように1回転の予算が
