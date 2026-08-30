@@ -75,7 +75,11 @@
   grid-template-rows: 18px 1fr;
   gap: 4px 2px;
   background: #0a0b0d;
-  border: 1px solid var(--color-border);
+  /* データランプは実機のLED風表示として、ページが白基調になった後も
+     このパネルだけダークのままにしている。囲み枠は共通の--color-border
+     （白基調用）を使うと暗い背景に対して見えなくなるため、ここだけ
+     旧ダークテーマの値を直接使う。 */
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-md);
   padding: var(--space-3) var(--space-2) var(--space-2);
   overflow-x: auto;
@@ -161,7 +165,7 @@
 
 .data-lamp__collabel {
   font-size: 0.6rem;
-  color: var(--color-text-muted);
+  color: var(--screen-text-muted);
 }
 
 /* 本日の成績 */
@@ -270,14 +274,14 @@
 
 .sim-state__label {
   font-size: 0.7rem;
-  color: var(--color-text-muted);
+  color: var(--screen-text-muted);
   letter-spacing: 0.08em;
 }
 
 .sim-state__value {
   font-size: 1.3rem;
   font-weight: 700;
-  color: var(--color-accent-strong);
+  color: var(--screen-accent-strong);
 }
 
 /* 今いる状態の当たり確率。状態名より一段落とす（主役は状態名の方）。
@@ -289,14 +293,14 @@
   font-size: 0.78rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  color: var(--color-accent);
+  color: var(--screen-accent);
 }
 
 .spin-counter {
   font-size: 2.4rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  color: var(--color-accent-strong);
+  color: var(--screen-accent-strong);
 }
 
 .investment-display {
@@ -374,7 +378,7 @@
   position: relative;
   z-index: 1;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #fff6df 0%, var(--color-accent) 60%, #8f6a35 100%);
+  background: radial-gradient(circle at 35% 30%, #fff6df 0%, var(--screen-accent) 60%, #8f6a35 100%);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
   transform: translateY(0) scale(1);
   opacity: 1;
@@ -463,7 +467,7 @@
   font-size: 1rem;
   font-weight: 800;
   letter-spacing: 0.2em;
-  color: var(--color-text-muted);
+  color: var(--screen-text-muted);
   /* bodyのline-height:1.6は比率として継承されるため、指定なしだと
      このあと出てくる大きいspan(2.4rem等)の行の高さが想定よりずっと膨らみ、
      RESULT表示のときだけ枠の高さが変わってボタン位置がずれる原因になっていた。
@@ -474,7 +478,7 @@
 .result-panel__renchan {
   font-size: 1.3rem;
   font-weight: 700;
-  color: var(--color-accent-strong);
+  color: var(--screen-accent-strong);
   line-height: 1.15;
 }
 
@@ -486,7 +490,7 @@
 .result-panel__balls {
   font-size: 1.3rem;
   font-weight: 700;
-  color: var(--color-accent-strong);
+  color: var(--screen-accent-strong);
   line-height: 1.15;
 }
 
@@ -531,7 +535,7 @@
   justify-content: center;
   font-size: 2.4rem;
   font-weight: 800;
-  color: var(--color-text-muted);
+  color: var(--screen-text-muted);
 }
 
 .reel-viewport.is-idle .reel-idle {
@@ -610,7 +614,7 @@
   font-size: 2.4rem;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
-  color: var(--color-text-muted);
+  color: var(--screen-text-muted);
 }
 
 /* 数字の色（枠の色は変えない） */
@@ -677,35 +681,36 @@
 .effect-area__idle {
   font-size: 0.8rem;
   line-height: 1.3;
-  color: var(--color-text-muted);
+  color: var(--screen-text-muted);
 }
 
 .effect-area__title {
   font-size: 0.92rem;
   line-height: 1.3;
   font-weight: 800;
-  color: var(--color-accent-strong);
+  color: var(--screen-accent-strong);
   animation: result-pop 0.32s ease;
 }
 
 .effect-area[data-kind="exhausted"] .effect-area__title {
-  color: var(--color-text-muted);
+  color: var(--screen-text-muted);
 }
 
 /* その当たりで獲得した出玉数。「＋」を付けて増えたことがひと目でわかるようにし、
-   投資収支の色（--color-plus）と揃えて緑にする */
+   緑にする（画面内はダーク配色のまま維持しているため、ページ全体の
+   --color-plusではなく--screen-plusを使う） */
 .effect-area__balls {
   font-size: 0.88rem;
   line-height: 1.3;
   font-weight: 800;
-  color: var(--color-plus);
+  color: var(--screen-plus);
   animation: result-pop 0.32s ease;
 }
 
 .effect-area__sub {
   font-size: 0.72rem;
   line-height: 1.3;
-  color: var(--color-text-muted);
+  color: var(--screen-text-muted);
 }
 
 /* 行き先がRUSH・STのときの「次回：〜」。通常・時短へ戻るときはただの案内だが、
@@ -744,7 +749,7 @@
   border-radius: var(--radius-lg);
   border: 1px solid rgba(212, 175, 122, 0.5);
   background: linear-gradient(180deg, #3a2f22 0%, #1a1512 100%);
-  color: var(--color-accent-strong);
+  color: var(--screen-accent-strong);
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
 }
 
@@ -769,7 +774,7 @@
 .action-button[data-mode="result"] {
   border-color: rgba(111, 217, 143, 0.7);
   background: linear-gradient(180deg, #1f3a28 0%, #12211a 100%);
-  color: var(--color-plus);
+  color: var(--screen-plus);
 }
 
 /* 速度選択: 「普通/速い/当たりまで」を3つ並べ、選択中がひと目でわかるようにする。
@@ -819,7 +824,7 @@
 .speed-toggle__btn.is-active {
   border-color: rgba(212, 175, 122, 0.7);
   background: linear-gradient(180deg, #2a231c 0%, #1a1512 100%);
-  color: var(--color-accent-strong);
+  color: var(--screen-accent-strong);
 }
 
 .machine-error {

@@ -120,13 +120,13 @@
 }
 
 .machine-link:hover {
-  background: #262b36;
+  background: #e9e4d6;
   border-color: var(--color-accent);
 }
 
 /* 押した瞬間に沈む。タップが届いたことが分かるようにする */
 .machine-link:active {
-  background: #2e3441;
+  background: #e0d9c4;
   border-color: var(--color-accent-strong);
 }
 
