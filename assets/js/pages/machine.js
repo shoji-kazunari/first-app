@@ -81,6 +81,11 @@
     let chargedThisAction = 0;
     let activePlayback = null; // 実行中のplayback制御（pause/resumeで使用）
     let pendingStart = null; // 保留チャージ中にSTOPされた場合、再開時に実行する消化開始処理
+    // 当たった数字が揃った直後、通常へ戻ってRESULT（連チャン数・出玉まとめ）を出す
+    // 直前で止めている間の{renchan, balls}。揃った瞬間にRESULTへ差し替わると
+    // 「当たったこと」を確認する間もないため、ボタンを押すまで待つ
+    // （finishAction/action button クリックハンドラ参照）。
+    let pendingResultPanel = null;
     let currentStreakId = null; // 進行中の「一撃」を識別するID（データランプの連チャンまとめ用）
     let streakSeq = 0;
     // Date.now()だけだと同一ミリ秒内の連続実行でID衝突する可能性があるため、
@@ -379,12 +384,14 @@
       return CALM_NEXT_THEMES.indexOf(state.theme) < 0;
     }
 
-    // line1: 「大当たり＜4R獲得＞」のようなメイン結果、line2: 「次回：最終決戦」のような行き先
-    function showResultEffect({ line1, line2, kind, nextEmphasis }) {
+    // line1: 「大当たり＜4R獲得＞」のようなメイン結果、ballsLine: 「+1,500玉」のような
+    // 今回の獲得出玉（当たり以外では省略）、line2: 「次回：最終決戦」のような行き先
+    function showResultEffect({ line1, ballsLine, line2, kind, nextEmphasis }) {
       els.effectArea.dataset.kind = kind;
       els.effectArea.dataset.nextEmphasis = nextEmphasis ? "on" : "off";
       els.effectArea.innerHTML = `
         <p class="effect-area__title">${line1}</p>
+        ${ballsLine ? `<p class="effect-area__balls">${ballsLine}</p>` : ""}
         ${line2 ? `<p class="effect-area__sub">${line2}</p>` : ""}
       `;
     }
@@ -783,6 +790,7 @@
 
         showResultEffect({
           line1: `大当たり＜${outcome.rounds}R獲得＞${outcome.resultNote ? `（${outcome.resultNote}）` : ""}`,
+          ballsLine: `+${PachiSim.format.ball(outcome.balls)}`,
           line2,
           kind: "hit",
           nextEmphasis,
@@ -809,14 +817,7 @@
         // 虚構推理の裏モードがこれにあたる。2R・300玉を得たあと左打ちで20回転
         // 回して外れると、玉を減らし続けた末に「1連 300玉獲得」が出る。
         // 20回転前の当たりを、負けた直後に祝う形になってしまう。
-        //
-        // 当たった瞬間に通常へ戻る構成（ユニコーンの電サポなし当たり）は対象外。
-        // あちらはRESULTがその当たり自体と同時に出るので、食い違いは起きない。
-        // 記録側（本日の成績・出玉ランキング）はどちらもこれまでどおり残す。
         const endedByLeftHandMiss = outcome.type !== "hit" && fromState.accruesInvestment;
-        if (!endedByLeftHandMiss) {
-          showResultPanel(renchan, balls);
-        }
         // Firestoreへの書き込みが実際に終わってから再取得したいので、
         // 再描画は完了後に行う（失敗してもプレイ自体は止めない）。
         PachiSim.rankingService
@@ -830,6 +831,29 @@
           })
           .then(() => renderMachineRanking())
           .catch(() => {});
+
+        if (!endedByLeftHandMiss && outcome.type === "hit") {
+          // 数字が揃った瞬間にRESULT（連チャン数・出玉まとめ）へ差し替わると、
+          // 当たった（数字が揃った）ことを確認する間もなく消えてしまう。揃った
+          // リールを見せたまま止め、ボタンを「RESULT」に変えて、押されてから
+          // showResultPanelへ切り替える（actionButtonのクリックハンドラ参照）。
+          // データ・統計・ランキング送信はここで確定済みなので、見た目の
+          // 切り替えだけを待たせている。
+          pendingResultPanel = { renchan, balls };
+          els.actionButton.textContent = "RESULT";
+          els.actionButton.dataset.mode = "result";
+          PachiSim.statsStore.save(slug, stats);
+          // isAnimatingはtrueのまま維持する。renderCurrentStateは
+          // isAnimating中はactionButtonの表示を上書きしないので、
+          // 上で設定した「RESULT」表示がそのまま保たれる
+          // （速度・リセットボタンも当たりの余韻の間はロックされたままになる）。
+          renderAll({ freezeStateDisplay: true });
+          return;
+        }
+
+        if (!endedByLeftHandMiss) {
+          showResultPanel(renchan, balls);
+        }
       }
 
       PachiSim.statsStore.save(slug, stats);
@@ -844,6 +868,18 @@
     }
 
     els.actionButton.addEventListener("click", () => {
+      if (pendingResultPanel) {
+        // 揃った数字を確認してもらったあとの「RESULT」タップ。
+        // ここでようやくRESULT（連チャン数・出玉まとめ）へ切り替える。
+        const { renchan, balls } = pendingResultPanel;
+        pendingResultPanel = null;
+        showResultPanel(renchan, balls);
+        isAnimating = false;
+        isPaused = false;
+        activePlayback = null;
+        renderAll({ freezeStateDisplay: true });
+        return;
+      }
       if (isAnimating && !isPaused) {
         // 抽選中 -> その場で一時停止する（結果を先読み・スキップしない）
         if (activePlayback) activePlayback.pause();

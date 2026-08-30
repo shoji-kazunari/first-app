@@ -652,15 +652,15 @@
 
 /* 演出欄: シミュレーションエリア下端いっぱいに広がる帯として置く（角丸は付けない。
    simulation-area自体の角丸だけがカード全体の輪郭になる）。
-   「抽選中」「大当たり＜○R獲得＞＋次回：〜」の最大2行を常に確保して、
+   「抽選中」「大当たり＜○R獲得＞＋出玉＋次回：〜」の最大3行を常に確保して、
    表示内容が変わっても帯の高さが変わらないようにする */
 .effect-area {
   width: 100%;
   /* min-heightではなくheight固定にする。bodyのline-height:1.6が
      中のテキストに継承されるため、内容の行数によって高さが変わり
-     ボタンの位置がズレてしまう問題があった（テキストなし/1行/2行を
+     ボタンの位置がズレてしまう問題があった（テキストなし/1行/2行/3行を
      すべて同じ高さに強制する）。 */
-  height: 60px;
+  height: 80px;
   overflow: hidden;
   border-top: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(0, 0, 0, 0.28);
@@ -690,6 +690,16 @@
 
 .effect-area[data-kind="exhausted"] .effect-area__title {
   color: var(--color-text-muted);
+}
+
+/* その当たりで獲得した出玉数。「＋」を付けて増えたことがひと目でわかるようにし、
+   投資収支の色（--color-plus）と揃えて緑にする */
+.effect-area__balls {
+  font-size: 0.88rem;
+  line-height: 1.3;
+  font-weight: 800;
+  color: var(--color-plus);
+  animation: result-pop 0.32s ease;
 }
 
 .effect-area__sub {
@@ -752,6 +762,14 @@
   border-color: rgba(255, 120, 120, 0.6);
   background: linear-gradient(180deg, #4a2323 0%, #2a1414 100%);
   color: #ffbdbd;
+}
+
+/* 当たった数字を見せたまま一旦止めている間だけRESULT表示になる。
+   次に進む先があると分かるよう、出玉表示と同じ緑系にする */
+.action-button[data-mode="result"] {
+  border-color: rgba(111, 217, 143, 0.7);
+  background: linear-gradient(180deg, #1f3a28 0%, #12211a 100%);
+  color: var(--color-plus);
 }
 
 /* 速度選択: 「普通/速い/当たりまで」を3つ並べ、選択中がひと目でわかるようにする。
