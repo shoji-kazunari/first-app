@@ -32,6 +32,13 @@
 // SEEDチャージは「通常時大当たりの一部がそう見える」という演出上の呼び分けとして
 // 扱う（機械的には48%/52%の2パターンに集約）。
 //
+// 【出玉は「実獲得個数」を採用（払い出し基準からの変更）】
+// スペック表は払い出し個数と実獲得個数の両方を載せている（10R: 約1500個/実獲得1400個、
+// 2R: 約300個/実獲得280個）。全機種を実獲得基準へ揃えることにしたため、payoutTable・
+// 各onHit.outcomesのballsは実獲得個数（1400/2800/4200）で入れてある
+// （経緯はpf-gundam-uc.jsのコメント参照）。上のコメント中の「約1500個」等は
+// スペック表に載っていた払い出し個数の表記のまま残している。
+//
 // 導入日: 2026年8月3日。型式名・検定番号はスペック表のとおり（2機種構成:
 // 6P0051 / 610473）。
 window.PachiSim = window.PachiSim || {};
@@ -64,9 +71,9 @@ PachiSim.machineRegistry.register({
     "ST（FULLBURST RUSH CLIMAX/FULLBURST RUSH）：130回転",
     "RUSH（LT）突入率：約52%（通常時の大当たりのうち、CLIMAXへ直行するのが約52%）",
     "RUSH（LT）継続率：約75%",
-    "通常時の大当たり振り分け（ヘソ入賞時）：10R・約1500個で時短なし（通常のまま）が約48%、10R・約1500個でFULLBURST RUSH CLIMAX(ST130回)が約52%",
-    "FULLBURST RUSH CLIMAX中の当選振り分け（電チュー入賞時）：10R×2・約3000個でFULLBURST RUSHへが約49%、10R×3・約4500個でCLIMAX継続が約51%",
-    "FULLBURST RUSH中の当選振り分け（電チュー入賞時）：10R・約1500個でRUSH継続が約50%、10R×2・約3000個でCLIMAX昇格が約47%、10R×3・約4500個でCLIMAX昇格が約3%",
+    "通常時の大当たり振り分け（ヘソ入賞時）：10R・実獲得約1400個で時短なし（通常のまま）が約48%、10R・実獲得約1400個でFULLBURST RUSH CLIMAX(ST130回)が約52%",
+    "FULLBURST RUSH CLIMAX中の当選振り分け（電チュー入賞時）：10R×2・実獲得約2800個でFULLBURST RUSHへが約49%、10R×3・実獲得約4200個でCLIMAX継続が約51%",
+    "FULLBURST RUSH中の当選振り分け（電チュー入賞時）：10R・実獲得約1400個でRUSH継続が約50%、10R×2・実獲得約2800個でCLIMAX昇格が約47%、10R×3・実獲得約4200個でCLIMAX昇格が約3%",
     "FULLBURST RUSH CLIMAX・FULLBURST RUSHとも130回転を全弾外すと通常へ",
   ],
 
@@ -84,8 +91,8 @@ PachiSim.machineRegistry.register({
       isRushEntry: false,
       onHit: {
         outcomes: [
-          { weight: 0.48, rounds: 10, balls: 1500, nextState: "normal", tag: "toNormal" },
-          { weight: 0.52, rounds: 10, balls: 1500, nextState: "climax", tag: "toClimax" },
+          { weight: 0.48, rounds: 10, balls: 1400, nextState: "normal", tag: "toNormal" },
+          { weight: 0.52, rounds: 10, balls: 1400, nextState: "climax", tag: "toClimax" },
         ],
       },
       onExhausted: null,
@@ -107,7 +114,7 @@ PachiSim.machineRegistry.register({
           {
             weight: 0.49,
             rounds: 10,
-            balls: 3000,
+            balls: 2800,
             nextState: "rush",
             tag: "climaxToRush",
             resultNote: "10R×2",
@@ -115,7 +122,7 @@ PachiSim.machineRegistry.register({
           {
             weight: 0.51,
             rounds: 10,
-            balls: 4500,
+            balls: 4200,
             nextState: "climax",
             tag: "climaxContinue",
             resultNote: "10R×3",
@@ -142,11 +149,11 @@ PachiSim.machineRegistry.register({
       isRushEntry: true,
       onHit: {
         outcomes: [
-          { weight: 0.5, rounds: 10, balls: 1500, nextState: "rush", tag: "rushContinue" },
+          { weight: 0.5, rounds: 10, balls: 1400, nextState: "rush", tag: "rushContinue" },
           {
             weight: 0.47,
             rounds: 10,
-            balls: 3000,
+            balls: 2800,
             nextState: "climax",
             tag: "rushToClimax",
             resultNote: "10R×2",
@@ -154,7 +161,7 @@ PachiSim.machineRegistry.register({
           {
             weight: 0.03,
             rounds: 10,
-            balls: 4500,
+            balls: 4200,
             nextState: "climax",
             tag: "rushToClimaxMega",
             resultNote: "10R×3",
@@ -167,7 +174,7 @@ PachiSim.machineRegistry.register({
 
   distributionTables: {},
 
-  // 10Rには1500/3000/4500個の3種類があるため、代表値のみ置き、実際の出玉は
+  // 10Rには1400/2800/4200個の3種類があるため、代表値のみ置き、実際の出玉は
   // 各onHit.outcomesのballsで上書きする。
-  payoutTable: { 10: 1500 },
+  payoutTable: { 10: 1400 },
 });

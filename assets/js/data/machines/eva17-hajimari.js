@@ -20,6 +20,13 @@
 //
 // 上記以外の基本値（確率1/399.9・1/99.6、ST157回転、時短100回転）は
 // 複数の情報源で一致しており確定値として扱っている。
+//
+// 【出玉は「実獲得個数」を採用（払い出し基準からの変更）】
+// 1geki.jpは払い出し個数と実獲得個数の両方を載せている
+// （10R: 約1500個/実獲得1400個、8R: 約1200個/実獲得1120個、2R: 約300個/実獲得280個）。
+// 全機種を実獲得基準へ揃えることにしたため、ここも払い出し基準から切り替えた
+// （経緯はpf-gundam-uc.jsのコメント参照）。8Rは「8R×2」「8R×4」で連続消化する
+// 機種のため、balls側は実獲得の1120個を2倍・4倍した2240個・4480個にしてある。
 window.PachiSim = window.PachiSim || {};
 
 PachiSim.machineRegistry.register({
@@ -40,9 +47,9 @@ PachiSim.machineRegistry.register({
     "ST（インパクトモード）中大当たり確率：約1/99.6",
     "ST：157回転（1回でも当選すれば再びST継続。継続率は約80%）",
     "時短（チャンスタイム）：100回転（大当たり確率は通常時と同じ約1/399.9）",
-    "通常時の大当たり振り分け（ヘソ入賞時）：2R・約300個でST直行が約50.0%、2R・約300個で時短が約49.5%、10R・約1500個でST直行が約0.5%",
+    "通常時の大当たり振り分け（ヘソ入賞時）：2R・実獲得約280個でST直行が約50.0%、2R・実獲得約280個で時短が約49.5%、10R・実獲得約1400個でST直行が約0.5%",
     "時短（チャンスタイム）中に当選するとST（インパクトモード）へ",
-    "ST・時短中の当選振り分け（電チュー入賞時）：8R・約2400個が約99.5%、8R・約4800個（LT成立）が約0.5%",
+    "ST・時短中の当選振り分け（電チュー入賞時）：8R・実獲得約2240個が約99.5%、8R・実獲得約4480個（LT成立）が約0.5%",
     "STを全弾外すと通常へ、時短（チャンスタイム）を全弾外すと通常へ",
   ],
 
@@ -60,12 +67,12 @@ PachiSim.machineRegistry.register({
       isRushEntry: false,
       onHit: {
         outcomes: [
-          { weight: 0.5, rounds: 2, balls: 300, nextState: "st", tag: "toStDirect" },
-          { weight: 0.495, rounds: 2, balls: 300, nextState: "chanceTime", tag: "toChanceTime" },
+          { weight: 0.5, rounds: 2, balls: 280, nextState: "st", tag: "toStDirect" },
+          { weight: 0.495, rounds: 2, balls: 280, nextState: "chanceTime", tag: "toChanceTime" },
           {
             weight: 0.005,
             rounds: 10,
-            balls: 1500,
+            balls: 1400,
             nextState: "st",
             tag: "toStDirectMega",
             resultNote: "全回転",
@@ -88,11 +95,11 @@ PachiSim.machineRegistry.register({
       isRushEntry: false,
       onHit: {
         outcomes: [
-          { weight: 0.995, rounds: 8, balls: 2400, nextState: "st", tag: "chanceToSt" },
+          { weight: 0.995, rounds: 8, balls: 2240, nextState: "st", tag: "chanceToSt" },
           {
             weight: 0.005,
             rounds: 8,
-            balls: 4800,
+            balls: 4480,
             nextState: "st",
             tag: "chanceToStMega",
             resultNote: "LT成立",
@@ -115,11 +122,11 @@ PachiSim.machineRegistry.register({
       isRushEntry: true,
       onHit: {
         outcomes: [
-          { weight: 0.995, rounds: 8, balls: 2400, nextState: "st", tag: "stContinue" },
+          { weight: 0.995, rounds: 8, balls: 2240, nextState: "st", tag: "stContinue" },
           {
             weight: 0.005,
             rounds: 8,
-            balls: 4800,
+            balls: 4480,
             nextState: "st",
             tag: "ltEntry",
             resultNote: "LT成立",
@@ -132,7 +139,7 @@ PachiSim.machineRegistry.register({
 
   distributionTables: {},
 
-  // ST・時短中の8Rには通常(2400個)とLT成立(4800個)の2種類があるため、
+  // ST・時短中の8Rには通常(2240個)とLT成立(4480個)の2種類があるため、
   // ここには代表値のみ置き、実際の出玉は各onHit.outcomesのballsで上書きする。
-  payoutTable: { 2: 300, 8: 2400, 10: 1500 },
+  payoutTable: { 2: 280, 8: 2240, 10: 1400 },
 });

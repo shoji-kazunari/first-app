@@ -3,14 +3,20 @@
 // 情報源: 1geki.jp（https://1geki.jp/pachinko/e_kyokousuiri/）。通常時・裏モード・
 // 鋼人攻略戦の3状態は、円グラフ画像・テキスト仕様表を直接確認した実数値。
 //
+// 【出玉は「実獲得個数」を採用（払い出し基準からの変更）】
+// 1geki.jpは払い出し個数と実獲得個数の両方を載せている（10R: 約1500個/実獲得1400個、
+// 2R: 約300個/実獲得280個）。全機種を実獲得基準へ揃えることにしたため、以下の
+// 「(約300個)」等の表記も含め、払い出し基準から実獲得基準へ切り替えた
+// （経緯はpf-gundam-uc.jsのコメント参照）。
+//
 // ヘソ入賞時（特図1・通常時）の大当たり振り分け:
-//   ・2R大当り(約300個)→鋼人攻略戦(ST36回+残保留)：50.5%
-//   ・2R大当り(約300個)→裏モード(20回転)：49.5%
+//   ・2R大当り(実獲得約280個)→鋼人攻略戦(ST36回+残保留)：50.5%
+//   ・2R大当り(実獲得約280個)→裏モード(20回転)：49.5%
 //   （※「知恵の神BONUS」「怪異BONUS」「ファイナルチャンス」は上記の内訳を見せる
 //   　演出上の呼び分けであり、最終的な振り分け先はこの2択のみ）
 // 電チュー入賞時（特図2・鋼人攻略戦中）:
-//   ・10R大当り(約1500個)→鋼人攻略戦継続：50.0%
-//   ・10R大当り(約1500個)→琴子のご褒美RUSH(お願い玉4個)：50.0%
+//   ・10R大当り(実獲得約1400個)→鋼人攻略戦継続：50.0%
+//   ・10R大当り(実獲得約1400個)→琴子のご褒美RUSH(お願い玉4個)：50.0%
 //
 // 琴子のご褒美RUSH・裏ご褒美RUSHについては、1geki.jpに当選確率の明記が無く、
 // 別サイトの記述をもとに補って実装を試みたが、最終的にユーザー指示により実機の
@@ -20,8 +26,8 @@
 //     発生しなかった回転は素通り（保留は消化するが、何も起きず・お願い玉も減らない）。
 //   ・リーチが発生した回だけ25%で当たり・75%でハズレてお願い玉を1個消費。
 //   ・保留の色変化予告は無し（このRUSH中は常に無色）。
-//   ・お願い玉が残り2個以下での当たり: 残り＋4個で琴子のご褒美RUSH継続（1500個）。
-//   ・お願い玉が残り3個以上での当たり: 3000個。82%で琴子のご褒美RUSHへ戻る、
+//   ・お願い玉が残り2個以下での当たり: 残り＋4個で琴子のご褒美RUSH継続（実獲得1400個）。
+//   ・お願い玉が残り3個以上での当たり: 実獲得2800個。82%で琴子のご褒美RUSHへ戻る、
 //     18%でお願い玉がVストック化し裏ご褒美RUSHへ。※82/18の比率は1geki.jp由来の
 //     実機データをそのまま採用。
 //     このときの次のRUSHは、どちらへ行っても【お願い玉が無制限】になる
@@ -35,8 +41,8 @@
 //     依頼者の指示による仕様変更。変更前は3個以上でも4個固定だった
 //     （平均連チャン2.32回 → 4.80回）。
 //   ・裏ご褒美RUSHは常にストック4個固定（持ち越し無し）。抽選方法は琴子のご褒美RUSHと
-//     同じ（1/11.6でリーチ→25%/75%）。87%で3000個、13%で4500個。さらに4500個側は
-//     「13%で+1500個」を成功する限り繰り返し上乗せするループボーナス付き。
+//     同じ（1/11.6でリーチ→25%/75%）。87%で実獲得2800個、13%で実獲得4200個。
+//     さらに4200個側は「13%で+1400個」を成功する限り繰り返し上乗せするループボーナス付き。
 window.PachiSim = window.PachiSim || {};
 
 // 1ファイル1機種。IIFEで包み、共通の振り分け定数がグローバルへ漏れないようにする。
@@ -49,7 +55,7 @@ window.PachiSim = window.PachiSim || {};
     {
       weight: 0.87,
       rounds: 10,
-      balls: 3000,
+      balls: 2800,
       nextState: "uraGohobiRush",
       tag: "uraGohobiContinue",
       stockSet: 4,
@@ -57,13 +63,13 @@ window.PachiSim = window.PachiSim || {};
     {
       weight: 0.13,
       rounds: 10,
-      balls: 4500,
+      balls: 4200,
       nextState: "uraGohobiRush",
       tag: "uraGohobiContinueMega",
       stockSet: 4,
       resultNote: "上乗せ",
-      // 成功する限り13%で+1500個を繰り返し上乗せするループボーナス。
-      bonusLoop: { probability: 0.13, balls: 1500 },
+      // 成功する限り13%で+1400個を繰り返し上乗せするループボーナス。
+      bonusLoop: { probability: 0.13, balls: 1400 },
     },
   ];
 
@@ -85,14 +91,14 @@ window.PachiSim = window.PachiSim || {};
     rules: [
       "通常時大当たり確率：約1/319",
       "鋼人攻略戦の大当たり確率：約1/44",
-      "通常時の大当たり振り分け：2R・約300個で鋼人攻略戦(ST36回+残保留)が50.5%、2R・約300個で裏モード(20回転)が49.5%",
-      "鋼人攻略戦：50%で継続(10R・約1500個)、50%で琴子のご褒美RUSH(お願い玉4個)へ",
+      "通常時の大当たり振り分け：2R・実獲得約280個で鋼人攻略戦(ST36回+残保留)が50.5%、2R・実獲得約280個で裏モード(20回転)が49.5%",
+      "鋼人攻略戦：50%で継続(10R・実獲得約1400個)、50%で琴子のご褒美RUSH(お願い玉4個)へ",
       "裏モード：左打ち（電サポなし）の20回転。回した分だけ玉が減る。当たれば裏ご褒美RUSHへ直行",
       "琴子のご褒美RUSH・裏ご褒美RUSHは固定回転数ではなく「お願い玉」を使うストック制（このシミュレーター独自仕様）。毎回転ではなく約1/11.6でリーチ（当落ジャッジ）が発生し、発生した回だけ25%で当たり・75%で外れてお願い玉を1個消費。0個で終了し通常へ",
-      "琴子のご褒美RUSH中、お願い玉が残り2個以下での当たりは、残り＋4個で継続（約1500個）",
-      "琴子のご褒美RUSH中、お願い玉が残り3個以上での当たりは、次のRUSHのお願い玉が無制限（♾️）になり、次の当たりまで減らない。82%で琴子のご褒美RUSH継続（約3000個）、18%でVストック化し裏ご褒美RUSHへ（約3000個）",
+      "琴子のご褒美RUSH中、お願い玉が残り2個以下での当たりは、残り＋4個で継続（実獲得約1400個）",
+      "琴子のご褒美RUSH中、お願い玉が残り3個以上での当たりは、次のRUSHのお願い玉が無制限（♾️）になり、次の当たりまで減らない。82%で琴子のご褒美RUSH継続（実獲得約2800個）、18%でVストック化し裏ご褒美RUSHへ（実獲得約2800個）",
     "無制限（♾️）中に当たると、そこで無制限は終わり、お願い玉4個で再開する",
-      "裏ご褒美RUSHはストック常に4個固定。87%で継続（約3000個）、13%で継続（約4500個。さらに13%成功ごとに+1500個を上乗せ）",
+      "裏ご褒美RUSHはストック常に4個固定。87%で継続（実獲得約2800個）、13%で継続（実獲得約4200個。さらに13%成功ごとに+1400個を上乗せ）",
     ],
 
     states: {
@@ -109,8 +115,8 @@ window.PachiSim = window.PachiSim || {};
         isRushEntry: false,
         onHit: {
           outcomes: [
-            { weight: 0.505, rounds: 2, balls: 300, nextState: "koujin", tag: "toKoujin" },
-            { weight: 0.495, rounds: 2, balls: 300, nextState: "uraMode", tag: "toUraMode" },
+            { weight: 0.505, rounds: 2, balls: 280, nextState: "koujin", tag: "toKoujin" },
+            { weight: 0.495, rounds: 2, balls: 280, nextState: "uraMode", tag: "toUraMode" },
           ],
         },
         onExhausted: null,
@@ -129,11 +135,11 @@ window.PachiSim = window.PachiSim || {};
         isRushEntry: true,
         onHit: {
           outcomes: [
-            { weight: 0.5, rounds: 10, balls: 1500, nextState: "koujin", tag: "koujinContinue" },
+            { weight: 0.5, rounds: 10, balls: 1400, nextState: "koujin", tag: "koujinContinue" },
             {
               weight: 0.5,
               rounds: 10,
-              balls: 1500,
+              balls: 1400,
               nextState: "kotokoRush",
               tag: "toKotokoRush",
               stockSet: 4,
@@ -164,7 +170,7 @@ window.PachiSim = window.PachiSim || {};
             {
               weight: 0.87,
               rounds: 10,
-              balls: 3000,
+              balls: 2800,
               nextState: "uraGohobiRush",
               tag: "uraModeToUraGohobi",
               stockSet: 4,
@@ -172,12 +178,12 @@ window.PachiSim = window.PachiSim || {};
             {
               weight: 0.13,
               rounds: 10,
-              balls: 4500,
+              balls: 4200,
               nextState: "uraGohobiRush",
               tag: "uraModeToUraGohobiMega",
               stockSet: 4,
               resultNote: "上乗せ",
-              bonusLoop: { probability: 0.13, balls: 1500 },
+              bonusLoop: { probability: 0.13, balls: 1400 },
             },
           ],
         },
@@ -213,7 +219,7 @@ window.PachiSim = window.PachiSim || {};
                 {
                   weight: 1,
                   rounds: 10,
-                  balls: 1500,
+                  balls: 1400,
                   nextState: "kotokoRush",
                   tag: "kotokoContinueLow",
                   stockAdd: 4,
@@ -228,7 +234,7 @@ window.PachiSim = window.PachiSim || {};
                 {
                   weight: 0.82,
                   rounds: 10,
-                  balls: 3000,
+                  balls: 2800,
                   nextState: "kotokoRush",
                   tag: "kotokoContinueHigh",
                   stockUnlimited: true,
@@ -236,7 +242,7 @@ window.PachiSim = window.PachiSim || {};
                 {
                   weight: 0.18,
                   rounds: 10,
-                  balls: 3000,
+                  balls: 2800,
                   nextState: "uraGohobiRush",
                   tag: "kotokoToUraGohobi",
                   stockUnlimited: true,
@@ -252,7 +258,7 @@ window.PachiSim = window.PachiSim || {};
                 {
                   weight: 0.82,
                   rounds: 10,
-                  balls: 3000,
+                  balls: 2800,
                   nextState: "kotokoRush",
                   tag: "kotokoContinueHigh",
                   stockSet: 4,
@@ -260,7 +266,7 @@ window.PachiSim = window.PachiSim || {};
                 {
                   weight: 0.18,
                   rounds: 10,
-                  balls: 3000,
+                  balls: 2800,
                   nextState: "uraGohobiRush",
                   tag: "kotokoToUraGohobi",
                   stockSet: 4,
@@ -312,8 +318,8 @@ window.PachiSim = window.PachiSim || {};
 
     distributionTables: {},
 
-    // 10Rには1500/3000/4500個の3種類があるため、代表値のみ置き、実際の出玉は
+    // 10Rには1400/2800/4200個の3種類があるため、代表値のみ置き、実際の出玉は
     // 各onHit.outcomesのballsで上書きする。
-    payoutTable: { 2: 300, 10: 1500 },
+    payoutTable: { 2: 280, 10: 1400 },
   });
 })();
