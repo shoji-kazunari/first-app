@@ -975,11 +975,13 @@
   });
 })();
 
-// 他機種に左打ちのまま消化しきる状態が無いこと（今回の変更の影響範囲の確認）。
+// 左打ちのまま消化しきる状態（RESULT抑止が効く状態）の一覧を固定し、
+// 新しい機種で同じパターンが増えたときに気づけるようにする
+// （増えること自体は問題ではなく、意図した機種かどうかをここで確認する）。
 (function () {
   const { test, assertEqual } = PachiSimTest;
 
-  test("RESULTの抑止が効くのは、いまのところ虚構推理の裏モードだけ", () => {
+  test("RESULTの抑止が効く状態の一覧", () => {
     const found = [];
     PachiSim.machineRegistry.getAll().forEach((m) => {
       Object.values(m.states).forEach((st) => {
@@ -991,7 +993,7 @@
     });
     assertEqual(
       found.join(", "),
-      "e虚構推理 / 裏モード",
+      "e虚構推理 / 裏モード, eゾン100～ゾンビになるまでにしたい100のこと～ / ハピネスタイム, eゾン100～ゾンビになるまでにしたい100のこと～ / フォーチュンチャンス",
       `想定外の状態にも影響している: ${JSON.stringify(found)}`
     );
   });
