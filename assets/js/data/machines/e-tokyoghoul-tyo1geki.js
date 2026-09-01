@@ -115,6 +115,10 @@ PachiSim.machineRegistry.register({
       mode: "countUp",
       maxAttempts: null,
       probability: 1 / 349.9,
+      // displayProbability: 見出し・現在の状態表示は、この機種の売り文句である
+      // 図柄揃い単体の確率(約1/999)を出す（詳細はファイル冒頭のコメント参照）。
+      // 抽選自体は上のprobability(チャージ込み合算値1/349.9)で行う。
+      displayProbability: 1 / 999,
       actionLabel: "START",
       theme: "normal",
       accruesInvestment: true,
