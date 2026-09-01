@@ -26,7 +26,6 @@ PachiSim.ui.renderAdminAuthBar = function (containerEl, onChange) {
     containerEl.innerHTML = `
       <button class="admin-auth-bar__toggle" type="button">運営ログイン</button>
       <form class="admin-auth-bar__form" hidden>
-        <input type="email" name="email" class="admin-auth-bar__input" placeholder="メールアドレス" autocomplete="username" required>
         <input type="password" name="password" class="admin-auth-bar__input" placeholder="パスワード" autocomplete="current-password" required>
         <button type="submit" class="admin-auth-bar__submit btn btn-secondary btn-small">ログイン</button>
         <p class="admin-auth-bar__error" hidden>ログインに失敗しました。</p>
@@ -42,7 +41,7 @@ PachiSim.ui.renderAdminAuthBar = function (containerEl, onChange) {
       e.preventDefault();
       errorEl.hidden = true;
       try {
-        await PachiSim.fb.login(form.email.value, form.password.value);
+        await PachiSim.fb.loginAsAdmin(form.password.value);
       } catch (err) {
         errorEl.hidden = false;
       }
