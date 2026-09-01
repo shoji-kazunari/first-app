@@ -23,12 +23,22 @@
 // 1/23.8を規定回数ぶん消化する素の計算がスペック表の「素の継続率」注記と
 // 正確に一致する（1-(1-1/23.8)^1≈4.2%、^30≈72.4%、^64≈93.6%）。
 //
-// 【残保留4個の引き戻しは実装していない】
+// 【残保留4個の引き戻しをmaxAttemptsへ組み込む実装（2026-09-02改訂）】
 // スペック表には各状態ごとに「時短N回継続率（素）」「残保留4個継続率（約15.8%）」
 // 「トータル継続率」が個別に注記されており（命の呼吸チャレンジ:4.2%→19.3%、
 // 炎上RUSH:72.4%→76.8%、アドラバースト:93.6%→94.6%）、素の値が上と正確に
-// 一致することを確認済み。残保留4個ぶんの引き戻しは、p-madokamagica3.js等と
-// 同じ理由（stateEngineのresidualAttemptsはonFall専用）で実装していない。
+// 一致することを確認済み。
+//
+// この機種はonFallを使わない規定回数消化型（転落ではなく、規定回数を打ち切ったら
+// 終了するタイプ）なので、「残保留4個」による引き戻しは、転落式のonFall.
+// residualAttemptsのような専用ロジックを組まなくても、maxAttempts自体に4を
+// 足し込むだけで数学的に正確に再現できる（独立試行の合計回数が同じなら、途中で
+// 追加のチャンスを挟んでも最初から回数に含めても成功確率は変わらないため）。
+// 実際に計算式1-(1-1/23.8)^Nへ代入すると、N=5（1+4）で19.3%、N=34（30+4）で
+// 76.8%、N=68（64+4）で94.6%と、公表の「トータル継続率」にすべて一致する。
+// 各状態のmaxAttemptsは本来のST回数+4（残保留分）とし、
+// includesResidualHold: trueを立てて画面の残り回数表示に
+// 「（残保留込み）」と小さく注記する（詳細はmachine.jsのspinCounterText参照）。
 //
 // 【出玉は「実獲得個数」を採用】
 // スペック表の実獲得個数をそのまま使用（9R: 約900個/実獲得810個、
@@ -51,7 +61,7 @@ PachiSim.machineRegistry.register({
   rules: [
     "通常時の図柄揃い確率：1/99.9",
     "命の呼吸チャレンジ・炎上RUSH・アドラバースト中の大当たり確率：共通で約1/23.8",
-    "命の呼吸チャレンジ：ST1回、炎上RUSH：ST30回・継続率約77%（残保留込み。素は約72.4%）、アドラバースト：ST64回・継続率約95%（残保留込み。素は約93.6%）",
+    "命の呼吸チャレンジ：ST1回（残保留4個込みで実質5回）・継続率約19.3%、炎上RUSH：ST30回（残保留込みで実質34回）・継続率約77%、アドラバースト：ST64回（残保留込みで実質68回）・継続率約95%",
     "トータルRUSH突入率：約60%",
     "通常時の大当り振り分け（ヘソ入賞時）：4R・実獲得約360個で命の呼吸チャレンジが49%、4R・実獲得約360個で炎上RUSHが50%、9R・実獲得約810個でアドラバーストが1%",
     "命の呼吸チャレンジ・炎上RUSH中の当選振り分け（電チュー入賞時、共通）：9R・実獲得約810個でアドラバーストが1%、9R・実獲得約810個で炎上RUSH継続が19%、4R・実獲得約360個で炎上RUSH継続が80%",
@@ -99,7 +109,8 @@ PachiSim.machineRegistry.register({
       id: "challenge",
       label: "命の呼吸チャレンジ",
       mode: "countDown",
-      maxAttempts: 1,
+      maxAttempts: 5, // 本来のST1回+残保留4個
+      includesResidualHold: true,
       probability: 1 / 23.8,
       actionLabel: "START",
       theme: "chance",
@@ -141,7 +152,8 @@ PachiSim.machineRegistry.register({
       id: "rush",
       label: "炎上RUSH",
       mode: "countDown",
-      maxAttempts: 30,
+      maxAttempts: 34, // 本来のST30回+残保留4個
+      includesResidualHold: true,
       probability: 1 / 23.8,
       actionLabel: "START",
       theme: "rush",
@@ -169,7 +181,8 @@ PachiSim.machineRegistry.register({
       id: "adlaBurst",
       label: "アドラバースト",
       mode: "countDown",
-      maxAttempts: 64,
+      maxAttempts: 68, // 本来のST64回+残保留4個
+      includesResidualHold: true,
       probability: 1 / 23.8,
       actionLabel: "START",
       theme: "rush",
