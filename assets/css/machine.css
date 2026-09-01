@@ -293,15 +293,38 @@
 }
 
 .spin-counter {
+  /* .simulation-area__bodyのalign-items:centerは各行（flexアイテムである
+     このp自体）をブロック単位で中央寄せするだけで、pの中の複数行そのものを
+     中央揃えにはしない。1行だけのときはpの横幅がその1行ぴったりになるため
+     たまたま中央に見えていたが、.spin-counter__noteで2行目が増えると、
+     幅は依然として長い方の行（「残り34回」）に合わせて決まり、短い2行目は
+     その左端に揃ってしまい中央からずれて見えていた。text-align:centerを
+     明示して行ごとに中央揃えする。 */
+  text-align: center;
   font-size: 2.4rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   color: var(--color-accent-strong);
+  /* bodyのline-height:1.6が比率として継承されると、この大きいフォントサイズでは
+     行の高さが想定よりふくらみ、下に付ける.spin-counter__noteとの間が間延びして
+     見える（.result-panel__titleと同じ原因）。ここで比率を締める。 */
+  line-height: 1.15;
+  /* .spin-counter__note（「（残保留込み）」注記）が付く状態と付かない状態を
+     行き来する機種で、注記の1行ぶんだけ.spin-counter自体の高さが変わり、
+     .simulation-areaの外側までふくらんでSTARTボタンの位置がずれてしまって
+     いた（.simulation-areaのmin-heightを広げる対処は、他の要素の高さに
+     引きずられて確実ではなかった）。注記込みの2行ぶん（2.4rem×1.15の本行＋
+     0.15emの余白＋0.9rem×1.15の注記行 ＝ 約3.93rem）を注記の有無に関わらず
+     常に確保しておくことで、.spin-counter自体の高さを固定する。 */
+  min-height: 4rem;
 }
 
 .spin-counter__note {
+  display: block;
+  margin-top: 0.15em;
   font-size: 0.9rem;
   font-weight: 400;
+  line-height: 1.15;
   color: var(--color-text-muted);
 }
 
