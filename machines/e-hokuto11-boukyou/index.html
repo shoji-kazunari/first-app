@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3957598417529608"
+     crossorigin="anonymous"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>e 北斗の拳11 暴凶星（Sammy） | ギジパチ！</title>
+  <meta name="description" content="e 北斗の拳11 暴凶星のスペックをもとに、初当たり・拳王RUSHをボタン操作で疑似体験できます。">
+  <link rel="canonical" href="https://gijipachi.jp/machines/e-hokuto11-boukyou/">
+  <link rel="stylesheet" href="../../assets/css/base.css">
+  <link rel="stylesheet" href="../../assets/css/machine.css">
+</head>
+<body data-machine-slug="e-hokuto11-boukyou">
+  <header class="site-header">
+    <a href="../../index.html">
+      <img class="site-header__logo" src="../../assets/img/logo-gijipachi-wordmark.png" alt="ギジパチ！ パチンコ疑似実践シミュレーター">
+    </a>
+  </header>
+  <div class="page">
+    <nav class="breadcrumb" aria-label="パンくずリスト">
+      <a href="../../index.html">TOP</a>
+      <span>&gt;</span>
+      <span id="manufacturerCrumb">Sammy</span>
+      <span>&gt;</span>
+      <span id="machineCrumb">e 北斗の拳11 暴凶星</span>
+    </nav>
+
+    <p id="machineError" class="machine-error" hidden></p>
+
+    <main>
+      <header class="machine-header">
+        <h2 id="machineName" class="machine-header__name"></h2>
+        <p id="manufacturerName" class="machine-header__maker"></p>
+      </header>
+
+      <section class="card" aria-label="スペック・ゲームフロー">
+        <details class="rules-details">
+          <summary class="rules-summary">
+            <span class="rules-summary__label">スペック・ゲームフロー</span>
+            <span class="rules-summary__hint">タップで開閉</span>
+          </summary>
+          <ul id="rulesList" class="rules-list"></ul>
+        </details>
+      </section>
+
+      <section class="card" aria-label="データランプ">
+        <div class="card__heading-row">
+          <h3 class="card__heading">データランプ</h3>
+          <button id="resetButton" class="btn btn-secondary btn-small" type="button">リセット</button>
+        </div>
+        <div id="dataLamp"></div>
+      </section>
+
+      <section class="simulation-area" id="simulationArea" data-theme="normal" aria-live="polite">
+        <div class="simulation-area__body">
+          <p class="sim-state">
+            <span class="sim-state__label">現在の状態</span><br>
+            <span id="currentStateLabel" class="sim-state__value">通常</span>
+            <span id="currentStateProbability" class="sim-state__prob"></span>
+          </p>
+          <p id="spinCounter" class="spin-counter">0回転</p>
+          <hr class="sim-divider">
+          <div id="reelDisplay" class="reel-display" aria-hidden="true"></div>
+          <div id="holdQueue" class="hold-queue" aria-hidden="true"></div>
+          <div id="resultPanel" class="result-panel" hidden>
+            <p class="result-panel__title">RESULT</p>
+            <p class="result-panel__renchan"><span id="resultRenchan">0</span>連</p>
+            <p class="result-panel__balls"><span id="resultBalls">0</span>玉獲得</p>
+          </div>
+        </div>
+        <div id="effectArea" class="effect-area" data-kind="idle"></div>
+      </section>
+
+      <p id="investmentDisplay" class="investment-display">投資目安：約0円</p>
+
+      <section class="action-row">
+        <button id="actionButton" class="action-button" type="button">START</button>
+        <div class="speed-toggle-row">
+          <span class="speed-toggle-row__label">速度変更</span>
+          <div class="speed-toggle" role="group" aria-label="抽選速度">
+            <button class="speed-toggle__btn" data-speed-id="normal" type="button">普通</button>
+            <button class="speed-toggle__btn" data-speed-id="fast" type="button">速い</button>
+            <button class="speed-toggle__btn" data-speed-id="instant" type="button">当たりまで</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" aria-label="本日の成績">
+        <h3 class="card__heading">本日の成績</h3>
+        <div id="statsGrid" class="stats-grid"></div>
+      </section>
+
+      <section class="card" aria-label="広告">
+        <div id="adSlot"></div>
+      </section>
+
+      <section class="card" aria-label="関連商品">
+        <h3 class="card__heading">関連商品</h3>
+        <div id="affiliateSection"></div>
+      </section>
+
+      <section class="card" aria-label="出玉ランキング">
+        <h3 class="card__heading"><span id="machineRankingHeading" class="heading-value"></span><br>出玉ランキング</h3>
+        <div id="machineRanking"></div>
+      </section>
+
+      <div id="adminAuthBar" class="admin-auth-bar"></div>
+
+      <footer class="page-footer">
+        <p class="disclaimer">
+          本サイトはパチンコの確率をもとにした疑似シミュレーションです。実際の遊技結果や収支を保証するものではありません。
+        </p>
+        <p class="footer-links"><a href="../../privacy/">プライバシーポリシー</a></p>
+      </footer>
+
+      <p class="back-to-top"><a href="../../index.html" class="btn btn-secondary">トップにもどる</a></p>
+    </main>
+  </div>
+
+  <script type="module" src="../../assets/js/core/firebase.js"></script>
+  <script src="../../assets/js/core/config.js"></script>
+  <script src="../../assets/js/core/analytics.js"></script>
+  <script src="../../assets/js/core/kana.js"></script>
+  <script src="../../assets/js/core/rng.js"></script>
+  <script src="../../assets/js/core/format.js"></script>
+  <script src="../../assets/js/core/holdOmens.js"></script>
+  <script src="../../assets/js/core/reelOmens.js"></script>
+  <script src="../../assets/js/core/stateEngine.js"></script>
+  <script src="../../assets/js/core/streakTracker.js"></script>
+  <script src="../../assets/js/core/statsStore.js"></script>
+  <script src="../../assets/js/core/historyStore.js"></script>
+  <script src="../../assets/js/core/machineValidator.js"></script>
+  <script src="../../assets/js/core/rankingStore.js"></script>
+  <script src="../../assets/js/core/rankingService.js"></script>
+  <script src="../../assets/js/data/registry.js"></script>
+  <script src="../../assets/js/data/machines/e-hokuto11-boukyou.js"></script>
+  <script src="../../assets/js/ui/holdQueue.js"></script>
+  <script src="../../assets/js/ui/reelDisplay.js"></script>
+  <script src="../../assets/js/ui/dataLamp.js"></script>
+  <script src="../../assets/js/ui/adSlot.js"></script>
+  <script src="../../assets/js/ui/affiliateSection.js"></script>
+  <script src="../../assets/js/ui/rankingList.js"></script>
+  <script src="../../assets/js/ui/adminAuth.js"></script>
+  <script src="../../assets/js/pages/machine.js"></script>
+</body>
+</html>
