@@ -813,9 +813,17 @@
           streakId: currentStreakId,
         });
 
+        // balls===0（「STリセット」のような出玉無しの当たり）は、実際にはラウンド
+        // 消化を伴わないので「＜NR獲得＞」という表現が実態と合わない。resultNote
+        // （「STリセット」等）だけを見出しにし、「+0玉」という無意味な行も省く。
         showResultEffect({
-          line1: `大当たり＜${outcome.displayRounds}R獲得＞${outcome.resultNote ? `（${outcome.resultNote}）` : ""}`,
-          ballsLine: `+${PachiSim.format.ball(outcome.balls)}`,
+          line1:
+            outcome.balls === 0
+              ? outcome.resultNote || "継続"
+              : `大当たり＜${outcome.displayRounds}R獲得＞${
+                  outcome.resultNote ? `（${outcome.resultNote}）` : ""
+                }`,
+          ballsLine: outcome.balls === 0 ? undefined : `+${PachiSim.format.ball(outcome.balls)}`,
           line2,
           kind: "hit",
           nextEmphasis,
