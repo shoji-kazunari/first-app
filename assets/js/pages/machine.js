@@ -424,7 +424,6 @@
       let currentSpeedMode = initialSpeedMode;
       let stopped = false;
       let paused = false;
-      let pendingJumpToEnd = false;
       let timer = null;
       let i = 0;
       let phase = "emphasize"; // "emphasize" | "resolve" - 一時停止からの再開先の判定に使う
@@ -485,8 +484,17 @@
         resume: () => {
           if (stopped || !paused) return;
           paused = false;
-          if (pendingJumpToEnd) {
-            pendingJumpToEnd = false;
+          // 再開時にどちらへ進むかは、そのとき現在の速度が「当たりまで」かどうか
+          // （isInstant()）だけで判断する。以前はpendingJumpToEndという専用フラグで
+          // 管理していたが、「setSpeedで当たりまでに切り替えてから一時停止して
+          // 再開」した場合にしかセットされず、「最初から当たりまでで開始し、
+          // 一発ジャンプ用のタイマーが発火する前にSTOPを押して一時停止した」場合は
+          // セットされないままだった。そのため後者のケースだけ再開時に通常の
+          // 1回転ずつの消化にフォールバックしてしまうバグがあった
+          // （当たりまでのつもりが回転数だけ順々に増えるモードになる）。
+          // 現在の速度を直接見れば、どちらの経路で一時停止したかに関わらず
+          // 常に正しく判断できる。
+          if (isInstant()) {
             timer = setTimeout(() => finish(true), 420);
             return;
           }
@@ -501,36 +509,31 @@
           if (stopped) return;
           const wasInstant = isInstant();
           currentSpeedMode = newSpeedMode;
+          // 一時停止中は、ここでタイマーを触らない。resume()が再開の瞬間に
+          // isInstant()を見て一発ジャンプか1回転ずつかを決める。
+          if (paused) return;
           if (isInstant()) {
             // 「当たりまで」へ切り替えた場合は、そこから先を一気にジャンプする
-            if (paused) {
-              pendingJumpToEnd = true;
-            } else {
-              clearTimeout(timer);
-              timer = setTimeout(() => finish(true), 420);
-            }
+            clearTimeout(timer);
+            timer = setTimeout(() => finish(true), 420);
             return;
           }
           if (wasInstant) {
-            // 「当たりまで」から抜けた場合、予約済みの一気ジャンプ（一時停止中に
-            // 予約しただけのpendingJumpToEndも含む）を取り消し、通常の1回転ずつの
-            // 消化に戻す。ここで取り消さないと、後から別の速度に変えても
-            // 直前に仕込んだジャンプタイマーがそのまま発火し、当たりまで飛び
-            // 続けてしまう。
-            pendingJumpToEnd = false;
-            if (!paused) {
-              clearTimeout(timer);
-              const split = tickSplit();
-              if (phase === "emphasize") {
-                timer = setTimeout(stepEmphasize, split.emphasizeMs);
-              } else {
-                timer = setTimeout(stepResolve, split.resolveMs);
-              }
+            // 「当たりまで」から抜けた場合だけ、今スケジュールされているのが
+            // 一発ジャンプ用のタイマーなので、通常の1回転ずつの消化に明示的に
+            // 張り直す必要がある。
+            clearTimeout(timer);
+            const split = tickSplit();
+            if (phase === "emphasize") {
+              timer = setTimeout(stepEmphasize, split.emphasizeMs);
+            } else {
+              timer = setTimeout(stepResolve, split.resolveMs);
             }
             return;
           }
-          // instant以外同士の速度切り替えは、次にスケジュールされるタイマーから
-          // tickSplit()経由で自動的に新しいテンポが反映される
+          // instant以外同士の速度切り替えは、今動いているタイマーはそのまま
+          // 走らせ、次にスケジュールされるタイマーからtickSplit()経由で
+          // 自動的に新しいテンポが反映される。
         },
       };
     }
