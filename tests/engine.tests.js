@@ -520,6 +520,11 @@
     const result = PachiSim.engine.resolveAction(session, machine3, rng);
     assertEqual(result.outcome.balls, 4200 + 1400 + 1400, "4200に2回分の上乗せで7000になるべき");
     assertEqual(result.newSession.stock, 4);
+    assertEqual(
+      result.outcome.displayRounds,
+      30 + 10 + 10,
+      "上乗せのたびdisplayRoundsも伸びるべき（payoutTable[10]=1400に対しbonusLoop.balls=1400なので1回=10R）"
+    );
   });
 
   test("engine(虚構推理): 裏ご褒美RUSHは、ゲートが開くたびにハズレるとお願い玉が1個ずつ減り、0個で終了し通常へ", () => {
