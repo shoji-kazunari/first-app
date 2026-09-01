@@ -300,9 +300,9 @@
     assertTrue(!PachiSim.kana.includesNormalized(machine.name, "まったくちがうご"));
   });
 
-  test("format: 287回転→投資目安は1,000円単位切り上げで18,000円", () => {
+  test("format: yenは端数を四捨五入するだけで、1,000円単位への切り上げはしない", () => {
     const raw = (287 / machine.spinsPer1000Yen) * 1000;
-    assertEqual(PachiSim.format.roundUpTo(raw, 1000), 18000);
+    assertEqual(PachiSim.format.yen(raw), "17,938円");
   });
 
   test("rng: weightedPickは重みの合計内で決定的に選ぶ", () => {

@@ -14,11 +14,6 @@ PachiSim.format = (function () {
     return Math.round(n).toLocaleString("ja-JP");
   }
 
-  function roundUpTo(n, unit) {
-    if (unit <= 0) return n;
-    return Math.ceil(n / unit) * unit;
-  }
-
   function percent(p, digits = 1) {
     return `${(p * 100).toFixed(digits)}%`;
   }
@@ -43,5 +38,5 @@ PachiSim.format = (function () {
     )}:${pad(d.getMinutes())}`;
   }
 
-  return { yen, ball, number, roundUpTo, percent, probabilityFraction, dateTimeLabel };
+  return { yen, ball, number, percent, probabilityFraction, dateTimeLabel };
 })();

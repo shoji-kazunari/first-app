@@ -142,9 +142,12 @@
       return Math.max(240, Math.min(700, Math.round(speedMode.tickMs * 0.55)));
     }
 
+    // 以前は1,000円単位で切り上げていたが、リセット直後の数回転でも「もう1,000円
+    // 使った」と表示されてしまい実感と合わなかった（例: 11回転・spinsPer1000Yen=16の
+    // 台で実際は687.5円のところ、切り上げで1,000円と表示されていた）。実額をそのまま
+    // 返す（画面表示側のformat.yenが整数円に丸める）。
     function investmentYen() {
-      const raw = (stats.totalNormalSpins / machine.spinsPer1000Yen) * 1000;
-      return PachiSim.format.roundUpTo(raw, PachiSim.config.investmentRoundingYen);
+      return (stats.totalNormalSpins / machine.spinsPer1000Yen) * 1000;
     }
 
     function balanceYen() {

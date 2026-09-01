@@ -29,9 +29,6 @@ PachiSim.config = {
   // 参照側は必ず machine.yenPerBall ?? config.yenPerBall のように使うこと。
   yenPerBall: 4,
 
-  // 投資額表示の丸め単位（円）
-  investmentRoundingYen: 1000,
-
   // 無限（countUp）状態の暴走防止用の安全上限回転数。
   // 1/199.8の抽選でここまで外れ続ける確率は天文学的に低く、統計結果には影響しない。
   maxSimulatedSpins: 100000,
