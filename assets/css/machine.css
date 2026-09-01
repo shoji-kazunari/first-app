@@ -299,6 +299,12 @@
   color: var(--color-accent-strong);
 }
 
+.spin-counter__note {
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
 .investment-display {
   font-size: 0.78rem;
   color: var(--color-text-muted);

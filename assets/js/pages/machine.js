@@ -226,6 +226,8 @@
       });
     }
 
+    // 戻り値はHTML（els.spinCounter.innerHTMLへ代入する。中身は固定文言＋数値のみで
+    // ユーザー入力を含まないため、そのままinnerHTMLに使ってよい）。
     function spinCounterText(state) {
       if (state.mode === "countUp") {
         return `${PachiSim.format.number(liveCount)}回転`;
@@ -244,7 +246,18 @@
         // 記号なら他の文字と同じ色・同じ書体で並ぶ。
         return `${state.remainingLabel || "残り"} ∞`;
       }
-      return `残り${state.remainingLabel || ""}${remaining}${state.remainingUnit || "回"}`;
+      // includesResidualHold（任意）: 規定回数消化型のRUSHで、「残保留N個」による
+      // 引き戻し分をmaxAttempts自体に組み込んで表現している場合の注記。
+      // 転落式のonFall.residualAttemptsと違い、規定回数消化型は「途中で追加の
+      // チャンスを挟む」のと「最初から回数に含めておく」のが数学的に同じ結果に
+      // なるため（独立試行の合計回数が同じなら成功確率は変わらない）、maxAttempts
+      // に残保留ぶんを直接足し込むだけで正確に再現できる。ただしそれだけだと
+      // 「本来の規定回数より多く表示されている」ことが伝わらないため、小さく
+      // 注記を添える。
+      const note = state.includesResidualHold
+        ? `<span class="spin-counter__note">（残保留込み）</span>`
+        : "";
+      return `残り${state.remainingLabel || ""}${remaining}${state.remainingUnit || "回"}${note}`;
     }
 
     // 抽選が実際に進行中（ポーズしていない）の間だけ、速度・リセットボタンをロックする。
@@ -303,7 +316,7 @@
         // 同じifの中で更新する。
         els.currentStateProbability.textContent = stateProbabilityText(state);
         els.simulationArea.dataset.theme = state.theme;
-        els.spinCounter.textContent = spinCounterText(state);
+        els.spinCounter.innerHTML = spinCounterText(state);
       }
       // アクション中は、貯まった保留の分だけ差し引いた値のままにする
       els.investmentDisplay.innerHTML = investmentDisplayText(chargedThisAction);
@@ -571,7 +584,7 @@
             : result.cap == null
             ? null
             : result.cap - roll.index;
-        els.spinCounter.textContent = spinCounterText(state);
+        els.spinCounter.innerHTML = spinCounterText(state);
         // 玉の消費は保留が貯まった時点でholdQueue.onChargeが反映済み。
         // ここでは消化した回転数ではなく、その貯まった数をそのまま使う。
         els.investmentDisplay.innerHTML = investmentDisplayText(chargedThisAction);
@@ -744,7 +757,7 @@
             : result.cap == null
             ? null
             : result.cap - outcome.attempts;
-        els.spinCounter.textContent = spinCounterText(fromState);
+        els.spinCounter.innerHTML = spinCounterText(fromState);
         holdQueue.reset();
         if (outcome.type === "hit") {
           const plan = PachiSim.reelOmens.decide(
