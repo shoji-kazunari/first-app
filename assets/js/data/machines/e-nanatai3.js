@@ -14,16 +14,34 @@
 //     （内訳は3枚目の円グラフより 2700個55.5%・3900個33.1%・5100個9.8%・
 //     6300個1.5%・7500個0.1%）
 //
-// 【チャレンジとRUSHで同じ振り分け表を使った理由】
-// 1geki.jpはヘソ入賞時（通常）・電チュー入賞時（右打ち中）の2種類の円グラフしか
-// 公開しておらず、「SEVEN RUSHチャレンジ中」専用の振り分け表は存在しない。
-// スペック表の「SEVEN RUSH突入率約40%」は、チャレンジ（時短100回・大当たり確率
-// 約1/196.2）の間に一度でも当選する確率 1-(1-1/196.2)^100≈39.4% とほぼ一致し、
-// 「SEVEN RUSH継続率約75%」は「右打ち中」円グラフの継続側（2.2%+72.8%=75.0%）と
-// 完全一致する。この2つの数値がそれぞれ独立に裏取りできることから、チャレンジ中の
-// 当選も右打ち中と同じ振り分け表を共有していると判断して実装した
-// （チャレンジの「突入率」は、チャレンジ窓の間に当選できたかどうかだけを指し、
-// その当選が振り分け表のどの枝に転んだかは別、という理解）。
+// 【チャレンジ当選は必ずRUSH突入（依頼者の実機プレイ経験による訂正）】
+// 当初はチャレンジ中の当選を「右打ち中」円グラフの表（25.0%で通常へ・2.2%で
+// RUSH継続・72.8%でPERFECT BONUS）にそのまま直結させ、チャレンジの当選が
+// 25.0%の確率で出玉を伴ったまま直接「通常」へ戻る実装にしていた。
+// これは実機のプレイ経験から誤りだと指摘を受けた。実際は
+// 「チャレンジ中の当たりは出玉無しで必ずSEVEN RUSHへ突入し、RUSH突入後の
+// 最初の1回（大当たり確率1/1＝ここもrush状態のprobability:1と整合）で
+// 右打ち中の振り分け表が初めて適用される」という作り。そのため「チャレンジ
+// から出玉を伴って直接通常へ落ちる」というパターンは存在しない
+// （即終了に見える場合も、必ず一度RUSHに突入した上でRUSHの1回目が
+// 「通常へ戻る」側を引いた結果であり、チャレンジ自体の失敗ではない）。
+//
+// 出玉の合計・最終的な移行先の確率分布としては、チャレンジ当選を
+// 「即座に右打ち中の表を適用」しても「0個でRUSHに入り、確率1のRUSHが
+// 直後に同じ表を適用」しても数学的には同じになる（rushの当選確率が1/1で
+// 遅延が無いため）。ただし「RUSH突入」を記録するstreakTracker.rushEnteredは
+// 遷移先状態（toState）のisRushEntry判定のため、以前の実装ではチャレンジの
+// 25.0%枝の遷移先が直接「通常」（isRushEntry:false）になっており、実際には
+// RUSHに入っているのにRUSH突入回数としてカウントされない不具合があった。
+// これを修正し、チャレンジの当選は必ずrushへ遷移する1本の枝にした。
+//
+// stateEngineのonHit.outcomesは出玉が正の数であることが前提のため、
+// 「チャレンジ当選＝出玉無し」をそのまま0個では表現できない
+// （e-kinnikuman.jsのSTリセット等と同じ制約）。実際の出玉はこの直後の
+// RUSH1回目（probability:1で確実に発生）で表現されるため、ここで小さな
+// 代表値を足すと二重計上になる。歪みを最小にするため、この機種で最小の
+// 単位である3R(実獲得420個)をチャレンジ当選→RUSH突入の代表値として採用した
+// （本来より僅かに出玉が多く出る近似だが、影響は小さい）。
 //
 // 【出玉は「実獲得個数」を採用】
 // スペック表の比率（10R: 約1500個/実獲得1400個、3R: 約450個/実獲得420個、
@@ -51,7 +69,8 @@ PachiSim.machineRegistry.register({
     "SEVEN RUSH突入率：約40%（チャレンジ100回の間に当選できる確率）",
     "SEVEN RUSH継続率：約75%",
     "通常時の大当たり振り分け（ヘソ入賞時）：3R・実獲得約420個で必ずSEVEN RUSHチャレンジ(時短100回)へ",
-    "SEVEN RUSHチャレンジ中・SEVEN RUSH中の当選振り分け（電チュー入賞時、共通）：10R・実獲得約1400個で通常へ戻るが25.0%、10R・実獲得約1400個で継続が2.2%、PERFECT BONUS（実獲得約2520〜7000個）で継続が72.8%",
+    "SEVEN RUSHチャレンジ中の当選：出玉無しで必ずSEVEN RUSHへ突入（このシミュレーターでは代表値として3R・実獲得約420個を付与。詳細はコメント）",
+    "SEVEN RUSH中の当選振り分け（電チュー入賞時）：10R・実獲得約1400個で通常へ戻るが25.0%、10R・実獲得約1400個で継続が2.2%、PERFECT BONUS（実獲得約2520〜7000個）で継続が72.8%",
     "SEVEN RUSHチャレンジは規定回数（100回）を全弾外すと通常へ",
   ],
 
@@ -86,47 +105,13 @@ PachiSim.machineRegistry.register({
       isRushEntry: false,
       onHit: {
         outcomes: [
-          { weight: 0.25, rounds: 10, balls: 1400, nextState: "normal", tag: "challengeBust" },
-          { weight: 0.022, rounds: 10, balls: 1400, nextState: "rush", tag: "challengeToRush" },
           {
-            weight: 0.40404,
-            rounds: 10,
-            balls: 2520,
+            weight: 1,
+            rounds: 3,
+            balls: 420,
             nextState: "rush",
-            tag: "perfectBonus2700",
-            resultNote: "PERFECT BONUS",
-          },
-          {
-            weight: 0.240968,
-            rounds: 10,
-            balls: 3640,
-            nextState: "rush",
-            tag: "perfectBonus3900",
-            resultNote: "PERFECT BONUS",
-          },
-          {
-            weight: 0.071344,
-            rounds: 10,
-            balls: 4760,
-            nextState: "rush",
-            tag: "perfectBonus5100",
-            resultNote: "PERFECT BONUS",
-          },
-          {
-            weight: 0.01092,
-            rounds: 10,
-            balls: 5880,
-            nextState: "rush",
-            tag: "perfectBonus6300",
-            resultNote: "PERFECT BONUS",
-          },
-          {
-            weight: 0.000728,
-            rounds: 10,
-            balls: 7000,
-            nextState: "rush",
-            tag: "perfectBonus7500",
-            resultNote: "PERFECT BONUS",
+            tag: "challengeToRush",
+            resultNote: "SEVEN RUSH突入",
           },
         ],
       },
