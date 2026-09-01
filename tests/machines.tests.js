@@ -110,9 +110,13 @@
         // 必ず1回転目で当たる乱数
         const hit = PachiSim.engine.resolveAction(session, m, () => 0);
         assertEqual(hit.outcome.type, "hit", `${m.slug}/${stateId}: 当たりにならない`);
+        // ballsは0以上であればよい（負値や非数はNG）。「STリセット」のような
+        // 出玉無しで継続する当たりは、balls: 0を明示したoutcomeとして正当に
+        // 存在する（machineValidator.jsが登録時に「明示的な0」と「書き忘れ」を
+        // 区別済みなので、ここでは弾く必要が無い）。
         assertTrue(
-          hit.outcome.balls > 0,
-          `${m.slug}/${stateId}: 当たりの出玉が0（payoutTableかballsの指定漏れ）`
+          hit.outcome.balls >= 0,
+          `${m.slug}/${stateId}: 当たりの出玉が不正な値（payoutTableかballsの指定漏れの可能性）`
         );
         assertTrue(
           !!m.states[hit.outcome.nextStateId],
@@ -182,6 +186,13 @@
       onHit: { outcomes: [{ weight: 1, rounds: 99, balls: 1234, nextState: "rush", tag: "t" }] },
     });
     assertEqual(errorsFor(ok).length, 0, "balls指定があるのに弾かれた");
+  });
+
+  test("machineValidator: 明示的なballs:0は通す（STリセット等、出玉無しで継続する当たり）", () => {
+    const ok = withState("normal", {
+      onHit: { outcomes: [{ weight: 1, rounds: 1, balls: 0, nextState: "rush", tag: "t" }] },
+    });
+    assertEqual(errorsFor(ok).length, 0, "明示的なballs:0が弾かれた");
   });
 
   test("machineValidator: weightの合計が1でないものを弾く", () => {
