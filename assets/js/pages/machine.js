@@ -49,7 +49,14 @@
       return;
     }
 
-    const baseProbability = machine.states[machine.baseStateId].probability;
+    const baseState = machine.states[machine.baseStateId];
+    // displayProbability（任意）: 抽選ロジックでは複数の当選契機を合算した確率を
+    // 使う必要があるが、見出しに出す確率はその機種の売り文句となる単体の確率を
+    // 出したい場合がある（例: e東京喰種 超デカ超一撃ver.の図柄揃い単体1/999。
+    // 抽選自体はチャージ込みの合算値1/349.9で行う）。指定が無ければ従来通り
+    // probabilityをそのまま使う。
+    const baseProbability =
+      baseState.displayProbability != null ? baseState.displayProbability : baseState.probability;
     const probabilityLabel = PachiSim.format.probabilityFraction(baseProbability);
 
     document.title = `${machine.name}（${machine.manufacturer.name}） | ${PachiSim.config.siteTitle}`;
@@ -266,9 +273,14 @@
     // state.probabilityをそのまま出すと実際よりはるかに当たりやすく見える
     // （琴子のご褒美RUSHが1/4と表示されていた）。換算はengine側に置いてある。
     function stateProbabilityText(state) {
-      const hit = PachiSim.format.probabilityFraction(
-        PachiSim.engine.effectiveHitProbability(state)
-      );
+      // displayProbability（任意）: machineNameの見出しと同じ理由で、抽選確率とは
+      // 別の表示用確率を出したいときに使う。judgmentGateの換算は不要（表示専用の
+      // 値をそのまま出す）。
+      const hitProbability =
+        state.displayProbability != null
+          ? state.displayProbability
+          : PachiSim.engine.effectiveHitProbability(state);
+      const hit = PachiSim.format.probabilityFraction(hitProbability);
       if (!state.onFall) return hit;
       const fall = PachiSim.format.probabilityFraction(state.onFall.probability);
       return `大当り ${hit}　転落 ${fall}`;
