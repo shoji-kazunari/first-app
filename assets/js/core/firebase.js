@@ -77,6 +77,12 @@ window.PachiSim.fb = {
     await signInWithEmailAndPassword(auth, email, password);
   },
 
+  // 運営ログイン専用。メールアドレスは固定（ADMIN_EMAIL）なので、
+  // パスワードだけ入力すればログインできる。
+  async loginAsAdmin(password) {
+    await signInWithEmailAndPassword(auth, ADMIN_EMAIL, password);
+  },
+
   async logout() {
     await signOut(auth);
   },
