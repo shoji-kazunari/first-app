@@ -39,7 +39,14 @@
 //                                      // （通常かRUSHかをボタンの文字で当てる演出は未実装のため）
 //       theme: "normal"|"chance"|"rush"|string, // 背景テーマ（自由に拡張可）
 //       accruesInvestment: boolean,    // この状態の回転数を投資額に計上するか
-//       isBaseState: boolean,          // 「通常」相当（一撃/連チャンの起点）か
+//       isBaseState: boolean,          // 「通常」相当（一撃/連チャンの起点）か。
+//         // 1機種につき1つだけ（machineValidatorが強制）。
+//       resetsStreak: boolean,         // （任意）isBaseStateではないが、一撃/連チャンの
+//         // 区切りとしてはisBaseStateと同じに扱ってほしい状態か。隠しカウンター保持の
+//         // ためnormalと同じ役割の状態を複数チェーンさせる機種
+//         // （例: pa-ainofujichaku-sweet.jsのnormal→normal2→normal3）向け。
+//         // streakTracker.js・machine.jsはisBaseStateとこのフラグのどちらでも
+//         // 同じに扱う（詳細はstreakTracker.jsのisStreakBoundary参照）。
 //       isRushEntry: boolean,          // RUSH突入回数としてカウントする状態か
 //       onHit: (
 //         { outcomes: [{weight, rounds, nextState, tag, balls?, displayRounds?, resultNote?, stockAdd?, stockSet?, bonusLoop?}, ...] }

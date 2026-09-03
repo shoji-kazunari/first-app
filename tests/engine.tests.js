@@ -288,6 +288,36 @@
     assertTrue(r.streak.rushEntered, "新しいstreakにはrushEnteredが反映されているべき");
   });
 
+  test("streakTracker: resetsStreak:trueの状態はisBaseStateと同じく一撃の区切りになる（RUSH非突入時の合算バグの回帰テスト）", () => {
+    // pa-ainofujichaku-sweet.jsのnormal→normal2→normal3のような、隠しカウンター
+    // 保持のためisBaseState:falseのままnormalと同じ役割を持たせたい状態を模す。
+    const normalBase = { isBaseState: true };
+    const normalLike = { isBaseState: false, resetsStreak: true };
+    const rush = { isRushEntry: true };
+
+    // normal→normalLike（RUSH非突入の3R）: resetsStreakな状態へ戻る当たりは
+    // その場で完結する別の一撃として即finishするべき（実機の非突入当たりと同じ）。
+    let r = PachiSim.streakTracker.applyResult(null, normalBase, normalLike, {
+      type: "hit",
+      rounds: 3,
+      balls: 270,
+    });
+    assertTrue(r.finished, "resetsStreakな状態への当たりはその場でfinishするべき");
+    assertEqual(r.finishedStreak.totalBalls, 270);
+    assertEqual(PachiSim.streakTracker.renchanCount(r.finishedStreak), 1);
+    assertEqual(r.streak, null, "finish後のstreakはnullに戻るべき");
+
+    // normalLike→rush: resetsStreakな状態からの当たりも、isBaseStateからの当たりと
+    // 同じく新しい一撃としてリセットされてから積まれるべき（前の一撃と合算されない）。
+    r = PachiSim.streakTracker.applyResult(r.streak, normalLike, rush, {
+      type: "hit",
+      rounds: 10,
+      balls: 900,
+    });
+    assertEqual(r.streak.totalBalls, 900, "resetsStreakな状態からの当たりでリセットされず合算されている(バグ再発)");
+    assertEqual(PachiSim.streakTracker.renchanCount(r.streak), 1);
+  });
+
   test("kana: ひらがな入力「しんふぉ」で機種名がヒットする", () => {
     assertTrue(PachiSim.kana.includesNormalized(machine.name, "しんふぉ"));
   });

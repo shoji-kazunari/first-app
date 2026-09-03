@@ -17,6 +17,14 @@
 // （3回目、100%でRUSHへ）という3つの通常相当の状態をリレーする形で表現した
 // （normal2・normal3はaccruesInvestment:trueのまま、通常と同じ左打ち状態）。
 //
+// 【一撃/連チャン集計へのresetsStreak対応（2026-09-03修正）】
+// normal2・normal3はisBaseState:false（machineValidatorが1機種1つしか許さない
+// ため）だが、これをそのままにするとstreakTracker.jsが「一撃の区切り」を
+// isBaseStateだけで判定してしまい、非突入時の3R(270個)がRUSH本編の連チャン数・
+// 出玉に合算されてしまう不具合があった（実機なら非突入の3Rはその場で完結する
+// 別の一撃のはず）。normal2・normal3にresetsStreak: trueを立てて、
+// isBaseStateに準じる「一撃の区切り」として扱われるよう修正した。
+//
 // 電チュー入賞時（特図2・愛の降臨RUSH中、大当り確率1/54.3）の振り分け:
 //   ・3R大当り(約300個)→継続：50.0%
 //   ・10R大当り(約1000個)→継続：50.0%
@@ -98,6 +106,7 @@ PachiSim.machineRegistry.register({
       theme: "normal",
       accruesInvestment: true,
       isBaseState: false,
+      resetsStreak: true,
       isRushEntry: false,
       onHit: {
         outcomes: [
@@ -118,6 +127,7 @@ PachiSim.machineRegistry.register({
       theme: "normal",
       accruesInvestment: true,
       isBaseState: false,
+      resetsStreak: true,
       isRushEntry: false,
       onHit: {
         outcomes: [
