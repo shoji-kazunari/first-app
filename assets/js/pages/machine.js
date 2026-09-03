@@ -782,7 +782,10 @@
       // 同じ描画で吸収されるため目には見えない。
       chargedThisAction = 0;
 
-      if (fromState.isBaseState) {
+      // isBaseStateだけでなく、resetsStreak（隠しカウンター保持のためのnormal
+      // チェーン等、isBaseStateに準じる状態。streakTracker.js参照）でも新しい
+      // 一撃として区切る。
+      if (fromState.isBaseState || fromState.resetsStreak) {
         streakSeq += 1;
         currentStreakId = `${sessionTag}-${streakSeq}`;
       }
@@ -811,7 +814,7 @@
       if (outcome.type === "hit") {
         stats.totalHitCount += 1;
         stats.totalBalls += outcome.balls;
-        if (fromState.isBaseState) stats.initialHitCount += 1;
+        if (fromState.isBaseState || fromState.resetsStreak) stats.initialHitCount += 1;
 
         // 保存はここで済ませるが、データランプ上で「1回前」へ送るのは
         // 次の1回転が始まってから（renderDataLampLiveのコメント参照）
@@ -822,7 +825,7 @@
           // 複数ブロック連続の当たりは実機のデータカウンターと同じく合計R（30）で見せる。
           spins: spinsSinceLastHit,
           rounds: outcome.displayRounds,
-          context: fromState.isBaseState ? "normal" : "rush",
+          context: fromState.isBaseState || fromState.resetsStreak ? "normal" : "rush",
           streakId: currentStreakId,
         });
 
