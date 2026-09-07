@@ -61,7 +61,7 @@ PachiSim.machineRegistry.register({
   baseStateId: "normal",
 
   rules: [
-    "通常時のCZ確率：約1/129（c時短経由・大当たり経由の合算値）",
+    "通常時のCZ確率：約1/129（c時短経由・大当り経由の合算値）",
     "烈核解放CZ：抽選回数10回、成功期待度約33%",
     "超孤紅の恤RUSH：ST144回、当選確率約1/99、継続率約77%",
     "超孤紅の恤RUSH突入率：CZ成功の約51%",
