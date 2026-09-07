@@ -23,11 +23,9 @@
     return document.getElementById(id);
   }
 
-  // "1/319.6" でも "319.6" でも、末尾の数値（＝分母）だけを取り出す。
+  // 入力は「1/」を固定表示にした分母のみ（例: 319.6）。
   function parseDenominator(raw) {
-    const match = String(raw).match(/([\d.]+)\s*$/);
-    if (!match) return null;
-    const value = Number(match[1]);
+    const value = Number(raw);
     return Number.isFinite(value) && value > 0 ? value : null;
   }
 

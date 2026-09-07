@@ -42,6 +42,25 @@
   outline-offset: 2px;
 }
 
+/* 大当たり確率欄。「1/」を固定表示にして、分母だけ入力してもらう */
+.yosou-form__prob-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.yosou-form__prob-prefix {
+  flex: none;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.yosou-form__prob-input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 .yosou-form__submit {
   align-self: flex-start;
 }

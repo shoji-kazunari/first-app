@@ -35,8 +35,11 @@
         <form id="yosouForm" class="yosou-form">
           <label class="yosou-form__field">
             <span class="yosou-form__label">大当たり確率</span>
-            <input id="yosouProbability" class="yosou-form__input" type="text" inputmode="decimal"
-              placeholder="例: 1/319.6" autocomplete="off" required>
+            <span class="yosou-form__prob-group">
+              <span class="yosou-form__prob-prefix">1/</span>
+              <input id="yosouProbability" class="yosou-form__input yosou-form__prob-input" type="number"
+                inputmode="decimal" min="0" step="0.1" placeholder="319.6" required>
+            </span>
           </label>
 
           <label class="yosou-form__field">
