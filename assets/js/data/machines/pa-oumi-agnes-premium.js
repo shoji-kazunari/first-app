@@ -46,7 +46,7 @@ PachiSim.machineRegistry.register({
   name: "PA大海物語Withアグネス・ラム Premium Edition",
   nameKana: "ぴーえーおおうみものがたりうぃずあぐねすらむぷれみあむえでぃしょん",
   aliases: ["大海物語アグネス", "アグネスラム大海物語", "大海アグネス", "PA大海物語アグネス", "大海物語アグネスラム"],
-  manufacturer: { id: "sanyo", name: "SANYO" },
+  manufacturer: { id: "sanyo-bussan", name: "SANYO（三洋物産）" },
   releaseYear: 2026,
   category: "ST機（甘デジ・遊タイム）",
 

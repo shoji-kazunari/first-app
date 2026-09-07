@@ -59,7 +59,7 @@ PachiSim.machineRegistry.register({
   name: "PAスーパー海物語IN沖縄6 Withえなこ",
   nameKana: "ぴーえーすーぱーうみものがたりいんおきなわろくうぃずえなこ",
   aliases: ["沖海6", "沖海6えなこ", "スーパー海物語沖縄6", "海物語沖縄6", "PA沖海6"],
-  manufacturer: { id: "sanyo", name: "SANYO" },
+  manufacturer: { id: "sanyo-bussan", name: "SANYO（三洋物産）" },
   releaseYear: 2026,
   category: "パチンコ（ST機・甘デジ）",
 

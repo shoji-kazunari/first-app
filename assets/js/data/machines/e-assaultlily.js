@@ -37,7 +37,7 @@ PachiSim.machineRegistry.register({
   name: "eアサルトリリィ",
   nameKana: "いーあさるとりりぃ",
   aliases: ["アサルトリリィ", "アサリリ", "eアサリリ"],
-  manufacturer: { id: "bisty", name: "Bisty" },
+  manufacturer: { id: "besty", name: "ビスティ" },
   releaseYear: 2026,
   category: "スマパチ（ライト・ラッキートリガー・一種二種混合機）",
 
