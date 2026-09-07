@@ -1,7 +1,7 @@
 // サイト全体の共通設定。
 // サイトタイトルを変更したい場合はここ(siteTitle)だけを書き換えれば
 // ブラウザタブ・ホーム画面追加時の名前に反映される
-// （見た目のロゴ画像は assets/img/logo-gijipachi.jpg を直接差し替える）。
+// （見た目のロゴ画像は assets/img/logo-gijipachi-wordmark.png を直接差し替える）。
 window.PachiSim = window.PachiSim || {};
 
 PachiSim.config = {

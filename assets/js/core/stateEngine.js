@@ -39,7 +39,14 @@
 //                                      // （通常かRUSHかをボタンの文字で当てる演出は未実装のため）
 //       theme: "normal"|"chance"|"rush"|string, // 背景テーマ（自由に拡張可）
 //       accruesInvestment: boolean,    // この状態の回転数を投資額に計上するか
-//       isBaseState: boolean,          // 「通常」相当（一撃/連チャンの起点）か
+//       isBaseState: boolean,          // 「通常」相当（一撃/連チャンの起点）か。
+//         // 1機種につき1つだけ（machineValidatorが強制）。
+//       resetsStreak: boolean,         // （任意）isBaseStateではないが、一撃/連チャンの
+//         // 区切りとしてはisBaseStateと同じに扱ってほしい状態か。隠しカウンター保持の
+//         // ためnormalと同じ役割の状態を複数チェーンさせる機種
+//         // （例: pa-ainofujichaku-sweet.jsのnormal→normal2→normal3）向け。
+//         // streakTracker.js・machine.jsはisBaseStateとこのフラグのどちらでも
+//         // 同じに扱う（詳細はstreakTracker.jsのisStreakBoundary参照）。
 //       isRushEntry: boolean,          // RUSH突入回数としてカウントする状態か
 //       onHit: (
 //         { outcomes: [{weight, rounds, nextState, tag, balls?, displayRounds?, resultNote?, stockAdd?, stockSet?, bonusLoop?}, ...] }
@@ -271,12 +278,26 @@ PachiSim.engine = (function () {
       }
       let balls = ballsOverride != null ? ballsOverride : machine.payoutTable[rounds] || 0;
       // bonusLoop（任意）: 成功する限り繰り返し上乗せするボーナス（例:
-      // 「13%で+1500個」を外すまで繰り返す）。安全上限として最大200回まで。
+      // 「13%で+1400個」を外すまで繰り返す）。安全上限として最大200回まで。
       // rng()を毎回1個消費する。
+      //
+      // 上乗せするたびdisplayRounds（画面の「＜NR獲得＞」表示）も伸ばす。以前は
+      // ballsだけ増やしdisplayRoundsを据え置いていたため、何回ループが成功しても
+      // 画面には突入時のRのまま表示され、実際に上乗せされた出玉との整合が
+      // 取れていなかった（例: カバネリ2の超輪廻ループで5回成功し合計+9,800個
+      // 獲得しても「20R獲得」のまま）。1回のループがR換算で何R分に当たるかは、
+      // その機種のpayoutTable[rounds]（1ブロックあたりの基準出玉）に対する
+      // bonusLoop.ballsの比率から逆算できる（例: kabaneri2は payoutTable[10]=1400、
+      // bonusLoop.balls=1400なので比率1、1回のループ=10R。lycoris-recoilは
+      // payoutTable[5]=700、bonusLoop.balls=2800なので比率4、1回のループ=20R）。
+      // 新しい数値をデータ側に足す必要はなく、既存の数値だけで求まる。
       if (bonusLoop) {
+        const basePerBlock = machine.payoutTable[rounds];
+        const roundsPerLoop = basePerBlock ? Math.round((rounds * bonusLoop.balls) / basePerBlock) : 0;
         for (let i = 0; i < 200; i++) {
           if (!PachiSim.rng.bernoulli(rng, bonusLoop.probability)) break;
           balls += bonusLoop.balls;
+          displayRounds += roundsPerLoop;
         }
       }
       outcome = {

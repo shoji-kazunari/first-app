@@ -154,7 +154,7 @@
     assertEqual(result.outcome.type, "hit");
     assertEqual(result.outcome.attempts, 3);
     assertEqual(result.outcome.rounds, 4);
-    assertEqual(result.outcome.balls, 364);
+    assertEqual(result.outcome.balls, 340);
     assertEqual(result.outcome.nextStateId, "finalBattle");
   });
 
@@ -163,7 +163,7 @@
     const rng = PachiSim.rng.createScriptedRng([0.001, 0.995]);
     const result = PachiSim.engine.resolveAction(session, machine, rng);
     assertEqual(result.outcome.rounds, 15);
-    assertEqual(result.outcome.balls, 1365);
+    assertEqual(result.outcome.balls, 1274);
     assertEqual(result.outcome.nextStateId, "symphogearChance");
     assertEqual(result.outcome.resultNote, "RUSH直行");
   });
@@ -174,7 +174,7 @@
     const result = PachiSim.engine.resolveAction(session, machine, rng);
     assertEqual(result.outcome.attempts, 3);
     assertEqual(result.outcome.rounds, 8);
-    assertEqual(result.outcome.balls, 728);
+    assertEqual(result.outcome.balls, 679);
     assertEqual(result.outcome.nextStateId, "symphogearChance");
   });
 
@@ -288,6 +288,36 @@
     assertTrue(r.streak.rushEntered, "新しいstreakにはrushEnteredが反映されているべき");
   });
 
+  test("streakTracker: resetsStreak:trueの状態はisBaseStateと同じく一撃の区切りになる（RUSH非突入時の合算バグの回帰テスト）", () => {
+    // pa-ainofujichaku-sweet.jsのnormal→normal2→normal3のような、隠しカウンター
+    // 保持のためisBaseState:falseのままnormalと同じ役割を持たせたい状態を模す。
+    const normalBase = { isBaseState: true };
+    const normalLike = { isBaseState: false, resetsStreak: true };
+    const rush = { isRushEntry: true };
+
+    // normal→normalLike（RUSH非突入の3R）: resetsStreakな状態へ戻る当たりは
+    // その場で完結する別の一撃として即finishするべき（実機の非突入当たりと同じ）。
+    let r = PachiSim.streakTracker.applyResult(null, normalBase, normalLike, {
+      type: "hit",
+      rounds: 3,
+      balls: 270,
+    });
+    assertTrue(r.finished, "resetsStreakな状態への当たりはその場でfinishするべき");
+    assertEqual(r.finishedStreak.totalBalls, 270);
+    assertEqual(PachiSim.streakTracker.renchanCount(r.finishedStreak), 1);
+    assertEqual(r.streak, null, "finish後のstreakはnullに戻るべき");
+
+    // normalLike→rush: resetsStreakな状態からの当たりも、isBaseStateからの当たりと
+    // 同じく新しい一撃としてリセットされてから積まれるべき（前の一撃と合算されない）。
+    r = PachiSim.streakTracker.applyResult(r.streak, normalLike, rush, {
+      type: "hit",
+      rounds: 10,
+      balls: 900,
+    });
+    assertEqual(r.streak.totalBalls, 900, "resetsStreakな状態からの当たりでリセットされず合算されている(バグ再発)");
+    assertEqual(PachiSim.streakTracker.renchanCount(r.streak), 1);
+  });
+
   test("kana: ひらがな入力「しんふぉ」で機種名がヒットする", () => {
     assertTrue(PachiSim.kana.includesNormalized(machine.name, "しんふぉ"));
   });
@@ -327,7 +357,7 @@
     assertEqual(result.outcome.type, "hit");
     assertEqual(result.outcome.attempts, 2);
     assertEqual(result.outcome.rounds, 2);
-    assertEqual(result.outcome.balls, 300);
+    assertEqual(result.outcome.balls, 280);
     assertEqual(result.outcome.nextStateId, "chanceTime");
     assertEqual(result.outcome.tag, "toChanceTime");
   });
@@ -337,7 +367,7 @@
     const rng = PachiSim.rng.createScriptedRng([0.001, 0.999]);
     const result = PachiSim.engine.resolveAction(session, machine2, rng);
     assertEqual(result.outcome.rounds, 10);
-    assertEqual(result.outcome.balls, 1500);
+    assertEqual(result.outcome.balls, 1400);
     assertEqual(result.outcome.nextStateId, "st");
     assertEqual(result.outcome.tag, "toStDirectMega");
   });
@@ -347,7 +377,7 @@
     const rng = PachiSim.rng.createScriptedRng([0.001, 0.999]);
     const result = PachiSim.engine.resolveAction(session, machine2, rng);
     assertEqual(result.outcome.rounds, 8);
-    assertEqual(result.outcome.balls, 4800, "payoutTable[8]=2400ではなく、outcome側のballs上書きが使われるべき");
+    assertEqual(result.outcome.balls, 4480, "payoutTable[8]=2240ではなく、outcome側のballs上書きが使われるべき");
     assertEqual(result.outcome.nextStateId, "st");
     assertEqual(result.outcome.tag, "ltEntry");
     assertEqual(result.newSession.stateId, "st");
@@ -387,7 +417,7 @@
     const result = PachiSim.engine.resolveAction(session, machine3, rng);
     assertEqual(result.outcome.type, "hit");
     assertEqual(result.outcome.rounds, 2);
-    assertEqual(result.outcome.balls, 300);
+    assertEqual(result.outcome.balls, 280);
     assertEqual(result.outcome.nextStateId, "koujin");
   });
 
@@ -396,7 +426,7 @@
     const rng = PachiSim.rng.createScriptedRng([0.001, 0.999]);
     const result = PachiSim.engine.resolveAction(session, machine3, rng);
     assertEqual(result.outcome.rounds, 10);
-    assertEqual(result.outcome.balls, 1500);
+    assertEqual(result.outcome.balls, 1400);
     assertEqual(result.outcome.nextStateId, "kotokoRush");
     assertEqual(result.newSession.stock, 4, "stockSet:4なので持ち越し計算をせず4になるべき");
   });
@@ -413,7 +443,7 @@
     const rng = PachiSim.rng.createScriptedRng([0.001 /* gate */, 0.001 /* hit */, 0.5 /* pick */]);
     const result = PachiSim.engine.resolveAction(session, machine3, rng);
     assertEqual(result.outcome.rounds, 10);
-    assertEqual(result.outcome.balls, 1500);
+    assertEqual(result.outcome.balls, 1400);
     assertEqual(result.outcome.nextStateId, "kotokoRush");
     assertEqual(
       result.newSession.stock,
@@ -426,7 +456,7 @@
     const session = { stateId: "kotokoRush", stock: 5, streak: null };
     const rng = PachiSim.rng.createScriptedRng([0.001 /* gate */, 0.001 /* hit */, 0.001 /* 82%側 */]);
     const result = PachiSim.engine.resolveAction(session, machine3, rng);
-    assertEqual(result.outcome.balls, 3000);
+    assertEqual(result.outcome.balls, 2800);
     assertEqual(result.outcome.nextStateId, "kotokoRush");
     assertEqual(
       result.newSession.stock,
@@ -440,7 +470,7 @@
     const rng = PachiSim.rng.createScriptedRng([0.001 /* gate */, 0.001 /* hit */, 0.999 /* 18%側 */]);
     const result = PachiSim.engine.resolveAction(session, machine3, rng);
     assertEqual(result.outcome.nextStateId, "uraGohobiRush");
-    assertEqual(result.outcome.resultNote, "Vストック");
+    assertEqual(result.outcome.resultNote, "10R×2・Vストック");
     assertEqual(
       result.newSession.stock,
       Infinity,
@@ -493,7 +523,7 @@
     const session = { stateId: "uraMode", stock: null, streak: null };
     const rng = PachiSim.rng.createScriptedRng([0.001, 0.001]);
     const result = PachiSim.engine.resolveAction(session, machine3, rng);
-    assertEqual(result.outcome.balls, 3000);
+    assertEqual(result.outcome.balls, 2800);
     assertEqual(result.outcome.nextStateId, "uraGohobiRush");
     assertEqual(result.newSession.stock, 4);
   });
@@ -502,7 +532,7 @@
     const session = { stateId: "uraGohobiRush", stock: 6, streak: null };
     const rng = PachiSim.rng.createScriptedRng([0.001 /* gate */, 0.001 /* hit */, 0.001 /* 87%側 */]);
     const result = PachiSim.engine.resolveAction(session, machine3, rng);
-    assertEqual(result.outcome.balls, 3000);
+    assertEqual(result.outcome.balls, 2800);
     assertEqual(result.outcome.nextStateId, "uraGohobiRush");
     assertEqual(result.newSession.stock, 4, "stockSet:4なので持ち越しは関係なく4固定になるべき");
   });
@@ -512,14 +542,19 @@
     const rng = PachiSim.rng.createScriptedRng([
       0.001, // gate開
       0.001, // 当たり
-      0.999, // weightedPick→13%側（4500個）
-      0.001, // bonusLoop 1回目: 成功 → +1500
-      0.001, // bonusLoop 2回目: 成功 → +1500
+      0.999, // weightedPick→13%側（4200個）
+      0.001, // bonusLoop 1回目: 成功 → +1400
+      0.001, // bonusLoop 2回目: 成功 → +1400
       0.999, // bonusLoop 3回目: 失敗 → ここで打ち止め
     ]);
     const result = PachiSim.engine.resolveAction(session, machine3, rng);
-    assertEqual(result.outcome.balls, 4500 + 1500 + 1500, "4500に2回分の上乗せで7500になるべき");
+    assertEqual(result.outcome.balls, 4200 + 1400 + 1400, "4200に2回分の上乗せで7000になるべき");
     assertEqual(result.newSession.stock, 4);
+    assertEqual(
+      result.outcome.displayRounds,
+      30 + 10 + 10,
+      "上乗せのたびdisplayRoundsも伸びるべき（payoutTable[10]=1400に対しbonusLoop.balls=1400なので1回=10R）"
+    );
   });
 
   test("engine(虚構推理): 裏ご褒美RUSHは、ゲートが開くたびにハズレるとお願い玉が1個ずつ減り、0個で終了し通常へ", () => {

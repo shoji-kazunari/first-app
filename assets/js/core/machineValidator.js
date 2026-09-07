@@ -28,10 +28,19 @@ PachiSim.machineValidator = (function () {
     return isPositiveNumber(v) && Number.isInteger(v);
   }
 
+  function isNonNegativeNumber(v) {
+    return typeof v === "number" && Number.isFinite(v) && v >= 0;
+  }
+
   // 出玉が決まるか（payoutTableに該当ラウンドがあるか、balls指定があるか）。
   // どちらも無いとengineが黙って0玉にしてしまい、テーブルの書き忘れに気づけない。
+  //
+  // balls（明示的なオーバーライド）だけは0を許可する。「STリセット」（出玉無しで
+  // 継続）のような実在する当たりを表現するため。payoutTableのデフォルト値の方は
+  // 引き続き正の数のみ（ラウンド数に対する一般的な払い出しが0個というのは
+  // 通常あり得ないため、書き忘れのままにしておきたい）。
   function payoutIsResolvable(machine, rounds, ballsOverride) {
-    if (ballsOverride != null) return isPositiveNumber(ballsOverride);
+    if (ballsOverride != null) return isNonNegativeNumber(ballsOverride);
     return isPositiveNumber(machine.payoutTable && machine.payoutTable[rounds]);
   }
 

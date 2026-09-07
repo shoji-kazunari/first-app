@@ -226,6 +226,8 @@
       });
     }
 
+    // 戻り値はHTML（els.spinCounter.innerHTMLへ代入する。中身は固定文言＋数値のみで
+    // ユーザー入力を含まないため、そのままinnerHTMLに使ってよい）。
     function spinCounterText(state) {
       if (state.mode === "countUp") {
         return `${PachiSim.format.number(liveCount)}回転`;
@@ -244,7 +246,18 @@
         // 記号なら他の文字と同じ色・同じ書体で並ぶ。
         return `${state.remainingLabel || "残り"} ∞`;
       }
-      return `残り${state.remainingLabel || ""}${remaining}${state.remainingUnit || "回"}`;
+      // includesResidualHold（任意）: 規定回数消化型のRUSHで、「残保留N個」による
+      // 引き戻し分をmaxAttempts自体に組み込んで表現している場合の注記。
+      // 転落式のonFall.residualAttemptsと違い、規定回数消化型は「途中で追加の
+      // チャンスを挟む」のと「最初から回数に含めておく」のが数学的に同じ結果に
+      // なるため（独立試行の合計回数が同じなら成功確率は変わらない）、maxAttempts
+      // に残保留ぶんを直接足し込むだけで正確に再現できる。ただしそれだけだと
+      // 「本来の規定回数より多く表示されている」ことが伝わらないため、小さく
+      // 注記を添える。
+      const note = state.includesResidualHold
+        ? `<span class="spin-counter__note">（残保留込み）</span>`
+        : "";
+      return `残り${state.remainingLabel || ""}${remaining}${state.remainingUnit || "回"}${note}`;
     }
 
     // 抽選が実際に進行中（ポーズしていない）の間だけ、速度・リセットボタンをロックする。
@@ -303,7 +316,7 @@
         // 同じifの中で更新する。
         els.currentStateProbability.textContent = stateProbabilityText(state);
         els.simulationArea.dataset.theme = state.theme;
-        els.spinCounter.textContent = spinCounterText(state);
+        els.spinCounter.innerHTML = spinCounterText(state);
       }
       // アクション中は、貯まった保留の分だけ差し引いた値のままにする
       els.investmentDisplay.innerHTML = investmentDisplayText(chargedThisAction);
@@ -424,7 +437,6 @@
       let currentSpeedMode = initialSpeedMode;
       let stopped = false;
       let paused = false;
-      let pendingJumpToEnd = false;
       let timer = null;
       let i = 0;
       let phase = "emphasize"; // "emphasize" | "resolve" - 一時停止からの再開先の判定に使う
@@ -485,8 +497,17 @@
         resume: () => {
           if (stopped || !paused) return;
           paused = false;
-          if (pendingJumpToEnd) {
-            pendingJumpToEnd = false;
+          // 再開時にどちらへ進むかは、そのとき現在の速度が「当たりまで」かどうか
+          // （isInstant()）だけで判断する。以前はpendingJumpToEndという専用フラグで
+          // 管理していたが、「setSpeedで当たりまでに切り替えてから一時停止して
+          // 再開」した場合にしかセットされず、「最初から当たりまでで開始し、
+          // 一発ジャンプ用のタイマーが発火する前にSTOPを押して一時停止した」場合は
+          // セットされないままだった。そのため後者のケースだけ再開時に通常の
+          // 1回転ずつの消化にフォールバックしてしまうバグがあった
+          // （当たりまでのつもりが回転数だけ順々に増えるモードになる）。
+          // 現在の速度を直接見れば、どちらの経路で一時停止したかに関わらず
+          // 常に正しく判断できる。
+          if (isInstant()) {
             timer = setTimeout(() => finish(true), 420);
             return;
           }
@@ -501,36 +522,31 @@
           if (stopped) return;
           const wasInstant = isInstant();
           currentSpeedMode = newSpeedMode;
+          // 一時停止中は、ここでタイマーを触らない。resume()が再開の瞬間に
+          // isInstant()を見て一発ジャンプか1回転ずつかを決める。
+          if (paused) return;
           if (isInstant()) {
             // 「当たりまで」へ切り替えた場合は、そこから先を一気にジャンプする
-            if (paused) {
-              pendingJumpToEnd = true;
-            } else {
-              clearTimeout(timer);
-              timer = setTimeout(() => finish(true), 420);
-            }
+            clearTimeout(timer);
+            timer = setTimeout(() => finish(true), 420);
             return;
           }
           if (wasInstant) {
-            // 「当たりまで」から抜けた場合、予約済みの一気ジャンプ（一時停止中に
-            // 予約しただけのpendingJumpToEndも含む）を取り消し、通常の1回転ずつの
-            // 消化に戻す。ここで取り消さないと、後から別の速度に変えても
-            // 直前に仕込んだジャンプタイマーがそのまま発火し、当たりまで飛び
-            // 続けてしまう。
-            pendingJumpToEnd = false;
-            if (!paused) {
-              clearTimeout(timer);
-              const split = tickSplit();
-              if (phase === "emphasize") {
-                timer = setTimeout(stepEmphasize, split.emphasizeMs);
-              } else {
-                timer = setTimeout(stepResolve, split.resolveMs);
-              }
+            // 「当たりまで」から抜けた場合だけ、今スケジュールされているのが
+            // 一発ジャンプ用のタイマーなので、通常の1回転ずつの消化に明示的に
+            // 張り直す必要がある。
+            clearTimeout(timer);
+            const split = tickSplit();
+            if (phase === "emphasize") {
+              timer = setTimeout(stepEmphasize, split.emphasizeMs);
+            } else {
+              timer = setTimeout(stepResolve, split.resolveMs);
             }
             return;
           }
-          // instant以外同士の速度切り替えは、次にスケジュールされるタイマーから
-          // tickSplit()経由で自動的に新しいテンポが反映される
+          // instant以外同士の速度切り替えは、今動いているタイマーはそのまま
+          // 走らせ、次にスケジュールされるタイマーからtickSplit()経由で
+          // 自動的に新しいテンポが反映される。
         },
       };
     }
@@ -568,7 +584,7 @@
             : result.cap == null
             ? null
             : result.cap - roll.index;
-        els.spinCounter.textContent = spinCounterText(state);
+        els.spinCounter.innerHTML = spinCounterText(state);
         // 玉の消費は保留が貯まった時点でholdQueue.onChargeが反映済み。
         // ここでは消化した回転数ではなく、その貯まった数をそのまま使う。
         els.investmentDisplay.innerHTML = investmentDisplayText(chargedThisAction);
@@ -741,7 +757,7 @@
             : result.cap == null
             ? null
             : result.cap - outcome.attempts;
-        els.spinCounter.textContent = spinCounterText(fromState);
+        els.spinCounter.innerHTML = spinCounterText(fromState);
         holdQueue.reset();
         if (outcome.type === "hit") {
           const plan = PachiSim.reelOmens.decide(
@@ -766,7 +782,10 @@
       // 同じ描画で吸収されるため目には見えない。
       chargedThisAction = 0;
 
-      if (fromState.isBaseState) {
+      // isBaseStateだけでなく、resetsStreak（隠しカウンター保持のためのnormal
+      // チェーン等、isBaseStateに準じる状態。streakTracker.js参照）でも新しい
+      // 一撃として区切る。
+      if (fromState.isBaseState || fromState.resetsStreak) {
         streakSeq += 1;
         currentStreakId = `${sessionTag}-${streakSeq}`;
       }
@@ -795,7 +814,7 @@
       if (outcome.type === "hit") {
         stats.totalHitCount += 1;
         stats.totalBalls += outcome.balls;
-        if (fromState.isBaseState) stats.initialHitCount += 1;
+        if (fromState.isBaseState || fromState.resetsStreak) stats.initialHitCount += 1;
 
         // 保存はここで済ませるが、データランプ上で「1回前」へ送るのは
         // 次の1回転が始まってから（renderDataLampLiveのコメント参照）
@@ -806,13 +825,21 @@
           // 複数ブロック連続の当たりは実機のデータカウンターと同じく合計R（30）で見せる。
           spins: spinsSinceLastHit,
           rounds: outcome.displayRounds,
-          context: fromState.isBaseState ? "normal" : "rush",
+          context: fromState.isBaseState || fromState.resetsStreak ? "normal" : "rush",
           streakId: currentStreakId,
         });
 
+        // balls===0（「STリセット」のような出玉無しの当たり）は、実際にはラウンド
+        // 消化を伴わないので「＜NR獲得＞」という表現が実態と合わない。resultNote
+        // （「STリセット」等）だけを見出しにし、「+0玉」という無意味な行も省く。
         showResultEffect({
-          line1: `大当たり＜${outcome.displayRounds}R獲得＞${outcome.resultNote ? `（${outcome.resultNote}）` : ""}`,
-          ballsLine: `+${PachiSim.format.ball(outcome.balls)}`,
+          line1:
+            outcome.balls === 0
+              ? outcome.resultNote || "継続"
+              : `大当たり＜${outcome.displayRounds}R獲得＞${
+                  outcome.resultNote ? `（${outcome.resultNote}）` : ""
+                }`,
+          ballsLine: outcome.balls === 0 ? undefined : `+${PachiSim.format.ball(outcome.balls)}`,
           line2,
           kind: "hit",
           nextEmphasis,
