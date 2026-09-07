@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3957598417529608"
+     crossorigin="anonymous"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>どこまでいくねん予想 | ギジパチ！</title>
+  <meta name="description" content="大当たり確率と回転数を入れると、今打っている台が何回転目で当たるかを予想する、遊び心たっぷりのコンテンツです。">
+  <link rel="canonical" href="https://gijipachi.jp/yosou/">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/yosou.css">
+</head>
+<body>
+  <header class="site-header">
+    <a href="../index.html">
+      <img class="site-header__logo" src="../assets/img/logo-gijipachi-wordmark.png" alt="ギジパチ！ パチンコ疑似実践シミュレーター">
+    </a>
+  </header>
+  <div class="page">
+    <nav class="breadcrumb" aria-label="パンくずリスト">
+      <a href="../index.html">TOP</a>
+      <span>&gt;</span>
+      <span>どこまでいくねん予想</span>
+    </nav>
+
+    <main>
+      <h2 class="policy-title">どこまでいくねん予想</h2>
+      <p class="yosou-intro">
+        今打っている台の大当たり確率・回転数を入れると、何回転目で大当たりするかを予想します。
+        当たりを保証するものではない、遊びのコンテンツとしてお楽しみください。
+      </p>
+
+      <section class="card yosou-card">
+        <form id="yosouForm" class="yosou-form">
+          <label class="yosou-form__field">
+            <span class="yosou-form__label">大当たり確率</span>
+            <input id="yosouProbability" class="yosou-form__input" type="text" inputmode="decimal"
+              placeholder="例: 1/319.6" autocomplete="off" required>
+          </label>
+
+          <label class="yosou-form__field">
+            <span class="yosou-form__label">現在の回転数</span>
+            <input id="yosouCurrent" class="yosou-form__input" type="number" inputmode="numeric"
+              min="0" step="1" placeholder="例: 350" required>
+          </label>
+
+          <label class="yosou-form__field">
+            <span class="yosou-form__label">前回の当たりまで、または閉店時の回転数（分かれば）</span>
+            <input id="yosouReference" class="yosou-form__input" type="number" inputmode="numeric"
+              min="0" step="1" placeholder="例: 620">
+          </label>
+
+          <p id="yosouError" class="yosou-error" hidden>大当たり確率と現在の回転数を、正しい数字で入力してください。</p>
+
+          <button type="submit" class="btn yosou-form__submit">予想する</button>
+        </form>
+
+        <div id="yosouResult" class="yosou-result" hidden>
+          <p id="yosouResultText" class="yosou-result__text"></p>
+          <p class="yosou-result__comment-label">大当たりに近づくオカルトコメント</p>
+          <p id="yosouComment" class="yosou-result__comment"></p>
+        </div>
+      </section>
+
+      <p class="back-to-top"><a href="../index.html" class="btn btn-secondary">トップにもどる</a></p>
+    </main>
+  </div>
+
+  <script src="../assets/js/core/config.js"></script>
+  <script src="../assets/js/core/analytics.js"></script>
+  <script src="../assets/js/pages/yosou.js"></script>
+</body>
+</html>

@@ -36,7 +36,7 @@ const TOP_MARKER_START = "<!-- machines:start -->";
 const TOP_MARKER_END = "<!-- machines:end -->";
 
 // 雛形から作らない手書きのページ。canonicalの貼り直しだけここで面倒を見る。
-const STATIC_PAGES = ["index.html", path.join("privacy", "index.html")];
+const STATIC_PAGES = ["index.html", path.join("privacy", "index.html"), path.join("yosou", "index.html")];
 
 const CANONICAL_PATTERN = /<link rel="canonical" href="[^"]*">/;
 
