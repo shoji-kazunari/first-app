@@ -41,6 +41,21 @@
   min-width: 0;
 }
 
+.machine-link__name {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* 機種名の後ろに小さく添える基本確率（例: 1/319.6）。
+   似た名前・シリーズ違いの機種が増えてきたときに見分ける手がかりになる。 */
+.machine-link__prob {
+  margin-left: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: 0.8em;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
 .search-results__maker {
   color: var(--color-text-muted);
   font-size: 0.8rem;
@@ -74,6 +89,19 @@
   color: var(--color-text-muted);
   font-weight: 400;
   font-size: 0.8rem;
+}
+
+.manufacturer-list__hint {
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  margin: 0 0 var(--space-2);
+}
+
+.card__heading-count {
+  color: var(--color-text-muted);
+  font-weight: 400;
+  font-size: 0.75rem;
+  margin-left: var(--space-1);
 }
 
 .manufacturer-group__machines {

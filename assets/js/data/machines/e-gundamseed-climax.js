@@ -71,12 +71,12 @@ PachiSim.machineRegistry.register({
   baseStateId: "normal",
 
   rules: [
-    "通常時大当たり確率：約1/399.9",
-    "FULLBURST RUSH CLIMAX・FULLBURST RUSH中の大当たり確率：ともに約1/95.6",
+    "通常時大当り確率：約1/399.9",
+    "FULLBURST RUSH CLIMAX・FULLBURST RUSH中の大当り確率：ともに約1/95.6",
     "ST（FULLBURST RUSH CLIMAX/FULLBURST RUSH）：130回転",
-    "RUSH（LT）突入率：約52%（通常時の大当たりのうち、CLIMAXへ直行するのが約52%）",
+    "RUSH（LT）突入率：約52%（通常時の大当りのうち、CLIMAXへ直行するのが約52%）",
     "RUSH（LT）継続率：約75%",
-    "通常時の大当たり振り分け（ヘソ入賞時）：10R・実獲得約1400個で時短なし（通常のまま）が約48%、10R・実獲得約1400個でFULLBURST RUSH CLIMAX(ST130回)が約52%",
+    "通常時の大当り振り分け（ヘソ入賞時）：10R・実獲得約1400個で時短なし（通常のまま）が約48%、10R・実獲得約1400個でFULLBURST RUSH CLIMAX(ST130回)が約52%",
     "FULLBURST RUSH CLIMAX中の当選振り分け（電チュー入賞時）：10R×2・実獲得約2800個でFULLBURST RUSHへが約49%、10R×3・実獲得約4200個でCLIMAX継続が約51%",
     "FULLBURST RUSH中の当選振り分け（電チュー入賞時）：10R・実獲得約1400個でRUSH継続が約50%、10R×2・実獲得約2800個でCLIMAX昇格が約47%、10R×3・実獲得約4200個でCLIMAX昇格が約3%",
     "FULLBURST RUSH CLIMAX・FULLBURST RUSHとも130回転を全弾外すと通常へ",

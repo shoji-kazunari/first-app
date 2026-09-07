@@ -81,12 +81,12 @@ window.PachiSim = window.PachiSim || {};
     baseStateId: "normal",
 
     rules: [
-      "通常時大当たり確率：約1/199.9",
-      "SWORD RUSH・War of Underworld中の大当たり確率：ともに約1/51.6",
+      "通常時大当り確率：約1/199.9",
+      "SWORD RUSH・War of Underworld中の大当り確率：ともに約1/51.6",
       "SWORD RUSH：ST53回、継続率約65%",
       "War of Underworld：ST70回、継続率約75%",
-      "RUSH突入率：約50%（通常時の大当たりのうち、SWORD RUSHへ突入するのが約48.5%、War of Underworldへ直行するのが約1.5%）",
-      "通常時の大当たり振り分け（ヘソ入賞時）：2R・実獲得約280個で通常のままが約50.0%、2R・実獲得約280個でSWORD RUSH(ST53回)が約48.5%、Epilogue BONUS「ぼくの英雄」でWar of Underworld(ST70回)直行が約1.5%",
+      "RUSH突入率：約50%（通常時の大当りのうち、SWORD RUSHへ突入するのが約48.5%、War of Underworldへ直行するのが約1.5%）",
+      "通常時の大当り振り分け（ヘソ入賞時）：2R・実獲得約280個で通常のままが約50.0%、2R・実獲得約280個でSWORD RUSH(ST53回)が約48.5%、Epilogue BONUS「ぼくの英雄」でWar of Underworld(ST70回)直行が約1.5%",
       "SWORD RUSH中の当選振り分け（電チュー入賞時）：10R・実獲得約1400個でRUSH継続が合計約78%（決意の刃なし45.0%、決意の刃失敗33.0%）、決意の刃成功でWar of Underworldへが約11.0%、「咲け、花たち」でWar of Underworldへが約11.0%",
       "War of Underworld中の当選振り分け（電チュー入賞時）：10R・実獲得約1400個で継続が約60.0%、「神器解放 SWORD DRIVE」で継続が約40.0%",
       "SWORD RUSH・War of Underworldとも規定回数を全弾外すと通常へ",

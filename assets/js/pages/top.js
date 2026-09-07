@@ -10,6 +10,23 @@
     return `machines/${machine.slug}/index.html`;
   }
 
+  // 一覧上でどの機種か見分けやすいよう、基本状態（baseStateId）の確率を
+  // 「1/319.6」のように添える。judgmentGate（リーチ発生率×当選率の2段構え）を
+  // 持つ状態は、core/stateEngine.jsのeffectiveHitProbabilityと同じ考え方で
+  // 掛け合わせる（TOPページはstateEngine.js自体は読み込んでいないため、
+  // ここでは同じ計算をその場で行っている）。
+  function baseProbabilityLabel(machine) {
+    const state = machine.states[machine.baseStateId];
+    if (!state || typeof state.probability !== "number") return "";
+    const gate = state.judgmentGate ? state.judgmentGate.probability : 1;
+    return PachiSim.format.probabilityFraction(state.probability * gate);
+  }
+
+  // メーカー名・機種名をひらがな正規化した上での五十音順比較。
+  function byKana(a, b) {
+    return PachiSim.kana.normalize(a).localeCompare(PachiSim.kana.normalize(b), "ja");
+  }
+
   function matchesQuery(machine, query) {
     if (!query) return false;
     return (
@@ -38,7 +55,9 @@
             (m) => `
               <li>
                 <a class="machine-link" href="${machineHref(m)}">
-                  <span class="search-results__name">${m.name}</span>
+                  <span class="search-results__name">${m.name}<span class="machine-link__prob">${baseProbabilityLabel(
+                    m
+                  )}</span></span>
                   <span class="search-results__maker">${m.manufacturer.name}</span>
                 </a>
               </li>
@@ -49,21 +68,38 @@
     `;
   }
 
+  // メーカー数・機種数が増えるほど、全メーカーを開いたまま並べる一覧は
+  // ページが縦に伸びきってしまい探しづらくなる。五十音順に並べ替えたうえで
+  // <details>を閉じた状態にし、目的のメーカーだけを開いて探せるようにする
+  // （目的の機種そのものが分かっているときは、上の検索を使う方が早い）。
   function renderManufacturers(container, manufacturers) {
     if (manufacturers.length === 0) {
       container.innerHTML = '<p class="manufacturer-list__empty">掲載機種は準備中です。</p>';
       return;
     }
-    container.innerHTML = manufacturers
+    const sortedGroups = manufacturers
+      .map((group) => ({
+        ...group,
+        machines: [...group.machines].sort((a, b) => byKana(a.nameKana, b.nameKana)),
+      }))
+      .sort((a, b) => byKana(a.name, b.name));
+
+    container.innerHTML = sortedGroups
       .map(
         (group) => `
-          <details class="manufacturer-group" open>
+          <details class="manufacturer-group">
             <summary class="manufacturer-group__name">${group.name}<span class="manufacturer-group__count">${group.machines.length}機種</span></summary>
             <ul class="manufacturer-group__machines">
               ${group.machines
                 .map(
                   (m) => `
-                    <li><a class="machine-link" href="${machineHref(m)}">${m.name}</a></li>
+                    <li>
+                      <a class="machine-link" href="${machineHref(m)}">
+                        <span class="machine-link__name">${m.name}<span class="machine-link__prob">${baseProbabilityLabel(
+                          m
+                        )}</span></span>
+                      </a>
+                    </li>
                   `
                 )
                 .join("")}
@@ -103,6 +139,7 @@
       searchInput: $("searchInput"),
       searchResults: $("searchResults"),
       manufacturerList: $("manufacturerList"),
+      manufacturerListCount: $("manufacturerListCount"),
       rankingAllTime: $("rankingAllTime"),
       rankingToday: $("rankingToday"),
       adminAuthBar: $("adminAuthBar"),
@@ -114,6 +151,9 @@
     const manufacturers = PachiSim.machineRegistry.getManufacturers();
 
     renderManufacturers(els.manufacturerList, manufacturers);
+    if (els.manufacturerListCount) {
+      els.manufacturerListCount.textContent = `（全${machines.length}機種）`;
+    }
 
     els.searchInput.addEventListener("input", (e) => {
       renderSearchResults(els.searchResults, machines, e.target.value.trim());
