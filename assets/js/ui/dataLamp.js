@@ -104,12 +104,15 @@ PachiSim.ui.renderDataLamp = function (containerEl, entries, liveAttempts) {
         : n > 0
         ? PachiSim.format.number(n)
         : "-";
+      // 1000回転を超えるとカンマ区切りで4桁+になり、この幅の列では折り返して
+      // 見づらくなるため、桁数に応じて文字を小さくして1行に収める。
+      const gameLengthClass = gameText.length >= 6 ? " data-lamp__game--xlong" : gameText.length >= 4 ? " data-lamp__game--long" : "";
 
       return `
         <div class="data-lamp__col" style="grid-column:${idx + 1}">
           <div class="data-lamp__gauge">${segmentsHtml}</div>
           <span class="data-lamp__rounds">${col.rounds ? `${col.rounds}R` : ""}</span>
-          <span class="data-lamp__game">${gameText}</span>
+          <span class="data-lamp__game${gameLengthClass}">${gameText}</span>
           <span class="data-lamp__collabel">${col.label}</span>
         </div>
       `;

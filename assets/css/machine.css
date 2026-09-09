@@ -157,6 +157,19 @@
   font-weight: 700;
   color: #f2f3f5;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* 回転数が1,000を超えてカンマ区切りの4桁になると、この列幅では折り返して
+   見づらくなるため、桁数に応じて縮小して1行に収める（5桁以上はさらに縮小）。 */
+.data-lamp__game--long {
+  font-size: 0.6rem;
+  letter-spacing: -0.02em;
+}
+
+.data-lamp__game--xlong {
+  font-size: 0.52rem;
+  letter-spacing: -0.03em;
 }
 
 .data-lamp__collabel {
