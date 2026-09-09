@@ -15,11 +15,17 @@
   // 持つ状態は、core/stateEngine.jsのeffectiveHitProbabilityと同じ考え方で
   // 掛け合わせる（TOPページはstateEngine.js自体は読み込んでいないため、
   // ここでは同じ計算をその場で行っている）。
+  // displayProbability（任意）: machine.jsの見出しと同じ理由で、抽選確率とは
+  // 別に機種の売り文句となる単体の確率を出したい場合がある（例: e東京喰種
+  // 超デカ超一撃ver.の図柄揃い単体1/999、eタクトオーパス デスティニーの
+  // 図柄揃い単体1/1394.3）。指定が無ければ従来通りprobabilityをそのまま使う。
   function baseProbabilityLabel(machine) {
     const state = machine.states[machine.baseStateId];
-    if (!state || typeof state.probability !== "number") return "";
-    const gate = state.judgmentGate ? state.judgmentGate.probability : 1;
-    return PachiSim.format.probabilityFraction(state.probability * gate);
+    if (!state) return "";
+    const probability = state.displayProbability != null ? state.displayProbability : state.probability;
+    if (typeof probability !== "number") return "";
+    const gate = state.displayProbability != null ? 1 : state.judgmentGate ? state.judgmentGate.probability : 1;
+    return PachiSim.format.probabilityFraction(probability * gate);
   }
 
   // メーカー名・機種名をひらがな正規化した上での五十音順比較。

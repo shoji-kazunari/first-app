@@ -44,6 +44,13 @@
 // ことが売り」「1万円が約30分」との情報提供があり、777回転/時間÷2＝約388.5回転/
 // 1万円≒約38.85回転/1000円と、この2つの情報から独立に近い値が導けるため、
 // 39を採用した（既定の16のままでは持ち玉の減りが実感より大幅に遅くなってしまう）。
+//
+// 【displayProbabilityについて】
+// 抽選自体は上記の合算値1/348.5で行うが、依頼者から「この台はインパクトが大事な
+// ので表示は図柄揃い単体の1/1394.3を使ってほしい」との指示があったため、
+// e-tokyoghoul-tyo1geki.js（図柄揃い単体1/999を表示、抽選はチャージ込み合算値）
+// と同じ考え方でdisplayProbability: 1/1394.3を設定した。TOPページの確率表示
+// （assets/js/pages/top.js）もdisplayProbabilityを見るように合わせて対応した。
 window.PachiSim = window.PachiSim || {};
 
 PachiSim.machineRegistry.register({
@@ -60,7 +67,7 @@ PachiSim.machineRegistry.register({
   baseStateId: "normal",
 
   rules: [
-    "通常時大当り確率：約1/348.5（図柄揃い約1/1394.3とチャージ約1/464.7の合算。詳細はコメント）",
+    "通常時大当り確率：図柄揃い約1/1394.3（この機種の売り）、チャージ約1/464.7（合算では約1/348.5）",
     "DESTINY RUSH中の当選確率：1/99.9",
     "DESTINY RUSH（DC+LT）：ST144回、継続率約77%",
     "RUSH突入率：50%（図柄揃い時。チャージ分の扱いは非公開のため区別していない）",
@@ -76,6 +83,10 @@ PachiSim.machineRegistry.register({
       mode: "countUp",
       maxAttempts: null,
       probability: 1 / 348.5,
+      // displayProbability: 見出し・TOPページの確率表示は、この機種の売り文句である
+      // 図柄揃い単体の確率(約1/1394.3)を出す（依頼者の指定。詳細はファイル冒頭の
+      // コメント参照）。抽選自体は上のprobability(チャージ込み合算値1/348.5)で行う。
+      displayProbability: 1 / 1394.3,
       actionLabel: "START",
       theme: "normal",
       accruesInvestment: true,
