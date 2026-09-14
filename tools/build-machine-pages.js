@@ -30,13 +30,24 @@ const vm = require("vm");
 const ROOT = path.resolve(__dirname, "..");
 const MACHINE_DATA_DIR = path.join(ROOT, "assets", "js", "data", "machines");
 const TEMPLATE_PATH = path.join(__dirname, "machine-page.template.html");
-const TOP_PAGE_PATH = path.join(ROOT, "index.html");
-const TEST_PAGE_PATH = path.join(ROOT, "tests", "index.html");
 const TOP_MARKER_START = "<!-- machines:start -->";
 const TOP_MARKER_END = "<!-- machines:end -->";
 
 // 雛形から作らない手書きのページ。canonicalの貼り直しだけここで面倒を見る。
-const STATIC_PAGES = ["index.html", path.join("privacy", "index.html"), path.join("yosou", "index.html")];
+const STATIC_PAGES = [
+  "index.html",
+  path.join("privacy", "index.html"),
+  path.join("yosou", "index.html"),
+  path.join("naniutsu", "index.html"),
+];
+
+// 機種データの読み込み行（machines:start/end）を持つページ。
+// srcPrefix: そのページから見たassetsまでの相対パス
+const MACHINE_LIST_PAGES = [
+  { relativePath: "index.html", srcPrefix: "", label: "index.html" },
+  { relativePath: path.join("tests", "index.html"), srcPrefix: "../", label: "tests/index.html" },
+  { relativePath: path.join("naniutsu", "index.html"), srcPrefix: "../", label: "naniutsu/index.html" },
+];
 
 const CANONICAL_PATTERN = /<link rel="canonical" href="[^"]*">/;
 
@@ -159,25 +170,18 @@ function main() {
     };
   });
 
-  const topHtml = fs.readFileSync(TOP_PAGE_PATH, "utf8");
-  outputs.push({
-    label: "TOP（機種データの読み込み行・canonical）",
-    filePath: TOP_PAGE_PATH,
-    content: withCanonical(
-      renderMachineScripts(topHtml, machines, "", "index.html"),
-      "index.html",
-      siteBaseUrl
-    ),
+  MACHINE_LIST_PAGES.forEach(({ relativePath, srcPrefix, label }) => {
+    const filePath = path.join(ROOT, relativePath);
+    const html = fs.readFileSync(filePath, "utf8");
+    outputs.push({
+      label: `${label}（機種データの読み込み行・canonical）`,
+      filePath,
+      content: withCanonical(renderMachineScripts(html, machines, srcPrefix, label), relativePath, siteBaseUrl),
+    });
   });
 
-  const testHtml = fs.readFileSync(TEST_PAGE_PATH, "utf8");
-  outputs.push({
-    label: "テストページ（機種データの読み込み行）",
-    filePath: TEST_PAGE_PATH,
-    content: renderMachineScripts(testHtml, machines, "../", "tests/index.html"),
-  });
-
-  STATIC_PAGES.filter((rel) => rel !== "index.html").forEach((rel) => {
+  const machineListPaths = new Set(MACHINE_LIST_PAGES.map((p) => p.relativePath));
+  STATIC_PAGES.filter((rel) => !machineListPaths.has(rel)).forEach((rel) => {
     const filePath = path.join(ROOT, rel);
     outputs.push({
       label: `${rel}（canonical）`,
