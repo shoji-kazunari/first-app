@@ -44,6 +44,7 @@ PachiSim.machineRegistry.register({
   aliases: ["盾の勇者の成り上がりパチンコ", "タテユウパチンコ", "RISING RUSH", "裏アルティメットタイム"],
   manufacturer: { id: "taiyo-elec", name: "TAIYO ELEC（タイヨーエレック）" },
   releaseYear: 2026,
+  releaseDate: "2026-01-05",
   category: "パチンコ（ライトミドル・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

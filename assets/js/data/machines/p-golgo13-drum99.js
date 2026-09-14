@@ -29,6 +29,7 @@ PachiSim.machineRegistry.register({
   aliases: ["ドラムゴルゴ13パチンコ", "ゴルゴ13パチンコ", "スナイパーRUSH"],
   manufacturer: { id: "sankyo", name: "SANKYO（三共）" },
   releaseYear: 2019,
+  releaseDate: "2019-05-07",
   category: "パチンコ（ライトミドル・一種二種混合機）",
 
   spinsPer1000Yen: 16,

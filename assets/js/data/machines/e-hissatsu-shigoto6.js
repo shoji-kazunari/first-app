@@ -49,6 +49,7 @@ PachiSim.machineRegistry.register({
   aliases: ["必殺仕事人6", "必殺仕事人Ⅵ", "必殺仕事人", "仕事人6", "必殺仕事人パチンコ"],
   manufacturer: { id: "kyoraku", name: "KYORAKU" },
   releaseYear: 2026,
+  releaseDate: "2026-07-06",
   category: "スマパチ（ミドル・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

@@ -37,6 +37,7 @@ PachiSim.machineRegistry.register({
   aliases: ["シン・ウルトラマン79", "シンウルトラマン79ver.", "eシンウルトラマン", "ウルトラマン79"],
   manufacturer: { id: "ok", name: "OK!!" },
   releaseYear: 2026,
+  releaseDate: "2026-09-07",
   category: "スマパチ（一種二種混合機・甘デジ）",
 
   spinsPer1000Yen: 16,

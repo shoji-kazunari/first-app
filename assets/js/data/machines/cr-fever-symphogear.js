@@ -17,6 +17,13 @@
 //   8R:  728個 → 679個
 //   12R: 1092個 → 1019個
 //   15R: 1365個 → 1274個
+//
+// 【releaseDate（導入日）の出典・この機種だけ1geki.jp以外】
+// 上記の通り1geki.jpに掲載ページが無いため、SANKYO公式の機種史ページ
+// （https://www.sankyo-fever.jp/history/machine_detail/id_693.php、要旨
+// 「導入日は2017年8月21日」）をWebSearch経由で確認して採用した。実行環境の
+// ネットワークポリシーでこのURLへの直接curlは403でブロックされたため、
+// 直接fetchによる裏取りはできていない。
 window.PachiSim = window.PachiSim || {};
 
 PachiSim.machineRegistry.register({
@@ -34,6 +41,7 @@ PachiSim.machineRegistry.register({
   ],
   manufacturer: { id: "sankyo", name: "SANKYO" },
   releaseYear: 2017,
+  releaseDate: "2017-08-21",
   category: "ライトミドル",
 
   spinsPer1000Yen: 16,

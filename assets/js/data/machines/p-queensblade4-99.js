@@ -31,6 +31,7 @@ PachiSim.machineRegistry.register({
   aliases: ["クイーンズブレイド4", "クイブレ4ナナエル", "Pクイーンズブレイド4", "クイーンズブレイドナナエル"],
   manufacturer: { id: "takao", name: "TAKAO（高尾）" },
   releaseYear: 2025,
+  releaseDate: "2025-02-17",
   category: "パチンコ（甘デジ・一種二種混合機）",
 
   spinsPer1000Yen: 16,

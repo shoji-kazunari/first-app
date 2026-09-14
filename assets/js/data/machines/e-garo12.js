@@ -47,6 +47,7 @@ PachiSim.machineRegistry.register({
   aliases: ["牙狼", "ガロ", "牙狼12", "牙狼7500", "黄金騎士極限", "牙狼極限"],
   manufacturer: { id: "sansei-rd", name: "SanseiR&D" },
   releaseYear: 2025,
+  releaseDate: "2025-08-04",
   category: "スマパチ（ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

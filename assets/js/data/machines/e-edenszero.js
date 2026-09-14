@@ -55,6 +55,7 @@ PachiSim.machineRegistry.register({
   aliases: ["エデンズゼロ", "EDENS ZERO", "エデンズゼロ究極LT", "eエデンズゼロ"],
   manufacturer: { id: "nanashow", name: "NANASHOW" },
   releaseYear: 2026,
+  releaseDate: "2026-08-03",
   category: "スマパチ（ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

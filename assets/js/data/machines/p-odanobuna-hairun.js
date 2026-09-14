@@ -60,6 +60,7 @@ PachiSim.machineRegistry.register({
   aliases: ["入るんスタート織田信奈", "織田信奈の野望249", "織田信奈の野望入るんスタート", "P織田信奈の野望"],
   manufacturer: { id: "takao", name: "TAKAO（高尾）" },
   releaseYear: 2026,
+  releaseDate: "2026-07-06",
   category: "パチンコ（ミドル・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

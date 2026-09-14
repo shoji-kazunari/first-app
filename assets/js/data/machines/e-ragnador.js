@@ -67,6 +67,7 @@ PachiSim.machineRegistry.register({
   aliases: ["ラグナドール", "ラグナドールパチンコ", "eラグナドール", "ラグナドRUSH"],
   manufacturer: { id: "macy", name: "MACY（メーシー）" },
   releaseYear: 2026,
+  releaseDate: "2026-04-06",
   category: "パチンコ（スマパチ・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

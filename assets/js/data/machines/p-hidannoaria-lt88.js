@@ -34,6 +34,7 @@ PachiSim.machineRegistry.register({
   aliases: ["緋弾のアリア88", "緋弾のアリアパチンコ", "LBR", "ライトニングバレットラッシュ"],
   manufacturer: { id: "fuji", name: "FUJI（藤商事）" },
   releaseYear: 2025,
+  releaseDate: "2025-06-02",
   category: "パチンコ（甘デジ・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

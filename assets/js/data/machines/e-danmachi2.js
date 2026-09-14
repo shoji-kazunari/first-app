@@ -31,6 +31,7 @@ PachiSim.machineRegistry.register({
   aliases: ["ダンまち2パチンコ", "ダンジョンに出会いを求めるのは間違っているだろうか2", "ヘスティアチャージ"],
   manufacturer: { id: "sankyo", name: "SANKYO（三共）" },
   releaseYear: 2025,
+  releaseDate: "2025-10-06",
   category: "パチンコ（スマパチ・ライトミドル・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

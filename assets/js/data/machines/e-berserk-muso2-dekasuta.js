@@ -45,6 +45,7 @@ PachiSim.machineRegistry.register({
   ],
   manufacturer: { id: "newgin", name: "newgin" },
   releaseYear: 2026,
+  releaseDate: "2026-07-21",
   category: "スマパチ（ミドル・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

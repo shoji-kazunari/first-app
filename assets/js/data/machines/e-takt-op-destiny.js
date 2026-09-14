@@ -80,6 +80,7 @@ PachiSim.machineRegistry.register({
   aliases: ["タクトオーパス", "タクトオーパスデスティニー", "eタクトオーパス", "TACT OP. Destiny"],
   manufacturer: { id: "newgin", name: "newgin" },
   releaseYear: 2026,
+  releaseDate: "2026-09-07",
   category: "スマパチ（ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 39,

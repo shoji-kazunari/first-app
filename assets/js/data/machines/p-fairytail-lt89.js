@@ -44,6 +44,7 @@ PachiSim.machineRegistry.register({
   aliases: ["フェアリーテイルパチンコ", "フェアリーテイル89", "FAIRY RUSH", "七炎竜RUSH", "一夜モード"],
   manufacturer: { id: "fuji", name: "FUJI（藤商事）" },
   releaseYear: 2025,
+  releaseDate: "2025-09-08",
   category: "パチンコ（甘デジ・ラッキートリガー・二種）",
 
   spinsPer1000Yen: 16,

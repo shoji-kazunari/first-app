@@ -35,6 +35,7 @@ PachiSim.machineRegistry.register({
   aliases: ["百花繚乱パチンコ", "百花繚乱ご奉仕", "忠chu乱舞BONUS", "P百花繚乱129"],
   manufacturer: { id: "dlight", name: "D-light（ディ・ライト）" },
   releaseYear: 2024,
+  releaseDate: "2024-08-05",
   category: "パチンコ（ライト・一種二種混合機）",
 
   spinsPer1000Yen: 16,

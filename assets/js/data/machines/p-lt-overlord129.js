@@ -33,6 +33,7 @@ PachiSim.machineRegistry.register({
   aliases: ["オーバーロードパチンコ", "オーバーロード129", "シャルティアバトル", "OVERMAX"],
   manufacturer: { id: "sansei-rd", name: "SanseiR&D（サンセイR&D）" },
   releaseYear: 2025,
+  releaseDate: "2025-02-03",
   category: "パチンコ（ライト・ラッキートリガー・二種）",
 
   spinsPer1000Yen: 16,

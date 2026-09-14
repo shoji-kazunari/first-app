@@ -54,6 +54,7 @@ PachiSim.machineRegistry.register({
   aliases: ["アズールレーン2", "アズレン2", "eアズールレーン2", "アズールレーンパチンコ2"],
   manufacturer: { id: "kyoraku", name: "KYORAKU（京楽）" },
   releaseYear: 2025,
+  releaseDate: "2025-12-08",
   category: "パチンコ（ライトミドル・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

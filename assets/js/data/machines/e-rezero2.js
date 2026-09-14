@@ -41,6 +41,7 @@ PachiSim.machineRegistry.register({
   aliases: ["リゼロ2", "リゼロseason2", "Re:ゼロ2", "eリゼロ2", "リゼロシーズン2"],
   manufacturer: { id: "daito", name: "Daito" },
   releaseYear: 2023,
+  releaseDate: "2023-11-20",
   category: "スマパチ（一種二種混合機）",
 
   spinsPer1000Yen: 16,

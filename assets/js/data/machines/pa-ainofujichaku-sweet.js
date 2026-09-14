@@ -58,6 +58,7 @@ PachiSim.machineRegistry.register({
   aliases: ["愛の不時着甘デジ", "愛の不時着99", "愛の不時着スイート", "PA愛の不時着"],
   manufacturer: { id: "macy", name: "MACY" },
   releaseYear: 2026,
+  releaseDate: "2026-09-07",
   category: "ラッキートリガー（二種・甘デジ）",
 
   spinsPer1000Yen: 16,

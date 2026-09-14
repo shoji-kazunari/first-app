@@ -42,6 +42,7 @@ PachiSim.machineRegistry.register({
   aliases: ["仮面ライダーブラックパチンコ", "JUSTICE RUSH", "EXTREME JUSTICE RUSH", "e仮面ライダーBLACKパチンコ"],
   manufacturer: { id: "kyoraku", name: "KYORAKU（京楽）" },
   releaseYear: 2025,
+  releaseDate: "2025-11-04",
   category: "パチンコ（スマパチ・ライトミドル・ラッキートリガー・一種二種混合機）",
 
   // 要確認: 「デカヘソ」搭載機だが具体的な回転数の記載が無いため既定値のまま。

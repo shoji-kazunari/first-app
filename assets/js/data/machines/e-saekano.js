@@ -34,6 +34,7 @@ PachiSim.machineRegistry.register({
   aliases: ["冴えカノ", "冴えない彼女の育てかたパチンコ", "冴えてる彼女RUSH", "eサエカノ"],
   manufacturer: { id: "daito", name: "Daito（大都技研）" },
   releaseYear: 2025,
+  releaseDate: "2025-06-02",
   category: "パチンコ（スマパチ・ライトミドル・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

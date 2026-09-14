@@ -47,6 +47,7 @@ PachiSim.machineRegistry.register({
   aliases: ["刀使ノ巫女パチンコ", "トウジノミコパチンコ", "快刀乱麻", "大荒魂討伐モード"],
   manufacturer: { id: "nishijin", name: "NISHIJIN（西陣）" },
   releaseYear: 2022,
+  releaseDate: "2022-08-22",
   category: "パチンコ（ライトミドル・一種二種混合機・遊タイム）",
 
   spinsPer1000Yen: 16,

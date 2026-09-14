@@ -55,6 +55,7 @@ PachiSim.machineRegistry.register({
   aliases: ["まどマギ3甘デジ", "まどか☆マギカ3甘デジ", "まどマギ3キュゥべえ", "Pまどマギ3"],
   manufacturer: { id: "kyoraku", name: "KYORAKU" },
   releaseYear: 2026,
+  releaseDate: "2026-06-08",
   category: "パチンコ（一種二種混合機・甘デジ）",
 
   spinsPer1000Yen: 16,

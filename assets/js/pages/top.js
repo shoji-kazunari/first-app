@@ -33,6 +33,15 @@
     return PachiSim.kana.normalize(a).localeCompare(PachiSim.kana.normalize(b), "ja");
   }
 
+  // メーカー内の並び順: 導入日が新しい機種を上に、同日ならあいうえお順。
+  // TOPページ自体には導入日を表示しないが、並び順にだけ使う。
+  function byReleaseDateThenKana(a, b) {
+    if (a.releaseDate !== b.releaseDate) {
+      return a.releaseDate > b.releaseDate ? -1 : 1;
+    }
+    return byKana(a.nameKana, b.nameKana);
+  }
+
   function matchesQuery(machine, query) {
     if (!query) return false;
     return (
@@ -86,7 +95,7 @@
     const sortedGroups = manufacturers
       .map((group) => ({
         ...group,
-        machines: [...group.machines].sort((a, b) => byKana(a.nameKana, b.nameKana)),
+        machines: [...group.machines].sort(byReleaseDateThenKana),
       }))
       .sort((a, b) => byKana(a.name, b.name));
 

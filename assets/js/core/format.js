@@ -38,5 +38,13 @@ PachiSim.format = (function () {
     )}:${pad(d.getMinutes())}`;
   }
 
-  return { yen, ball, number, percent, probabilityFraction, dateTimeLabel };
+  // 「YYYY-MM-DD」形式の導入日を「2026年3月2日 導入」の表記にする。
+  // 不正な形式が渡された場合は空文字を返す。
+  function releaseDateLabel(isoDate) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(isoDate || "");
+    if (!m) return "";
+    return `${Number(m[1])}年${Number(m[2])}月${Number(m[3])}日 導入`;
+  }
+
+  return { yen, ball, number, percent, probabilityFraction, dateTimeLabel, releaseDateLabel };
 })();

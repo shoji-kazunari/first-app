@@ -57,6 +57,7 @@ PachiSim.machineRegistry.register({
   aliases: ["キン肉マン", "キン肉マンパチンコ", "eキン肉マン", "フィーバーキン肉マン"],
   manufacturer: { id: "sankyo", name: "SANKYO" },
   releaseYear: 2026,
+  releaseDate: "2026-04-20",
   category: "スマパチ（ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

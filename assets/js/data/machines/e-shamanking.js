@@ -50,6 +50,7 @@ PachiSim.machineRegistry.register({
   aliases: ["シャーマンキングパチンコ", "eシャーマンキング でっけぇえなver.", "シャーマンファイト"],
   manufacturer: { id: "macy", name: "MACY（メーシー）" },
   releaseYear: 2025,
+  releaseDate: "2025-08-04",
   category: "パチンコ（スマパチ・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

@@ -44,6 +44,7 @@ PachiSim.machineRegistry.register({
   aliases: ["SAOスマパチ", "スマパチSAO", "ソードアートオンラインスマパチ", "SAO無印パチンコ"],
   manufacturer: { id: "kyoraku", name: "KYORAKU" },
   releaseYear: 2023,
+  releaseDate: "2023-09-04",
   category: "スマパチ（ミドル・V-ST機・突然時短）",
 
   spinsPer1000Yen: 16,

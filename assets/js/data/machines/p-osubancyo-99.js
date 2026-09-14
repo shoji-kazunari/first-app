@@ -17,6 +17,7 @@ PachiSim.machineRegistry.register({
   aliases: ["P押忍番長99", "P番長99", "Pぱちんこ押忍番長99ver", "押忍番長99パチンコ版"],
   manufacturer: { id: "daito", name: "Daito" },
   releaseYear: 2026,
+  releaseDate: "2026-08-03",
   category: "パチンコ（甘デジ・一種二種混合機）",
 
   spinsPer1000Yen: 16,

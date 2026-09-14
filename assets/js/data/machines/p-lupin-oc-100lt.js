@@ -40,6 +40,7 @@ PachiSim.machineRegistry.register({
   aliases: ["ルパン三世ONE COLLECTION", "ルパンパチンコ100", "GOLDEN TIME", "ルパン三世ワンコレ"],
   manufacturer: { id: "heiwa", name: "HEIWA（平和）" },
   releaseYear: 2025,
+  releaseDate: "2025-09-22",
   category: "パチンコ（甘デジ・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

@@ -75,6 +75,7 @@ window.PachiSim = window.PachiSim || {};
     ],
     manufacturer: { id: "kyoraku", name: "KYORAKU" },
     releaseYear: 2026,
+    releaseDate: "2026-08-03",
     category: "スマパチ（ライトミドル・ラッキートリガー・一種二種混合機）",
 
     spinsPer1000Yen: 16,

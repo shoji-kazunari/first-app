@@ -48,6 +48,7 @@ PachiSim.machineRegistry.register({
   aliases: ["大海物語アグネス", "アグネスラム大海物語", "大海アグネス", "PA大海物語アグネス", "大海物語アグネスラム"],
   manufacturer: { id: "sanyo-bussan", name: "SANYO（三洋物産）" },
   releaseYear: 2026,
+  releaseDate: "2026-12-07",
   category: "ST機（甘デジ・遊タイム）",
 
   spinsPer1000Yen: 16,

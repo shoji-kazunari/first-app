@@ -42,6 +42,7 @@ PachiSim.machineRegistry.register({
   aliases: ["うしおととら", "うしとら100", "うしおととら100ver.", "神のせSPEC"],
   manufacturer: { id: "dlight", name: "D-light（ディ・ライト）" },
   releaseYear: 2026,
+  releaseDate: "2026-09-07",
   category: "スマパチ（ラッキートリガー・一種二種混合機・甘デジ）",
 
   spinsPer1000Yen: 16,

@@ -42,6 +42,7 @@ PachiSim.machineRegistry.register({
   aliases: ["ワールドダイスター", "eワールドダイスター", "ワールドダイスターパチンコ"],
   manufacturer: { id: "daito", name: "Daito" },
   releaseYear: 2026,
+  releaseDate: "2026-07-06",
   category: "スマパチ（ライトミドル・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

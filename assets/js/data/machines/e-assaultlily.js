@@ -39,6 +39,7 @@ PachiSim.machineRegistry.register({
   aliases: ["アサルトリリィ", "アサリリ", "eアサリリ"],
   manufacturer: { id: "besty", name: "ビスティ" },
   releaseYear: 2026,
+  releaseDate: "2026-09-07",
   category: "スマパチ（ライト・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

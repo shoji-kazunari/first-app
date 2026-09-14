@@ -29,6 +29,7 @@ PachiSim.machineRegistry.register({
   aliases: ["春一番2026", "P春一番", "春一番パチンコ2026"],
   manufacturer: { id: "sophia", name: "Sophia（ソフィア）" },
   releaseYear: 2026,
+  releaseDate: "2026-08-17",
   category: "パチンコ（ST機・甘デジ）",
 
   spinsPer1000Yen: 16,

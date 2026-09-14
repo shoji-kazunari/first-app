@@ -40,6 +40,7 @@ PachiSim.machineRegistry.register({
   aliases: ["エヴァ17", "エヴァンゲリオン17", "はじまりの記憶", "エヴァはじまりの記憶", "エヴァ最新台"],
   manufacturer: { id: "besty", name: "ビスティ" },
   releaseYear: 2025,
+  releaseDate: "2025-12-22",
   category: "スマパチ（ST機/ラッキートリガー）",
 
   spinsPer1000Yen: 16,

@@ -31,6 +31,7 @@ PachiSim.machineRegistry.register({
   aliases: ["ガンダムユニコーン再来99", "ユニコーン2甘デジ", "覚醒HYPER99", "超覚醒HYPER99"],
   manufacturer: { id: "sankyo", name: "SANKYO（三共）" },
   releaseYear: 2025,
+  releaseDate: "2025-07-07",
   category: "パチンコ（甘デジ・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

@@ -50,6 +50,7 @@ PachiSim.machineRegistry.register({
   aliases: ["北斗の拳11", "暴凶星", "北斗の拳11暴凶星", "e北斗の拳11", "北斗の拳暴凶星2"],
   manufacturer: { id: "sammy", name: "Sammy" },
   releaseYear: 2025,
+  releaseDate: "2025-12-08",
   category: "スマパチ（ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

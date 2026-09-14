@@ -45,6 +45,7 @@ PachiSim.machineRegistry.register({
   aliases: ["エヴァ15", "エヴァ", "エヴァンゲリオン", "未来への咆哮", "新世紀エヴァンゲリオン", "エヴァ未来への咆哮"],
   manufacturer: { id: "besty", name: "ビスティ" },
   releaseYear: 2021,
+  releaseDate: "2021-12-20",
   category: "V-ST機（ミドル）",
 
   spinsPer1000Yen: 16,

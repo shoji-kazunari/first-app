@@ -45,6 +45,7 @@ PachiSim.machineRegistry.register({
   aliases: ["カケグルイ219", "eカケグルイ", "賭ケグルイパチンコ", "カケグルイ219ver"],
   manufacturer: { id: "dlight", name: "D-light（ディ・ライト）" },
   releaseYear: 2026,
+  releaseDate: "2026-05-11",
   category: "スマパチ（ライトミドル・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

@@ -41,6 +41,7 @@ PachiSim.machineRegistry.register({
   aliases: ["黄門ちゃま寿限無", "寿限無RUSH", "黄門ちゃまパチンコ", "e黄門ちゃま"],
   manufacturer: { id: "heiwa", name: "HEIWA（平和）" },
   releaseYear: 2025,
+  releaseDate: "2025-08-04",
   category: "パチンコ（スマパチ・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

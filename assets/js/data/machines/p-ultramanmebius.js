@@ -51,6 +51,7 @@ PachiSim.machineRegistry.register({
   aliases: ["ウルトラマンメビウス", "メビウスデカヘソ", "Pウルトラマンメビウス", "ウルトラマンメビウスパチンコ"],
   manufacturer: { id: "ok", name: "OK!!（オッケー）" },
   releaseYear: 2026,
+  releaseDate: "2026-04-06",
   category: "パチンコ（ミドル・ラッキートリガー・一種二種混合機）",
 
   // 要確認: 「デカヘソ」を売りにする台だが、実測値が無いため既定値のまま。

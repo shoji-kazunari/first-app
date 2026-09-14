@@ -41,6 +41,7 @@ PachiSim.machineRegistry.register({
   aliases: ["ガルパン159", "ガールズアンドパンツァー最終章", "eガルパン", "ガルパン最終章159"],
   manufacturer: { id: "heiwa", name: "HEIWA（平和）" },
   releaseYear: 2026,
+  releaseDate: "2026-07-06",
   category: "スマパチ（ライトミドル・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

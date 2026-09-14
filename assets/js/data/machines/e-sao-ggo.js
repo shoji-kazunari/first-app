@@ -47,6 +47,7 @@ PachiSim.machineRegistry.register({
   aliases: ["SAO GGO", "ガンゲイルオンラインパチンコ", "eSAO GGO", "ソードアートオンラインGGO", "SAOガンゲイル"],
   manufacturer: { id: "daito", name: "Daito" },
   releaseYear: 2026,
+  releaseDate: "2026-08-03",
   category: "スマパチ（ミドル・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

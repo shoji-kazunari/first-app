@@ -47,6 +47,7 @@ PachiSim.machineRegistry.register({
   aliases: ["東リベ", "東京リベンジャーズ", "e東リベ", "トーリベ"],
   manufacturer: { id: "ginza", name: "GINZA" },
   releaseYear: 2025,
+  releaseDate: "2025-07-07",
   category: "スマパチ（ミドル・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

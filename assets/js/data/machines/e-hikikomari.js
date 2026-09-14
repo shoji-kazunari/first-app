@@ -55,6 +55,7 @@ PachiSim.machineRegistry.register({
   aliases: ["ひきこまり", "ひきこまり吸血姫", "eひきこまり", "ひきこまり吸血姫の悶々パチンコ"],
   manufacturer: { id: "fuji", name: "FUJI" },
   releaseYear: 2026,
+  releaseDate: "2026-05-11",
   category: "スマパチ（ライトミドル・二種）",
 
   spinsPer1000Yen: 16,

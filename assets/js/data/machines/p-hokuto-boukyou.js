@@ -34,6 +34,7 @@ PachiSim.machineRegistry.register({
   aliases: ["北斗の拳暴凶星", "拳王RUSH", "P北斗の拳", "北斗の拳パチンコ暴凶星"],
   manufacturer: { id: "sammy", name: "Sammy（サミー）" },
   releaseYear: 2023,
+  releaseDate: "2023-05-08",
   category: "パチンコ（ミドル・一種二種混合機）",
 
   spinsPer1000Yen: 16,

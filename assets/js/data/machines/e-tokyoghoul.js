@@ -33,6 +33,7 @@ PachiSim.machineRegistry.register({
   aliases: ["東京喰種", "東京グール", "トーキョーグール", "喰種", "東京喰種無印", "東京喰種W"],
   manufacturer: { id: "besty", name: "ビスティ" },
   releaseYear: 2025,
+  releaseDate: "2025-04-21",
   category: "スマパチ（ライトミドル・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

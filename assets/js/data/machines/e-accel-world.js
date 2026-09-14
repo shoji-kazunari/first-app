@@ -91,6 +91,7 @@ PachiSim.machineRegistry.register({
   aliases: ["アクセルワールド", "アクセル・ワールド", "AW", "eAW", "加速世界"],
   manufacturer: { id: "newgin", name: "newgin" },
   releaseYear: 2026,
+  releaseDate: "2026-08-03",
   category: "スマパチ（ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

@@ -32,6 +32,7 @@ PachiSim.machineRegistry.register({
   aliases: ["番長", "押忍番長", "押忍!番長", "番長漢の頂", "e番長"],
   manufacturer: { id: "daito", name: "Daito" },
   releaseYear: 2025,
+  releaseDate: "2025-01-06",
   category: "スマパチ（ライトミドル・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

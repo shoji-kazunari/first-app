@@ -58,6 +58,7 @@ PachiSim.machineRegistry.register({
   aliases: ["魔女と野獣", "マジョヤジュウ", "e魔女と野獣パチンコ"],
   manufacturer: { id: "fuji", name: "FUJI" },
   releaseYear: 2026,
+  releaseDate: "2026-09-07",
   category: "スマパチ（ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

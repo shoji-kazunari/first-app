@@ -40,6 +40,7 @@ PachiSim.machineRegistry.register({
   aliases: ["化物語99", "化物語鬼99", "e化物語鬼99ver", "化物語パチンコ"],
   manufacturer: { id: "ginza", name: "GINZA（銀座）" },
   releaseYear: 2026,
+  releaseDate: "2026-06-08",
   category: "スマパチ（ラッキートリガー・一種二種混合機・甘デジ）",
 
   spinsPer1000Yen: 16,

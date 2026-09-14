@@ -37,6 +37,7 @@ PachiSim.machineRegistry.register({
   aliases: ["海物語極ジャパン", "極ジャパン", "海物語パチンコ極JAPAN", "極ノ刻"],
   manufacturer: { id: "sanyo-bussan", name: "SANYO（三洋物産）" },
   releaseYear: 2025,
+  releaseDate: "2025-05-07",
   category: "パチンコ（ミドル・一種二種混合機）",
 
   spinsPer1000Yen: 16,

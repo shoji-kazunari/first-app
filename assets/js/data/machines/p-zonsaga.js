@@ -44,6 +44,7 @@ PachiSim.machineRegistry.register({
   aliases: ["ゾンサガ", "ゾンビランドサガパチンコ", "七福ヘドバンRUSH", "サガRUSH"],
   manufacturer: { id: "sammy", name: "Sammy（サミー）" },
   releaseYear: 2025,
+  releaseDate: "2025-04-21",
   category: "パチンコ（ライトミドル・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

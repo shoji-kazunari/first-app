@@ -47,6 +47,7 @@ PachiSim.machineRegistry.register({
   aliases: ["グリッドマン159", "グリッドマンパチンコ", "eグリッドマン", "SSSSグリッドマン159"],
   manufacturer: { id: "nanashow", name: "NANASHOW（七匠）" },
   releaseYear: 2026,
+  releaseDate: "2026-03-16",
   category: "パチンコ（ライト・V-ST機）",
 
   spinsPer1000Yen: 16,

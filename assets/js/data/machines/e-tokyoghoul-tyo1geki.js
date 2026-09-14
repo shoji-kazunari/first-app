@@ -89,6 +89,7 @@ PachiSim.machineRegistry.register({
   ],
   manufacturer: { id: "besty", name: "ビスティ" },
   releaseYear: 2026,
+  releaseDate: "2026-06-08",
   category: "スマパチ（ラッキートリガー・一種二種混合機）",
 
   // 「超デカSTART」を売りにする台。依頼者の実感で28（詳細はファイル冒頭のコメント参照）。

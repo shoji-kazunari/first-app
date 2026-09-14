@@ -48,6 +48,7 @@ PachiSim.machineRegistry.register({
   aliases: ["女神のカフェテラス", "めがみのカフェテラス", "カフェテラス"],
   manufacturer: { id: "jfj", name: "JFJ" },
   releaseYear: 2025,
+  releaseDate: "2025-08-18",
   category: "スマパチ（ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

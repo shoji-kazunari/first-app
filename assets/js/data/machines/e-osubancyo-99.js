@@ -36,6 +36,7 @@ PachiSim.machineRegistry.register({
   aliases: ["押忍番長99", "番長99", "押忍番長漢の頂99ver", "eぱちんこ押忍番長99"],
   manufacturer: { id: "daito", name: "Daito" },
   releaseYear: 2026,
+  releaseDate: "2026-08-03",
   category: "スマパチ（甘デジ・一種二種混合機）",
 
   spinsPer1000Yen: 16,

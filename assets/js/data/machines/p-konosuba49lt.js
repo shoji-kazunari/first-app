@@ -52,6 +52,7 @@ PachiSim.machineRegistry.register({
   ],
   manufacturer: { id: "toyomaru", name: "TOYOMARU（豊丸産業）" },
   releaseYear: 2025,
+  releaseDate: "2025-12-08",
   category: "パチンコ（甘デジ・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

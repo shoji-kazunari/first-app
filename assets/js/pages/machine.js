@@ -16,6 +16,7 @@
     const els = {
       machineName: $("machineName"),
       manufacturerName: $("manufacturerName"),
+      releaseDate: $("releaseDate"),
       rulesList: $("rulesList"),
       dataLamp: $("dataLamp"),
       statsGrid: $("statsGrid"),
@@ -62,6 +63,7 @@
     document.title = `${machine.name}（${machine.manufacturer.name}） | ${PachiSim.config.siteTitle}`;
     els.machineName.textContent = `${machine.name}（${probabilityLabel}）`;
     els.manufacturerName.textContent = machine.manufacturer.name;
+    els.releaseDate.textContent = PachiSim.format.releaseDateLabel(machine.releaseDate);
     els.machineRankingHeading.textContent = machine.name;
     els.rulesList.innerHTML = machine.rules.map((r) => `<li>${r}</li>`).join("");
 

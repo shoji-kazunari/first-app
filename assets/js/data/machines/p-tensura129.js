@@ -36,6 +36,7 @@ PachiSim.machineRegistry.register({
   aliases: ["転スラパチンコ", "転スラ129", "P転生したらスライムだった件ARJ", "ハーベストフェスティバル"],
   manufacturer: { id: "sansei-rd", name: "SanseiR&D（サンセイR&D）" },
   releaseYear: 2025,
+  releaseDate: "2025-11-04",
   category: "パチンコ（ライト・ST機・一種二種混合機）",
 
   spinsPer1000Yen: 16,

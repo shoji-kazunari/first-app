@@ -34,6 +34,7 @@ PachiSim.machineRegistry.register({
   aliases: ["クイーンズブレイド奈落", "クイーンズブレイドパチンコ", "QUEEN'S BLADE", "クイブレ奈落5400"],
   manufacturer: { id: "takao", name: "TAKAO（高尾）" },
   releaseYear: 2025,
+  releaseDate: "2025-08-04",
   category: "パチンコ（ライトミドル・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

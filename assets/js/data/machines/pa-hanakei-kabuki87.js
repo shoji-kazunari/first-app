@@ -40,6 +40,7 @@ PachiSim.machineRegistry.register({
   aliases: ["花の慶次 傾奇一転87", "花の慶次甘デジ", "傾奇一転87", "Pa花の慶次"],
   manufacturer: { id: "newgin", name: "newgin" },
   releaseYear: 2026,
+  releaseDate: "2026-06-08",
   category: "パチンコ（一種二種混合機・甘デジ・遊タイム）",
 
   spinsPer1000Yen: 16,

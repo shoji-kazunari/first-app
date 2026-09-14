@@ -45,6 +45,7 @@ PachiSim.machineRegistry.register({
   aliases: ["ライザのアトリエ パチンコ", "ライザのアトリエ2", "eライザのアトリエ", "ライザパチンコ"],
   manufacturer: { id: "kyoraku", name: "KYORAKU（京楽）" },
   releaseYear: 2026,
+  releaseDate: "2026-05-07",
   category: "パチンコ（スマパチ・ライトミドル・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

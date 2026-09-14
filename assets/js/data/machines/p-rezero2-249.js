@@ -32,6 +32,7 @@ PachiSim.machineRegistry.register({
   aliases: ["リゼロ249", "Pリゼロ2 249", "リゼロ2 249ver.", "Pリゼロseason2 249"],
   manufacturer: { id: "daito", name: "Daito（大都技研）" },
   releaseYear: 2026,
+  releaseDate: "2026-10-05",
   category: "パチンコ（ライトミドル・一種二種混合機）",
 
   spinsPer1000Yen: 16,

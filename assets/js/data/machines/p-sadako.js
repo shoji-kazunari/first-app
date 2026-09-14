@@ -34,6 +34,7 @@ PachiSim.machineRegistry.register({
   aliases: ["貞子パチンコ", "リングパチンコ", "超貞子RUSH", "極最恐BONUS"],
   manufacturer: { id: "fuji", name: "FUJI（藤商事）" },
   releaseYear: 2024,
+  releaseDate: "2024-07-08",
   category: "パチンコ（ライトミドル・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

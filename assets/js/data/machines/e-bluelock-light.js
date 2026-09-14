@@ -54,6 +54,7 @@ PachiSim.machineRegistry.register({
   aliases: ["ブルーロックライト", "ブルーロック120", "eブルーロックLight", "eフィーバーブルーロックライト版"],
   manufacturer: { id: "sankyo", name: "SANKYO（三共）" },
   releaseYear: 2026,
+  releaseDate: "2026-07-06",
   category: "スマパチ（ライトミドル・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

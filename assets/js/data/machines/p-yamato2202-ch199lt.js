@@ -29,6 +29,7 @@ PachiSim.machineRegistry.register({
   aliases: ["宇宙戦艦ヤマト2202パチンコ", "ヤマト2202森雪199", "真波動RUSH", "宇宙戦艦ヤマト森雪"],
   manufacturer: { id: "besty", name: "ビスティ" },
   releaseYear: 2025,
+  releaseDate: "2025-05-07",
   category: "パチンコ（ライトミドル・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

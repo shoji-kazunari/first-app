@@ -35,6 +35,7 @@ PachiSim.machineRegistry.register({
   aliases: ["無職転生", "むしょくてんせい", "異世界行ったら本気だす"],
   manufacturer: { id: "newgin", name: "newgin" },
   releaseYear: 2026,
+  releaseDate: "2026-07-06",
   category: "スマパチ（ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

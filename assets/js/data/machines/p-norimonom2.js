@@ -27,6 +27,7 @@ PachiSim.machineRegistry.register({
   aliases: ["乗物娘2", "乗物娘パチンコ", "P乗物娘2", "乗物RUSH"],
   manufacturer: { id: "newgin", name: "newgin（ニューギン）" },
   releaseYear: 2025,
+  releaseDate: "2025-05-07",
   category: "パチンコ（ST機・ライトミドル）",
 
   spinsPer1000Yen: 16,

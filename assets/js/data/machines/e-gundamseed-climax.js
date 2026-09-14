@@ -65,6 +65,7 @@ PachiSim.machineRegistry.register({
   ],
   manufacturer: { id: "sankyo", name: "SANKYO" },
   releaseYear: 2026,
+  releaseDate: "2026-08-03",
   category: "スマパチ（ST機/ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

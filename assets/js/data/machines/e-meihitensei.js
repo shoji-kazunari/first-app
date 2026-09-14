@@ -52,6 +52,7 @@ PachiSim.machineRegistry.register({
   aliases: ["冥妃転生", "メイヒテンセイ", "eメイヒテンセイ"],
   manufacturer: { id: "macy", name: "MACY" },
   releaseYear: 2026,
+  releaseDate: "2026-06-08",
   category: "スマパチ（ライトミドル・ラッキートリガー・二種）",
 
   spinsPer1000Yen: 16,

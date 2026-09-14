@@ -53,6 +53,7 @@ PachiSim.machineRegistry.register({
   aliases: ["ゾン100", "ゾンビになるまでにしたい100のこと", "ゾン100パチンコ", "ゾンビ100"],
   manufacturer: { id: "sansei-rd", name: "SanseiR&D" },
   releaseYear: 2026,
+  releaseDate: "2026-08-17",
   category: "スマパチ（ライトミドル・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

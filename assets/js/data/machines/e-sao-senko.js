@@ -47,6 +47,7 @@ PachiSim.machineRegistry.register({
   aliases: ["SAO閃光の軌跡", "閃光の軌跡", "SAO199", "ソードアートオンライン閃光の軌跡"],
   manufacturer: { id: "kyoraku", name: "KYORAKU" },
   releaseYear: 2024,
+  releaseDate: "2024-12-16",
   category: "スマパチ（ライトミドル・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

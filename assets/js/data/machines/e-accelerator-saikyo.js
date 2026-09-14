@@ -44,6 +44,7 @@ PachiSim.machineRegistry.register({
   ],
   manufacturer: { id: "orange-fuji", name: "orange(オレンジ)/藤商事グループ" },
   releaseYear: 2026,
+  releaseDate: "2026-07-06",
   category: "スマパチ（ミドル・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

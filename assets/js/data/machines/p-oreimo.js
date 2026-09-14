@@ -37,6 +37,7 @@ PachiSim.machineRegistry.register({
   aliases: ["俺妹", "おれいも", "俺の妹がこんなに可愛いわけがないパチンコ", "運命の審判"],
   manufacturer: { id: "kyoraku", name: "KYORAKU（京楽）" },
   releaseYear: 2025,
+  releaseDate: "2025-03-03",
   category: "パチンコ（ライトミドル・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

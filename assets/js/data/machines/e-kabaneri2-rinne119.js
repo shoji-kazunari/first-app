@@ -36,6 +36,7 @@ PachiSim.machineRegistry.register({
   aliases: ["カバネリ2輪廻", "カバネリ輪廻の果報", "甲鉄城のカバネリ2", "カバネリ119"],
   manufacturer: { id: "sammy", name: "Sammy" },
   releaseYear: 2026,
+  releaseDate: "2026-09-07",
   category: "スマパチ（ライト・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

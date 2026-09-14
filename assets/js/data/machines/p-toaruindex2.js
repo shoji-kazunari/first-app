@@ -29,6 +29,7 @@ PachiSim.machineRegistry.register({
   aliases: ["とある魔術の禁書目録2パチンコ", "とあるパチンコ", "レールガン", "アクセラレータ"],
   manufacturer: { id: "jfj", name: "JFJ" },
   releaseYear: 2024,
+  releaseDate: "2024-01-09",
   category: "パチンコ（ミドル・一種二種混合機）",
 
   spinsPer1000Yen: 16,

@@ -46,6 +46,7 @@ PachiSim.machineRegistry.register({
   aliases: ["ゆゆゆ", "結城友奈", "ゆゆゆ極限7500", "結城友奈は勇者である", "極限7500"],
   manufacturer: { id: "sansei-rd", name: "SanseiR&D" },
   releaseYear: 2026,
+  releaseDate: "2026-07-06",
   category: "スマパチ（ミドル・ラッキートリガー・二種）",
 
   spinsPer1000Yen: 16,

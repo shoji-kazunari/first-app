@@ -32,6 +32,7 @@ PachiSim.machineRegistry.register({
   aliases: ["コマコマ倶楽部パチンコ", "坂本冬美パチンコ", "スペシャルチャンス"],
   manufacturer: { id: "toyomaru", name: "TOYOMARU（豊丸産業）" },
   releaseYear: 2022,
+  releaseDate: "2022-06-06",
   category: "パチンコ（ライトミドル・ST機・遊タイム）",
 
   spinsPer1000Yen: 16,

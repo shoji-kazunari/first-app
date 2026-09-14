@@ -39,6 +39,7 @@ PachiSim.machineRegistry.register({
   aliases: ["ひぐらし輪廻転生", "ひぐらしパチンコ", "真惨劇RUSH", "ひぐらし99"],
   manufacturer: { id: "dlight", name: "D-light（ディ・ライト）" },
   releaseYear: 2025,
+  releaseDate: "2025-03-17",
   category: "パチンコ（甘デジ・遊タイム）",
 
   spinsPer1000Yen: 16,

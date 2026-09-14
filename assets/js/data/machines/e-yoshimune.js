@@ -30,6 +30,7 @@ PachiSim.machineRegistry.register({
   aliases: ["吉宗パチンコ", "極乗3000", "e吉宗", "吉宗極乗"],
   manufacturer: { id: "daito", name: "Daito（大都技研）" },
   releaseYear: 2026,
+  releaseDate: "2026-01-05",
   category: "パチンコ（ライトミドル・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

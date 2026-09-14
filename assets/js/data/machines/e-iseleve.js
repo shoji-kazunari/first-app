@@ -40,6 +40,7 @@ PachiSim.machineRegistry.register({
   aliases: ["いせれべ", "異世界チート", "いせれべパチンコ", "異世界でチート能力を手にした俺"],
   manufacturer: { id: "fuji", name: "FUJI（藤商事）" },
   releaseYear: 2026,
+  releaseDate: "2026-02-02",
   category: "パチンコ（ライトミドル・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

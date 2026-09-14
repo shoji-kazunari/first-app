@@ -30,6 +30,7 @@ PachiSim.machineRegistry.register({
   aliases: ["ガンダムユニコーン再来129", "ユニコーン129", "覚醒HYPER", "超覚醒HYPER"],
   manufacturer: { id: "sankyo", name: "SANKYO（三共）" },
   releaseYear: 2025,
+  releaseDate: "2025-07-07",
   category: "パチンコ（ライト・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

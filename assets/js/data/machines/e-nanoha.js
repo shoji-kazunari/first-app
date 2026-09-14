@@ -49,6 +49,7 @@ PachiSim.machineRegistry.register({
   aliases: ["リリカルなのは", "なのはパチンコ", "eなのは", "魔法少女リリカルなのは"],
   manufacturer: { id: "santhree", name: "SanThree（サンスリー）" },
   releaseYear: 2026,
+  releaseDate: "2026-07-06",
   category: "スマパチ（ミドル・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

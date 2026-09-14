@@ -57,6 +57,7 @@ PachiSim.machineRegistry.register({
   ],
   manufacturer: { id: "newgin", name: "newgin（ニューギン）" },
   releaseYear: 2025,
+  releaseDate: "2025-10-06",
   category: "パチンコ（甘デジ・ラッキートリガー・一種二種混合機）",
 
   // 要確認: 「デカスタ」搭載機だが具体的な回転数の記載が無いため既定値のまま。

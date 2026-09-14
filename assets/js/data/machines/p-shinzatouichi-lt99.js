@@ -39,6 +39,7 @@ PachiSim.machineRegistry.register({
   aliases: ["座頭市パチンコ", "座頭市LT99", "真・座頭市物語", "神速一閃モード"],
   manufacturer: { id: "newgin", name: "newgin（ニューギン）" },
   releaseYear: 2025,
+  releaseDate: "2025-09-08",
   category: "パチンコ（甘デジ・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

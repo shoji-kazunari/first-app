@@ -38,6 +38,7 @@ PachiSim.machineRegistry.register({
   aliases: ["ダンベル何キロ持てる2パチンコ", "ダンベルパチンコ", "ゴールデンタイム"],
   manufacturer: { id: "sankyo", name: "SANKYO（三共）" },
   releaseYear: 2026,
+  releaseDate: "2026-03-02",
   category: "パチンコ（スマパチ・ライトミドル・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

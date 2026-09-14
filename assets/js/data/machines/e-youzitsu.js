@@ -31,6 +31,7 @@ PachiSim.machineRegistry.register({
   aliases: ["よう実", "ようこそ実力至上主義の教室へ", "よう実パチンコ", "eよう実"],
   manufacturer: { id: "sansei-rd", name: "SanseiR&D（サンセイR&D）" },
   releaseYear: 2026,
+  releaseDate: "2026-01-05",
   category: "パチンコ（スマパチ・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

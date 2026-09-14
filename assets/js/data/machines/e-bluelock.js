@@ -55,6 +55,7 @@ PachiSim.machineRegistry.register({
   aliases: ["ブルーロック", "ブルロ", "eブルーロック", "ブルーロックパチンコ"],
   manufacturer: { id: "sankyo", name: "SANKYO" },
   releaseYear: 2025,
+  releaseDate: "2025-09-08",
   category: "スマパチ（ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

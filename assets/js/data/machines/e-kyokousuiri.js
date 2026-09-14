@@ -90,6 +90,7 @@ window.PachiSim = window.PachiSim || {};
     aliases: ["虚構推理", "きょこうすいり", "e虚構推理パチンコ"],
     manufacturer: { id: "daiichi", name: "大一商会" },
     releaseYear: 2026,
+    releaseDate: "2026-07-06",
     category: "1種2種混合（ラッキートリガー）",
 
     // デカヘソ機。ヘソが大きいぶん回るので、他機種(16回転)より多い。

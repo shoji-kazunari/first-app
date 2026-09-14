@@ -38,6 +38,7 @@ PachiSim.machineRegistry.register({
   aliases: ["HOTD3", "ハイスクールオブザデッド3", "学園黙示録3", "e学園黙示録3", "がくもくHOTD3"],
   manufacturer: { id: "takao", name: "TAKAO（高尾）" },
   releaseYear: 2026,
+  releaseDate: "2026-06-08",
   category: "スマパチ（ミドル・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

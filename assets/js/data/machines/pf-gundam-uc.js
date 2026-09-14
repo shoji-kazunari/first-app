@@ -70,6 +70,7 @@ PachiSim.machineRegistry.register({
     "PF機動戦士ガンダムユニコーン",
   ],
   manufacturer: { id: "sankyo", name: "SANKYO" },
+  releaseDate: "2025-07-07",
 
   spinsPer1000Yen: 16,
   baseStateId: "normal",

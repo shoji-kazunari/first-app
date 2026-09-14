@@ -53,6 +53,7 @@ PachiSim.machineRegistry.register({
   aliases: ["炎炎ノ消防隊2", "炎炎2", "炎炎ノ消防隊", "eフィーバー炎炎", "炎炎2 99"],
   manufacturer: { id: "sankyo", name: "SANKYO" },
   releaseYear: 2026,
+  releaseDate: "2026-09-07",
   category: "スマパチ（ラッキートリガー・一種二種混合機・甘デジ）",
 
   spinsPer1000Yen: 16,

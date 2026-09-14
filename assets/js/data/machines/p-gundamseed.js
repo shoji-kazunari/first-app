@@ -53,6 +53,7 @@ PachiSim.machineRegistry.register({
   aliases: ["ガンダムSEED", "ガンダムシード", "PSEED", "ガンダムSEED無印", "フリーダムHYPER"],
   manufacturer: { id: "sankyo", name: "SANKYO" },
   releaseYear: 2023,
+  releaseDate: "2023-08-07",
   category: "ミドル（一種二種混合機）",
 
   spinsPer1000Yen: 16,

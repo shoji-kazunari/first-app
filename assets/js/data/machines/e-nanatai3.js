@@ -60,6 +60,7 @@ PachiSim.machineRegistry.register({
   aliases: ["七つの大罪", "ななつのたいざい", "七つの大罪3", "七つの大罪パチンコ"],
   manufacturer: { id: "ginza", name: "GINZA" },
   releaseYear: 2026,
+  releaseDate: "2026-08-03",
   category: "スマパチ（ミドル・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

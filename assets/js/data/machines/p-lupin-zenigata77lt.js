@@ -34,6 +34,7 @@ PachiSim.machineRegistry.register({
   aliases: ["ルパン三世銭形からの招待状", "ルパン銭形パチンコ", "GOLDEN TIME", "神GOLDEN TIME BOOST"],
   manufacturer: { id: "heiwa", name: "HEIWA（平和）" },
   releaseYear: 2024,
+  releaseDate: "2024-09-02",
   category: "パチンコ（甘デジ・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

@@ -61,6 +61,7 @@ PachiSim.machineRegistry.register({
   aliases: ["沖海6", "沖海6えなこ", "スーパー海物語沖縄6", "海物語沖縄6", "PA沖海6"],
   manufacturer: { id: "sanyo-bussan", name: "SANYO（三洋物産）" },
   releaseYear: 2026,
+  releaseDate: "2026-06-08",
   category: "パチンコ（ST機・甘デジ）",
 
   spinsPer1000Yen: 16,

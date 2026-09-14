@@ -39,6 +39,7 @@ PachiSim.machineRegistry.register({
   aliases: ["アクダマドライブ パチンコ", "アクダマドライブ", "eアクダマ", "ドラマチックST"],
   manufacturer: { id: "sanyo-bussan", name: "SANYO（三洋物産）" },
   releaseYear: 2026,
+  releaseDate: "2026-03-02",
   category: "パチンコ（スマパチ・ミドル・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

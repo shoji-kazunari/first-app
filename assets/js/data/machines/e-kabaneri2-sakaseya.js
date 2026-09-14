@@ -49,6 +49,7 @@ PachiSim.machineRegistry.register({
   aliases: ["カバネリ2咲かせや燦然", "カバネリ2旧台", "甲鉄城のカバネリ2咲かせや燦然", "eカバネリ2燦然"],
   manufacturer: { id: "ginza", name: "GINZA（銀座）" },
   releaseYear: 2026,
+  releaseDate: "2026-09-07",
   category: "スマパチ（ミドル・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

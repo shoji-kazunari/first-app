@@ -49,6 +49,7 @@ PachiSim.machineRegistry.register({
   aliases: ["リコリコ", "リコリス・リコイル", "リコリスリコイル", "リコリス", "千束", "たきな"],
   manufacturer: { id: "newgin", name: "newgin" },
   releaseYear: 2026,
+  releaseDate: "2026-04-06",
   category: "スマパチ（ミドル・ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,

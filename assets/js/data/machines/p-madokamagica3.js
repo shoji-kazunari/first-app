@@ -42,6 +42,7 @@ PachiSim.machineRegistry.register({
   aliases: ["まどマギ", "まどマギ3", "魔法少女まどかマギカ", "まどか☆マギカ", "まどか", "マミる"],
   manufacturer: { id: "kyoraku", name: "KYORAKU" },
   releaseYear: 2024,
+  releaseDate: "2024-06-03",
   category: "ライトミドル（ラッキートリガー・一種二種混合機）",
 
   spinsPer1000Yen: 16,
