@@ -75,10 +75,11 @@
   grid-template-rows: 18px 1fr;
   gap: 4px 2px;
   background: #0a0b0d;
-  border: 1px solid var(--color-border);
+  border: 3px solid #171310;
   border-radius: var(--radius-md);
   padding: var(--space-3) var(--space-2) var(--space-2);
   overflow-x: auto;
+  box-shadow: 0 8px 18px rgba(40, 30, 10, 0.16);
 }
 
 .data-lamp__banner {
@@ -240,10 +241,14 @@
 /* シミュレーションエリア（状態表示・回転数・演出欄・保留欄をすべて内包する） */
 /* シミュレーションエリアは「状態〜保留」までの本体と、下部の帯（演出欄）の
    2段構成にする。演出欄はカードの左右下端いっぱいまで伸びる帯として置く。 */
+/* 実機の画面のように「意図してここだけ暗い」と伝わるよう、周りが白基調でも
+   常に濃い筐体フレーム＋浮き上がるような影を付ける（フレームがないと、
+   白いページに黒い箱がただ浮いているだけに見えてしまっていた）。 */
 .simulation-area {
   position: relative;
   border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border);
+  border: 5px solid #171310;
+  box-shadow: 0 14px 30px rgba(40, 30, 10, 0.22), 0 3px 8px rgba(40, 30, 10, 0.16);
   display: flex;
   flex-direction: column;
   min-height: 220px;
@@ -859,9 +864,9 @@
 }
 
 .speed-toggle__btn.is-active {
-  border-color: rgba(212, 175, 122, 0.7);
-  background: linear-gradient(180deg, #2a231c 0%, #1a1512 100%);
-  color: var(--color-accent-strong);
+  border-color: rgba(122, 86, 32, 0.5);
+  background: linear-gradient(180deg, #f3dfb0 0%, #d9ae64 100%);
+  color: #4a3417;
 }
 
 .machine-error {
