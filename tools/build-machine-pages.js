@@ -39,6 +39,7 @@ const STATIC_PAGES = [
   path.join("privacy", "index.html"),
   path.join("yosou", "index.html"),
   path.join("naniutsu", "index.html"),
+  path.join("my9dai", "index.html"),
 ];
 
 // 機種データの読み込み行（machines:start/end）を持つページ。
@@ -47,6 +48,7 @@ const MACHINE_LIST_PAGES = [
   { relativePath: "index.html", srcPrefix: "", label: "index.html" },
   { relativePath: path.join("tests", "index.html"), srcPrefix: "../", label: "tests/index.html" },
   { relativePath: path.join("naniutsu", "index.html"), srcPrefix: "../", label: "naniutsu/index.html" },
+  { relativePath: path.join("my9dai", "index.html"), srcPrefix: "../", label: "my9dai/index.html" },
 ];
 
 const CANONICAL_PATTERN = /<link rel="canonical" href="[^"]*">/;
