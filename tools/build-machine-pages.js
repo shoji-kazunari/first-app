@@ -39,6 +39,8 @@ const STATIC_PAGES = [
   path.join("privacy", "index.html"),
   path.join("yosou", "index.html"),
   path.join("naniutsu", "index.html"),
+  path.join("about", "index.html"),
+  path.join("unei", "index.html"),
 ];
 
 // 機種データの読み込み行（machines:start/end）を持つページ。
