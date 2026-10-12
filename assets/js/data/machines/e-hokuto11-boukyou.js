@@ -56,6 +56,8 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights:
+    "ヘソ入賞時の振り分けだけで4パターンの枝があり、通常の10Rだけでなく10R×3や2R+10Rといった組み合わせ当りから拳王RUSHへ直行するルートも用意されている。拳王RUSH中もST回数のリセットを含む複数の当り方が混在し、北斗シリーズらしい一撃の存在感を演出する構成。",
   rules: [
     "通常時の図柄揃い確率：約1/399.8",
     "拳王RUSH中の大当り確率：約1/10.7",

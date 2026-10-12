@@ -23,6 +23,8 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights:
+    "「番長」シリーズらしい男気あふれる演出が持ち味の甘デジで、頂RUSH中の当りは小さく継続するか一気にまとめて大きく出すかの二択とシンプルな構成です。細かい駆け引きより展開の分かりやすさで勝負するタイプの機種です。",
   rules: [
     "通常時大当り確率：1/99.9",
     "頂RUSH中の大当り確率：1/99.9",

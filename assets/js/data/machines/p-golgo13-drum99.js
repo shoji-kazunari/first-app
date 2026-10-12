@@ -35,6 +35,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "通常時の大当りはそのままスナイパーRUSHに入るのではなく、まず5回抽選の突入判定を経てから本RUSHに入れるかが決まる2段構え。判定中もRUSH中も大当りの内訳は常に同じ比率で変わらないため、狙撃手らしく淡々とした一発の精度を試される展開が続く。",
   rules: [
     "通常時大当り確率：1/99.9",
     "スナイパーRUSH確定後の当選確率：1/10.6",

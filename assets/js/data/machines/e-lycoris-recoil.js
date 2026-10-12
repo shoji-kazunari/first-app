@@ -55,6 +55,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "RUSH中はモードAとモードBを五分五分で渡り歩き、モードBで化けると「アルティメットドライブ」へ突入、成功する限り出玉の上乗せが連続する爆発力が売り。リコリコらしいスタイリッシュな演出の先に、一気に伸びる瞬間が待っている。",
   rules: [
     "通常時大当り確率：約1/259.7",
     "RUSH中大当り確率：約1/97.1（電チューロング解放確率）",

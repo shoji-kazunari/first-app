@@ -43,6 +43,8 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights:
+    "人気ライトノベル原作らしいテンポの良い展開で、運命の審判を突破するとRUSH、そのうち一部はさらに上位RUSHへと格上げされる三段階構成が持ち味です。上位RUSHでは「次回まで」の無期限状態に化けることもあり、最後まで目が離せません。",
   rules: [
     "通常時大当り確率：1/199.9",
     "運命の審判・RUSH・上位RUSH中の当選確率：1/66.1",

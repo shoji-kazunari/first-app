@@ -36,6 +36,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "通常時の大当りはヘソでおよそ五分に分かれ、覚醒HYPERに入れば約4%で上位の超覚醒HYPER（LT）へ格上げされる2階建て構成。LTに到達すると当りは100%継続のみになるため、そこを抜けた先の安定感がガンダムシリーズらしい頼もしさを感じさせる。",
   rules: [
     "通常時図柄揃い確率：1/129.8",
     "覚醒HYPER・超覚醒HYPER中の当選確率：1/40.6",

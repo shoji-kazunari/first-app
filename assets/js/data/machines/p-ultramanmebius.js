@@ -59,6 +59,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "RUSHに入ると初回→タロウ参戦→セブン参戦→最上位（ウルトラの父参戦）という仲間が次々に駆けつける構成で、当たるたびに参戦キャラが豪華になっていく物語性が楽しい。最上位まで辿り着けば継続率約70%でそこに留まり続けられる。",
   rules: [
     "通常時大当り確率：1/319.9",
     "各RUSH中の当選確率：1/12.3（共通）",
