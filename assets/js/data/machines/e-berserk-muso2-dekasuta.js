@@ -51,6 +51,9 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights:
+    "通常時の当りの半分近くがそのまま放魔RUSHへ直結する入りやすさが特徴で、RUSH中も3Rと10Rがほぼ半々で入れ替わりながらST100回を駆け抜ける。畳みかけるような連打感を重視した設計になっている。",
+
   rules: [
     "通常時大当り確率：1/299.25",
     "放魔RUSH中の大当り確率：1/69.55",

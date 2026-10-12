@@ -51,6 +51,9 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights:
+    "大当りのたびに翼竜決戦→蝕みの女王BATTLE→最終決戦と、勝敗付きのバトルを勝ち上がっていく段階構成が大きな特徴。最後まで勝ち進むと「運命の錬金術」でさらに連続上乗せを狙え、ラッキートリガー機らしい一撃の伸びを楽しめる。",
+
   rules: [
     "通常時大当り確率：1/239.7",
     "ひと夏の冒険モード・最終決戦BATTLE4500中の当選確率：1/69.5",

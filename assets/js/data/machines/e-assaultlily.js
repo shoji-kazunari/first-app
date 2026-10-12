@@ -45,6 +45,9 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights:
+    "ST100回のロングランRUSHで、当りのたびに10R・10R×2・10R×3と上乗せ量が入れ替わりながら積み重なっていく。STリセットという小さな当りも挟まり、腰を据えて連チャンの波を追うタイプの一台。",
+
   rules: [
     "通常時の図柄揃い確率：約1/164.4",
     "ASSAULT RUSH中のリーチ確率：約1/65.5",

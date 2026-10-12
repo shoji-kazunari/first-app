@@ -61,6 +61,9 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights:
+    "初当りの半数以上がそのままエゴイストBATTLEへつながる突入率の高さがまず目を引く。転落式のRUSH中は10R・10R×2から10R×6まで出玉の段差が広く、どのクラスを引けるかで伸び方が大きく変わる一台。",
+
   rules: [
     "通常時の図柄揃い確率：約1/399.9",
     "エゴイストBATTLE中の大当り確率：約1/33.2",

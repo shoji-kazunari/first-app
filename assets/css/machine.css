@@ -17,6 +17,12 @@
   margin-top: 2px;
 }
 
+.machine-highlights {
+  font-size: 0.85rem;
+  line-height: 1.8;
+  color: var(--color-text);
+}
+
 /* スペック・ゲームフロー: 初期状態は畳んでおき、押すと開くことが
    ひと目でわかるよう、ネイティブの開閉マーカーに加えてヒント文言も添える */
 .rules-summary {

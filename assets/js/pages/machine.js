@@ -18,6 +18,8 @@
       manufacturerName: $("manufacturerName"),
       releaseDate: $("releaseDate"),
       rulesList: $("rulesList"),
+      highlightsSection: $("highlightsSection"),
+      machineHighlights: $("machineHighlights"),
       dataLamp: $("dataLamp"),
       statsGrid: $("statsGrid"),
       resetButton: $("resetButton"),
@@ -66,6 +68,10 @@
     els.releaseDate.textContent = PachiSim.format.releaseDateLabel(machine.releaseDate);
     els.machineRankingHeading.textContent = machine.name;
     els.rulesList.innerHTML = machine.rules.map((r) => `<li>${r}</li>`).join("");
+    if (machine.highlights) {
+      els.machineHighlights.textContent = machine.highlights;
+      els.highlightsSection.hidden = false;
+    }
 
     const dateKey = PachiSim.statsStore.todayKey();
     let stats = PachiSim.statsStore.load(slug);

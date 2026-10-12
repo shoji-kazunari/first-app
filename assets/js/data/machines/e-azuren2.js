@@ -60,6 +60,9 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights:
+    "大当りは必ず出玉のある「大海戦ATTACK」から始まり、続く成功判定を乗り越えられるかどうかで展開が大きく分かれる二段構え。突破後の共同戦線RUSHは転落式で、当りのたびにまとまった出玉が積み重なっていく。",
+
   rules: [
     "通常時大当り確率（ATTACK確率）：1/169.9",
     "共同戦線RUSH中の当選確率：約1/21.9、転落確率：約1/71.7",

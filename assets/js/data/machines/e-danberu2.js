@@ -44,6 +44,9 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights:
+    "RUSH中の当りは約900個から約4500個相当まで4段階で、最大の「ゴールデンタイム」を引けるかどうかが注目点になる。ST127回という長めのサイクルをどこまで更新し続けられるか、気軽に楽しめる作りになっている。",
+
   rules: [
     "通常時大当り確率：1/149.9",
     "RUSH中の当選確率：1/97.7",

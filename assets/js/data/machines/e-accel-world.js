@@ -97,6 +97,9 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights:
+    "通常時の大当りの7割近くがBURST BATTLEへ直行する入りやすさと、転落しても「LAST JUDGE」で粘れる救済構成が特徴。突破後のOVER HEAVENは前半の確定大量獲得から後半の高継続パートへ続き、ラッキートリガー機らしい右肩上がりの展開を味わえる。",
+
   rules: [
     "通常時大当り確率：約1/184.6",
     "BURST BATTLE・LT中の大当り確率：ともに約1/36.7",

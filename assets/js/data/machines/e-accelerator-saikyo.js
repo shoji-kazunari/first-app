@@ -50,6 +50,9 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights:
+    "一方通行OVER RUSH中は電チューロング開放を重ねるたびに出玉が積み上がり、約4回に1回は「最狂ジャッジメント」という外れの無い追加抽選に進める。ST15回という短いサイクルを繰り返し乗り越えていく忙しさが持ち味の一台。",
+
   rules: [
     "通常時当選確率：1/253",
     "一方通行OVER RUSH中の当選確率：1/13（電チューロング開放確率）",
