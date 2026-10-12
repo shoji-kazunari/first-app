@@ -53,6 +53,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "RUSH中にはRe:Startという出玉の乗らないリセット当りが挟まり、伸びる当りとの明暗がはっきり分かれる。ST144回の間、次の一発が継続かリセットかを見届ける緊張感がある。",
   rules: [
     "通常時大当り確率：1/349.9",
     "RUSH中の当選確率：1/99.9",

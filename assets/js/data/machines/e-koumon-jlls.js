@@ -47,6 +47,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "寿限無RUSHの中で五分五分の振り分けを突破すると、ST132回・継続率約75%の寿限無RUSH極へ格上げされる二段構え。黄門ちゃまシリーズらしい軽妙な演出を挟みつつ、段を踏んでじわじわ出玉を積み重ねていく安定感が持ち味。",
   rules: [
     "通常時当選確率：1/399.8（図柄揃い1/348.5と水戸チャージの合算値）",
     "寿限無RUSH・寿限無RUSH極中の当選確率：1/97.0",

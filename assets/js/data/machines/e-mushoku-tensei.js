@@ -41,6 +41,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "ヘソ入賞時点でRUSH突入率が約54%と高く、当りを引けば半分以上の確率で無職転生RUSHへ。RUSH中も10R・10R×2・10R×4の3段階で出玉が積み重なり、ST130回の間じっくり粘れる作り。",
   rules: [
     "通常時大当り確率：約1/348.6（魔力チャージを含む）",
     "無職転生RUSH中の当選確率：約1/90.4",

@@ -37,6 +37,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "甘デジでありながらラッキートリガー機でもあり、覚醒HYPERへ入ったあとさらに上位の超覚醒HYPERを目指すという二段構えの昇格構造が特徴。継続率はいずれも高めで、一度RUSHに乗ってからの伸びしろを楽しめる一台になっている。",
   rules: [
     "通常時図柄揃い確率：1/99.9",
     "覚醒HYPER・超覚醒HYPER中の当選確率：1/43.7",

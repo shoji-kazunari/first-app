@@ -46,6 +46,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "GOLDEN TIME65から105へ昇格すると、ブチヌキBONUSという一連の大当りをまとめた可変長の大型ボーナスが絡んでくる。平均値こそ大きいが幅のある一撃なので、乗った瞬間の伸び方に差が出やすい。",
   rules: [
     "通常時大当り確率：1/100.1",
     "GOLDEN TIME65・GOLDEN TIME105中の当選確率：1/66.7",

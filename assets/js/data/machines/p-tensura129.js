@@ -42,6 +42,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "初当たりは必ずハーベストフェスティバルへ直結するRUSH突入率100%の設計で、当たった瞬間から転生後の冒険が始まる感覚を楽しめる。電サポ72回のRUSH中は2R・10Rのシンプルな二択で、テンポよく展開を追えるライトな一種二種混合機。",
   rules: [
     "通常時大当り確率：1/129.7",
     "ハーベストフェスティバル中の当選確率：1/53.1",

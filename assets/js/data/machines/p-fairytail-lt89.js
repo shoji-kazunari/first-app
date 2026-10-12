@@ -50,6 +50,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "甘デジらしい控えめな大当り確率を、FAIRY RUSH・七炎竜RUSHの高い継続率（約60%・約88%）で補う構成。「一夜モード」を経由すると約40%の確率で出玉が1500個ずつ積み重なっていくため、ループがかかった時の伸びが大きいのが魅力。",
   rules: [
     "通常時大当り確率：1/89",
     "FAIRY RUSH・七炎竜RUSH中の当選確率：ともに1/59",

@@ -65,6 +65,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "RUSH中に出玉を伴わない「タイムリープ」が挟まり、次のステージへ飛ぶかどうかの行方を見守る時間がある点が独特。最終形態の鳳凰院凶真ZONEは時短10000回とほぼ無期限で、シュタインズゲートの世界線を辿るような段階的な駆け上がりを楽しめる一台。",
   rules: [
     "通常時大当り確率：1/99.9",
     "RUSH 0・RUSH 0 HYPER中の当選確率：1/59.4（大当り+小当り合算値）",

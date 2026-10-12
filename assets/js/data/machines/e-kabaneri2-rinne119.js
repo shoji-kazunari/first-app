@@ -42,6 +42,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "RUSH中の当りはほとんどが10R継続だが、5%だけ「超輪廻ループ」に化け、そこから約70%の確率で出玉を積み増し続ける一撃性が隠れている。ST134回・継続率約78%という長めのRUSHの中に、ときどき大きく伸びるロマン枠が混ざるつくり。",
   rules: [
     "通常時大当り確率：約1/119.8",
     "RUSH中の大当り確率：約1/89.7",

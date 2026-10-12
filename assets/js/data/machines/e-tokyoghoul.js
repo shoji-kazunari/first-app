@@ -39,6 +39,8 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights:
+    "通常時の大当りはほぼ半々で素通りとHYPER喰種RUSHへの直行に分かれ、まれに喰種チャージからも合流します。RUSH中は継続率約75%、まとめて10R×4まで伸びることもあり、シンプルな2状態構成ながらテンポの良い展開が楽しめます。",
   rules: [
     "通常時大当り確率：約1/199.9（図柄揃い1/399.9とチャージ1/399.9の合算）",
     "HYPER喰種RUSH中の当選確率：約1/95.3",

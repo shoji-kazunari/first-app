@@ -64,6 +64,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "通常時の当りはほぼ五分の確率で復讐RUSHへ直結し、そこからさらに運命分岐でBEAST ATTACK・超BEAST ATTACKという上乗せループへ発展する多段構成。一度当りを引いた後も「次がどこまで伸びるか」を追いかける展開が続く。",
   rules: [
     "通常時の当選確率：1/399（図柄揃い確率と魔女決戦BONUS当選確率の合算値）",
     "復讐RUSH中の当選確率：1/95",

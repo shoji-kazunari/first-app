@@ -51,6 +51,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "通常時もRUSH中も「ジャッジメント」という名の五分五分の上乗せ賭けが挟まり、原作の博打描写をそのままゲーム性に落とし込んだつくり。継続率約80%の絶対王政RUSH BURSTに入ってからも賭けが続くので、最後まで一喜一憂が途切れない。",
   rules: [
     "通常時図柄揃い確率：約1/219",
     "絶対王政RUSH BURST中の当選確率：約1/99",

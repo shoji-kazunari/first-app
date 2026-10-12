@@ -58,6 +58,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "このすばチャレンジ→このすばRUSH→祝福RUSH(LT)と段階を踏んで上がっていく構成で、規定回数のない祝福RUSHに乗れるかどうかが大勝ちの分かれ目。甘デジらしい軽快な回転感とLTらしい一発の重みを両方感じられる。",
   rules: [
     "通常時大当り確率：1/49.9",
     "電サポ中（このすばチャレンジ・このすばRUSH・祝福RUSH共通）の当選確率：1/25.1",

@@ -53,6 +53,8 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights:
+    "SWORD RUSHとLIGHTNING RUSHの2段階構成で、上位のLIGHTNING RUSHに入ると継続率約90%の高さで長く居座れるのが持ち味。「実質次回まで」の時短に化けることもあり、1回のRUSHがどこまで延びるか読めない点が楽しめます。",
   rules: [
     "通常時大当り確率：約1/199.9",
     "RUSH中の大当り確率：約1/59.9",

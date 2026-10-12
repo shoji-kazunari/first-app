@@ -45,6 +45,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "真惨劇RUSHはリーチを挟まず一瞬で当たりか転落かが分かる超short変動の転落抽選式で、ハラハラする時間が続く。通常時の当りはまずエンジェルモートという時短を経由することが多く、そこから発展できるかどうかの駆け引きも味わえる。",
   rules: [
     "通常時大当り確率：1/99.9",
     "真惨劇RUSH中の当選確率：1/49.9、転落確率：1/133.7",

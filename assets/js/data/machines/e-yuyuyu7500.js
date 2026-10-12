@@ -52,6 +52,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "真・勇者RUSH中は当りのたびにST回数がリセットされてその場に留まる枝と、大満開RUSHへ格上げされる枝に分かれ、大満開RUSHではBONUSジャッジで常に大きな当りを確定させながら継続を目指す2段構えのLT機。複数のRUSHを渡り歩く展開の多さが特徴。",
   rules: [
     "通常時大当り確率：約1/349",
     "RUSH中の大当り確率：約1/96.3",

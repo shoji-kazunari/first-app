@@ -64,6 +64,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "RUSH非突入が2連続すると3回目の初当りは必ず愛の降臨RUSHへ突入するという救済構造があり、通常時でも当たりを重ねるほど期待感が増していく。さらにRUSH中に1000個大当りを3回重ねると愛の燦然RUSH（LT）へ格上げされる、カウントアップ型の仕掛けも特徴。",
   rules: [
     "通常時大当り確率：1/99.9",
     "愛の降臨RUSH・愛の燦然RUSH中の大当り確率：1/54.3",

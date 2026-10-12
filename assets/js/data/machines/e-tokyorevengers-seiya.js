@@ -38,6 +38,8 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights:
+    "聖夜決戦は転落抽選型で、突破率約49%という五分五分の緊張感が続く短い勝負のステージです。突破すれば聖夜決戦CLIMAXに切り替わり、継続率約79%で安定して出玉を重ねていける二段構えの展開になっています。",
   rules: [
     "通常時大当り確率：1/199.8",
     "聖夜決戦・聖夜決戦CLIMAX中の大当り確率：ともに約1/10.2",

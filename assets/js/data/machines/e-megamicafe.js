@@ -54,6 +54,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "女神の交響曲TIME中は25/50/25の振り分けに加え、2回目以降は条件を満たすたびに「まるっと爆乗せ」で同じ抽選が上乗せされ続ける仕組み。1回のRUSH中にどこまで膨らむか分からない伸び方が楽しめる。",
   rules: [
     "通常時大当り確率：約1/348（TERRACE CHARGEからの突入を含む）",
     "女神の交響曲TIME中の当選確率：約1/73",

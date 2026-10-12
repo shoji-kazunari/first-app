@@ -59,6 +59,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "初当りの瞬間に3000FEVER直撃・ストライクRUSH・ストライクチャレンジの3つへ枝分かれし、RUSH中も昇格を繰り返していく展開型のミドル機。次の一発がどのランクに化けるか、画面から目を離せない忙しさがある。",
   rules: [
     "通常時大当り確率：約1/319.7",
     "ストライクRUSH・フリーダムHYPER中の大当り確率：ともに約1/84.0",

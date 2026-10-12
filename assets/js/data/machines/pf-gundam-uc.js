@@ -75,6 +75,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "RUSHは規定回転数では終わらず、リーチの溜めを挟まずに一瞬で当たりか転落小当りかが決まる超short変動がひたすら続く緊張感が持ち味。転落を引いても残保留分の当たり目が残るため、最後まで引き戻しの可能性を捨てずに追いかけられる。",
   rules: [
     "通常時大当り確率：1/319.7",
     "RUSH中大当り確率：約1/41.1",

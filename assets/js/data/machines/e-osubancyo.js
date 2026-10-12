@@ -38,6 +38,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "頂RUSH中の振り分けは実質2択とシンプルだが、継続率は約80%と高水準。1回の権利がどこまで続くかに集中できる、番長シリーズらしい骨太な構成。",
   rules: [
     "通常時大当り確率：約1/179.5",
     "頂RUSH中の大当り確率：約1/99.5",

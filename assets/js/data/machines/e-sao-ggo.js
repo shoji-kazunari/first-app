@@ -53,6 +53,8 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights:
+    "通常時の大当りはほとんど（97%）がSJ JUDGEという足切り的なステージを経由する構成。そこを突破率約40%で勝ち抜いてようやくSJ RUSHへ進みます。RUSH中は300個から3600個まで出玉の振れ幅が大きく、一撃の大きさを競うような展開になります。",
   rules: [
     "通常時大当り確率：1/319.9",
     "SJ JUDGE・SJ RUSH中の大当り確率：ともに1/99.9",

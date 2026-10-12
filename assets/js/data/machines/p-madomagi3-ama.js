@@ -61,6 +61,8 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights:
+    "甘デジらしく大当りへのハードルは低めながら、マギカRUSH中の電チュー当選では「ワルプルギスの夜BONUS」のラウンドバトルに勝てるかどうかで上位のアルティメット超RUSHへの道が分かれます。残保留を使い切るまで気が抜けない粘り構造も健在です。",
   rules: [
     "通常時大当たり確率：約1/99.9（大当たりと小当たりの合算値）",
     "マギカRUSH・アルティメット超RUSH中の大当たり確率：ともに約1/62.1",

@@ -38,6 +38,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "スペシャルチャンスはST50回を抜けたあとさらに時短50回が続く二段構えで、初当りすればほぼ確実に電サポへ突入する。通常時の確率が低めな分、当たったときの勢いがはっきり出る構成。",
   rules: [
     "通常時大当り確率：1/199.8",
     "スペシャルチャンス（ST50回）中の当選確率：1/49.9",

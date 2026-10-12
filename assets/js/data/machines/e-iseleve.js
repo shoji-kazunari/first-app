@@ -46,6 +46,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "RUSH突入率は約20%と控えめだが、一度突入すればBONUSの1G連ループが約59%で続くため、当たり始めると加速度的に出玉が伸びていく。異世界でやり直す原作の爽快さと、じわっと連鎖していくループ構造の噛み合いが見どころ。",
   rules: [
     "通常時大当り確率：約1/179",
     "RUSH中の抽選確率：1/77（電チューロング開放確率）",

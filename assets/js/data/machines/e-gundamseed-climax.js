@@ -71,6 +71,8 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights:
+    "FULLBURST RUSH CLIMAXとFULLBURST RUSHの間を出玉ランクの上下を繰り返しながら渡り歩く構成で、当りのたびにCLIMAXへ格上げされるか一段階下のRUSHに留まるかが決まる。いずれも130回転のST機で、シリーズらしい一戦ごとの出玉の伸びしろを追いかける展開になる。",
   rules: [
     "通常時大当り確率：約1/399.9",
     "FULLBURST RUSH CLIMAX・FULLBURST RUSH中の大当り確率：ともに約1/95.6",

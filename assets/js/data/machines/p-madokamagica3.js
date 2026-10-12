@@ -48,6 +48,8 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights:
+    "大当りのたびにマギカRUSHへ進めるか通常止まりかが分かれ、RUSH中には「ワルプルギスの夜BONUS」という追加のバトル分岐も挟まります。そこを勝ち上がってアルティメット超RUSHまで駆け上がれるかどうかが一番の見どころです。",
   rules: [
     "通常時大当り確率：約1/199.9",
     "RUSH中の大当り確率：約1/62.2",

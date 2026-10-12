@@ -40,6 +40,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "GOLDEN TIMEから神GOLDEN TIME BOOSTへ昇格すると継続率が約91%まで跳ね上がり、そこからはなかなか終わらない感覚で出玉を伸ばしていける。昇格前と昇格後の体感差が大きいのがこの台の持ち味。",
   rules: [
     "通常時大当り確率：1/77.7",
     "GOLDEN TIME・神GOLDEN TIME BOOST中の当選確率：1/37.3",

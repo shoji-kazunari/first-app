@@ -35,6 +35,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "真波動RUSH中はSTリセット・2R・10R・10R×2の4種類が入り混じり、継続率約80%という高い数値を保ちながらも展開が単調にならない。宇宙戦艦ヤマトらしい波動砲の一撃を思わせる10R×2の大玉に当たると出玉の伸びも大きい。",
   rules: [
     "通常時大当り確率：約1/199.9",
     "真波動RUSH中の当選確率：約1/93.9",

@@ -55,6 +55,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "チャレンジタイムとフルドライブSTという二つの経路があり、フルドライブ中は10R〜10R×5まで5段階の上乗せ幅を持つ。右打ち後も当りの大きさが毎回変わるので飽きにくい。",
   rules: [
     "通常時・チャレンジタイム中の大当り確率：1/348.5",
     "フルドライブST中の大当り確率：1/51.6",

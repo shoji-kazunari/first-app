@@ -66,6 +66,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "SEVEN RUSHチャレンジでの当りは出玉を伴わずそのままRUSHへ直結し、RUSH中はPERFECT BONUSという2520〜7000個規模の上乗せが7割以上の確率で発生する。小さな入口から大きく伸びる振れ幅がある。",
   rules: [
     "通常時大当り確率：約1/319.7",
     "SEVEN RUSHチャレンジ中の当選確率：約1/196.2（時短100回）",

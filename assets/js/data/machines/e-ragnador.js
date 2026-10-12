@@ -73,6 +73,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "CHAIN CHANCEとCHAIN CHANCE GOLDという入れ子のループに、裏CHALLENGE経由の隠し展開まで絡み、1回の当りから枝分かれする道筋が非常に多い。展開を追いかける忙しさそのものが持ち味の一種二種混合機。",
   rules: [
     "通常時当選確率：1/239.5（大当り確率1/349.9と裏CHALLENGE発生確率1/758.9の合算値）",
     "ラグナドRUSH・ラグナドRUSH GOLD：ST125回、ラグナドATTACK（GOLD）出現率1/79.2、成功期待度約75%",

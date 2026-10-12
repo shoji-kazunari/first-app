@@ -81,6 +81,8 @@ window.PachiSim = window.PachiSim || {};
     spinsPer1000Yen: 16,
     baseStateId: "normal",
 
+    highlights:
+      "SWORD RUSHからWar of Underworldへと発展していく2段階RUSH構成。War of Underworldは演出面だけが変化しながら長く続く上位ステージで、決意の刃やSWORD DRIVE系の技に成功するたび出玉が段階的に積み上がっていきます。",
     rules: [
       "通常時大当り確率：約1/199.9",
       "SWORD RUSH・War of Underworld中の大当り確率：ともに約1/51.6",

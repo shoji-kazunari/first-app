@@ -77,6 +77,8 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights:
+    "震撼ジャッジメントとGチャージという二つの経路が合算された通常時抽選に加え、当選後はUG-RUSH(ST)とUG-RUSH(時短)の二系統に枝分かれする。さらにUC（アルティメットチャージ）による上乗せ判定で出玉が段階的に積み上がっていく、上乗せの比重が大きいタイプの一台。",
   rules: [
     "通常時大当り確率：約1/229.9（震撼ジャッジメント経由＋Gチャージの合算値）",
     "UG-RUSH(ST)中の当選確率：1/84.1、UG-RUSH(時短)中の当選確率：1/399.61",

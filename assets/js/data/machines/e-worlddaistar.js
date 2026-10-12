@@ -48,6 +48,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "ヘソの大当りの4分の1がワールドダイスターRUSHへの直行チャンスとなるラッキートリガー機。RUSH中は多くが2R止まりの小粒な当りで繋ぎつつ、1割の確率で一気に35R相当まで積み上がる大きな当りも混ざり、小さく粘るか大きな一撃を待つかの駆け引きが楽しめる。",
   rules: [
     "通常時大当り確率：1/159.9",
     "ワールドダイスターRUSH中の当選確率：1/3.5",

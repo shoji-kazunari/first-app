@@ -46,6 +46,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "ヘソの大当りはほぼ五分でST(インパクトモード)直行か時短（チャンスタイム）に振り分けられ、どちらに転んでも最終的にSTへ合流する素直な構成。ST・時短中はわずか0.5%ながら8R×4のLT成立を含み、長尺RUSHへの夢をわずかに残している。",
   rules: [
     "通常時大当り確率：約1/399.9",
     "ST（インパクトモード）中大当り確率：約1/99.6",

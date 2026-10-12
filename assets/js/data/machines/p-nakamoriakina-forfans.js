@@ -35,6 +35,8 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights:
+    "歌姫をテーマにした一本道のST機で、初当りすれば必ずSTへ突入できる安心設計です。4R・7R・10Rの3種類の大当りがほぼ均等に抽選されるため、通常時もST中も毎回どのラウンドが来るかで表情が変わります。",
   rules: [
     "通常時大当り確率：1/319.7",
     "ST中の当選確率：1/85.6",

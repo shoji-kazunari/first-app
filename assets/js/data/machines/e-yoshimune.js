@@ -36,6 +36,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "時代劇シリーズらしい「吉宗」の名を継ぐ一台で、通常時の大当りからヘソ30%で振舞RUSH(ST157回)に突入する。RUSH中の当りは2Rの軽い当りと5R×4の大きな当りがほぼ半々で現れるため、小刻みに繋ぐ展開と一気に伸びる展開の両方を味わえる。",
   rules: [
     "通常時大当り確率：1/199.9",
     "振舞RUSH中の当選確率：1/99.5",

@@ -44,6 +44,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "奴RUSHに入ると必ず奴RUSH SUPERへ格上げされる一段構えが特徴で、SUPER移行後は継続率約93%まで伸びるぶん、一度火がつくと連チャンが長く続きやすい。ゾンビサバイバルの原作らしい緊迫感とともに、尻上がりに加速していく展開を楽しめる。",
   rules: [
     "通常時大当り確率：1/299.2",
     "奴RUSH・奴RUSH SUPER中の当選確率：ともに約1/32.4（大当り確率1/299.2と小当り確率1/36.4の合算）",

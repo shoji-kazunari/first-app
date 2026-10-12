@@ -46,6 +46,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "通常時に当たれば必ず傾奇RUSHへ突入する「RUSH直行型」の甘デジで、外れを気にせず当たりの波に乗れる構成。RUSH中は約6割の継続率で小さな当りを繋いでいく展開になり、花の慶次らしい侠気のある演出とともにテンポよく回せる一台。",
   rules: [
     "通常時・傾奇RUSH中の大当たり確率：ともに1/87.8",
     "通常時の大当たりは必ず傾奇RUSHへ突入（RUSH突入率100%、4R・実獲得約360個が99.0%、10R・実獲得約900個が1.0%）",

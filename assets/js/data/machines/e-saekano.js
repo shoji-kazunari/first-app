@@ -40,6 +40,8 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights:
+    "初当りの半分前後がそのまま冴えてる彼女RUSHへ直結するライトミドル機。RUSH中も約80%の継続率で回を重ねられ、一部はさらに継続率約92%の冴えてる彼女RUSH♭へと発展していく、右肩上がりの展開が持ち味です。",
   rules: [
     "通常時大当り確率：1/179.6",
     "冴えてる彼女RUSH・冴えてる彼女RUSH♭中の当選確率：1/35.1",

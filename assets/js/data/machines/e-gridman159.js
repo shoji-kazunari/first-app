@@ -53,6 +53,8 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights:
+    "通常時に当たった大当りの半分は「電光RUSH」という時短へ進み、そこでの当りはすべて本線の「電光覚醒RUSH」へ合流するという一本道の二階建て構造になっている。ST中の継続率は約8割あり、V-ST機らしく長い右打ちの連続を狙える機種。",
   rules: [
     "通常時大当り確率：約1/159.8",
     "電光覚醒RUSH中の当選確率：約1/77.4",

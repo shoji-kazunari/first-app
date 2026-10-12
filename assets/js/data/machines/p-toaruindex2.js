@@ -35,6 +35,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "RUSH中にST回数がリセットされる抽選が組み込まれており、当たりが止まっているように見えても裏で回数が延びていく粘り強さがある。V入賞を伴う大当り×2のルートも用意され、とある魔術の禁書目録らしい一発の派手さも楽しめる。",
   rules: [
     "通常時大当り確率：1/319.6",
     "RUSH中の当選確率：1/99.9",

@@ -61,6 +61,8 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights:
+    "当りそのものよりもまず「烈核解放CZ」という10回のチャンスをどこかで1回拾えるかが鍵になるCZ機で、成功期待度は約33%と決して高くない緊張感がある。突破後の超孤紅の恤RUSHは孤紅の恤BONUSを挟みながら出玉を積み上げていく展開になる。",
   rules: [
     "通常時のCZ確率：約1/129（c時短経由・大当り経由の合算値）",
     "烈核解放CZ：抽選回数10回、成功期待度約33%",

@@ -33,6 +33,8 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights:
+    "乗り物と踊り子たちの賑やかな世界観が持ち味で、初当りすればRUSH突入率100%という安心感があります。RUSH中は4Rか10Rの二択とシンプルながら、継続率約77%の緊張感をテンポよく味わえる機種です。",
   rules: [
     "通常時大当り確率：1/199.8",
     "乗物RUSH中の当選確率：1/69.4",

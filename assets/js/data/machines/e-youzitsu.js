@@ -37,6 +37,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "ヘソの大当りはほぼ五分五分でTREASURE HUNTへ進み、そこからも約73%の確率で上位のTREASURE HUNT EXTRAへ格上げされるなど、段階を踏むほど続きやすくなる右肩上がりの構成。実力勝負の原作らしく、RUSHのステップアップを追いかける忙しさがある一台。",
   rules: [
     "通常時大当り確率：1/349.9",
     "TREASURE HUNT中の当選確率：1/94.1",

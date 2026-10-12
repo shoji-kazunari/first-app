@@ -55,6 +55,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "後継機である輪廻の果報119ver.に対し、こちらは一世代前にあたる台。RUSH中の当りはほぼ全てが継続につながる手堅さがありつつ、わずか6.2%の大当りだけが約7.7%の成功ごとに出玉を積み増すロングチャンスを秘めている。",
   rules: [
     "通常時大当り確率：1/319.7",
     "RUSH「KABANERI OF THE IRON FORTRESS 海門決戦」中の大当り確率：1/98.3",

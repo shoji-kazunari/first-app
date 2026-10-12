@@ -50,6 +50,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "通常時の当りはSWORD RUSH直行とSWORD CHANCE（時短経由）に五分五分で分かれ、どちらからも同じ10R当りでRUSHへ合流していく構成。ST159回という長めの継続区間を8割超の確率で繋いでいけるため、一度火がつくと長丁場の展開を楽しめる。",
   rules: [
     "通常時大当り確率：1/319.9",
     "SWORD RUSH中の大当り確率：1/97.7",

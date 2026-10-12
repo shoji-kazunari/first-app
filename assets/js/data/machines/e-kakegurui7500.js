@@ -63,6 +63,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "50/50ジャッジメント、ツラヌキチャレンジ、運命の一撃と、当たるたびに次の分岐を選ばされる多段構成が持ち味。1段抜けるごとに懸かる出玉の規模が一段ずつ膨らんでいくので、ギャンブル漫画らしい際どい駆け引きを最後まで味わえる。",
   rules: [
     "通常時図柄揃い確率：約1/204",
     "絶対王政RUSH BURST中の当選確率：約1/99",

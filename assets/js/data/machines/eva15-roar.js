@@ -51,6 +51,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "後継機eva17-hajimariの前作にあたるV-ST機で、通常時の大当りは約59%の確率でIMPACT MODE(ST163回)に直結する。時短のチャンスタイムに落ちても当り振り分けは通常時と変わらないため、展開の落差を感じにくく粘り強く回し続けられる。",
   rules: [
     "通常時大当り確率（低確率）：約1/319.7",
     "IMPACT MODE中の大当り確率（高確率）：約1/99.4",

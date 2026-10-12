@@ -58,6 +58,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "SEVEN'S RUSH中の当りはおおむね継続だが、一部は脳汁3000チャンスという約50%で上乗せが続くチャンスゾーンに分岐する。淡々とした継続の中にたまに訪れる上乗せ劇場が差し色になっている。",
   rules: [
     "通常時大当り確率：1/199.8",
     "SEVEN'S RUSH中の大当り確率：約1/95.5",

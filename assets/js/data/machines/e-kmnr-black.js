@@ -50,6 +50,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "JUSTICE RUSHからEXTREME JUSTICE RUSHへ、五分五分の抽選で駆け上がっていく二段階の昇格構造が特徴。正義と悪のせめぎ合いを思わせる原作らしく、一段ずつ着実にステージを上げていく歩みの着実さが味わえる。",
   rules: [
     "通常時図柄揃い確率：1/349.9",
     "JUSTICE RUSH・EXTREME JUSTICE RUSH中の当選確率：1/50.1",

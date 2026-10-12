@@ -47,6 +47,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "RUSH中は2R・10R・10R×2の3段階で出玉が積み重なり、「約3000個+α」という上乗せロマンも示唆される。ST145回を使い切るまで気を抜けない展開が続く。",
   rules: [
     "通常時大当り確率：約1/349.9",
     "RUSH中の大当り確率：約1/99.9",

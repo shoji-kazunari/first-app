@@ -40,6 +40,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "拳王RUSHは規定回数こそ短いが当選確率が1/10.7と非常に高く、一度突入すれば連打のように大当りを重ねて出玉を伸ばしていける。北斗の拳らしい一撃の強さが前面に出た構成になっている。",
   rules: [
     "通常時大当り確率：1/319.7",
     "拳王RUSH中の当選確率：1/10.7（大当り+小当り合算）",

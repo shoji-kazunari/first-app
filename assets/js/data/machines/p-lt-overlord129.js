@@ -39,6 +39,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "シャルティアバトルとOVERMAXはいずれも当選確率が極端に高い即時解決型の演出で、当たったかどうかがほぼその場で決まるスピード感がある。OVERLORDらしい、強者が押し切る雰囲気を体感できる構成。",
   rules: [
     "通常時大当り確率：1/129.7",
     "シャルティアバトル：時短1回の即時解決演出、突破率約9.5%",

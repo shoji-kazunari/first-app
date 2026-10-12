@@ -61,6 +61,8 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights:
+    "絆バトルRUSHとULTRA OVER DRIVEはいずれも「バトルに勝ち続けられるか」で出玉を伸ばしていく転落式のRUSHで、原作のバトル展開を追うような緊張感がある。RUSH中はリーチや保留の色予告を挟まず結果だけが次々と出るため、一回ごとの当たり外れがそのまま体感に直結する作りになっている。",
   rules: [
     "通常時の図柄揃い確率：約1/399.9",
     "絆バトルRUSH：転落式（バトル勝利確率約1/1.7、バトル敗北確率約1/5.7、継続率約77%）",

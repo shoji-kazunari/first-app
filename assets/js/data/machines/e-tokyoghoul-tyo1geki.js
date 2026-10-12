@@ -96,6 +96,8 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 28,
   baseStateId: "normal",
 
+  highlights:
+    "図柄揃いでの当選確率こそ約1/999と重いものの、揃えば一撃が破壊的という「重い代わりに一撃がでかい」設計が売り。HYPER喰種RUSH中は上乗せジャッジに成功する限り出玉が積み上がっていく、短いながら濃いRUSHが特徴です。",
   rules: [
     "通常時大当り確率：図柄揃い約1/999（この機種の売り）、喰種チャージ約1/538.8（合算では約1/349.9）",
     "HYPER喰種RUSH中の当選確率：約1/7.7",

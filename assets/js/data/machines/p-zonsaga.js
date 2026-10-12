@@ -50,6 +50,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "サガRUSH→サガRUSH LTチャンス→七福ヘドバンRUSHと段階を踏んでLTへ近づいていく多層構造で、どの状態にいるかで次の展開への期待度が変わる。七福ヘドバンRUSHに突入すれば継続率約89%の高継続が待っており、ゾンビランドサガらしい賑やかな連チャンを楽しめる。",
   rules: [
     "通常時大当り確率：1/159.8",
     "サガRUSH・サガRUSH LTチャンス中の当選確率：1/71.4",

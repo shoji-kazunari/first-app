@@ -48,6 +48,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "真うしとらRUSH中に発生する「二体で最強BONUS」は、獲得個数が約1800個から約4500個まで段階的に分かれており、同じ当りでも引いた瞬間の伸び幅に差が出る。甘デジらしい手軽さと、うしおととらの力比べを思わせる出玉の振れ幅を両立した一台。",
   rules: [
     "通常時の図柄揃い確率：1/100",
     "真うしとらRUSH中の当選確率：1/100",

@@ -60,6 +60,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "通常時の大当りの半分は時短1回のりむるしか勝たんチャレンジに進み、1/2の一回勝負で超ドラ熱ATTACKに入れるかが即決まる。ATTACK中も1/2の当落ループが続くため、1回転ごとの結果がすぐ分かるテンポの速さが持ち味。",
   rules: [
     "通常時大当り確率：1/259.0",
     "りむるしか勝たんチャレンジ・超ドラ熱ATTACK中の当選確率：1/2.0",

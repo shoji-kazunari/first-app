@@ -55,6 +55,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "ST中も通常時も4R・7R・10Rの3種類の当りが毎回抽選され、どのラウンドを引くかで出玉のリズムが変わる。ST突入率100%で、継続率約70%の粘り強さも併せ持つ。",
   rules: [
     "通常時大当り確率：1/319.7",
     "ST中の当選確率：1/85.6",

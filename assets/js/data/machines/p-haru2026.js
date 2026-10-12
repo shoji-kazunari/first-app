@@ -35,6 +35,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "通常時の大当りは必ず乱舞モードへ直結するシンプルな一段構成のST機。回転数は標準的な範囲で手軽に回しつつ、当たれば確実にRUSHへ入るという安心感を軸にしている。",
   rules: [
     "通常時大当り確率：約1/89.9",
     "乱舞モード中の大当り確率：約1/65.9",

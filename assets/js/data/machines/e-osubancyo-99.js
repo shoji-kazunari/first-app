@@ -42,6 +42,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "同シリーズの甘デジ版で、通常時大当り確率1/99.9と非常に軽い。頂RUSH中も当り方は2択のみとシンプルで、気負わず回せる入門機として作られている。",
   rules: [
     "通常時大当り確率：1/99.9",
     "頂RUSH中の大当り確率：1/99.9",

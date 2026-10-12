@@ -47,6 +47,8 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights:
+    "戦車道RUSHは規定回数がST3回+残保留1個とかなり短く、1回の当落で勝負が決まるコンパクトなLT構造になっている。通常時の大当り確率は1/159.8とライトミドル寄りで、気軽に初当たりを重ねながら短期決戦のRUSHを何度も狙えるテンポの良さが特徴。",
   rules: [
     "通常時大当り確率：1/159.8",
     "戦車道RUSH中の当選確率：1/3.4",

@@ -41,6 +41,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights: "忠chu乱舞BONUSに当選すると、そこから確率的にループを重ねて出玉が積み上がっていく仕組みが軸になっている。STには初回と上位の2段階があり、どちらに乗っているかで展開の伸び方が大きく変わる。",
   rules: [
     "通常時大当り確率：約1/129.8",
     "ST（初回）中の当選確率：約1/101.1",

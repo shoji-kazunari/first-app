@@ -50,6 +50,8 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights:
+    "RISING RUSHは転落抽選型で、当たるか終わるかをテンポよく繰り返す緊張感が持ち味です。突破すれば継続率約85%の裏アルティメットタイムへ進み、腰を据えて出玉を伸ばせる落ち着いた展開に切り替わります。",
   rules: [
     "通常時大当り確率：1/199",
     "RISING RUSH中の当選確率：1/45.2（転落確率1/23.7の転落式）",
