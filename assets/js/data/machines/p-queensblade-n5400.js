@@ -40,6 +40,8 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights:
+    "図柄揃いのほかに「聖乳チャージ」という出玉だけの小さな当りも用意されており、通常時から退屈しにくい設計です。QUEEN'S BLADEに入れば1回勝負の即時判定で、勝てば9R×4という大量出玉の夢も見える一撃の爽快感が持ち味です。",
   rules: [
     "通常時当選確率：約1/145.4（図柄揃い1/199.8と聖乳チャージ約1/533.9の合算値）",
     "QUEEN'S BLADE：時短1回の即時解決演出、継続率50.5%",

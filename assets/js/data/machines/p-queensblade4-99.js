@@ -37,6 +37,8 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights:
+    "同シリーズの甘デジ版で、通常時の大当りの半数以上がそのままRUSH突入につながりやすい設計です。初当り含む3連達成で消化速度が上がる演出もあり、残存保留での粘りも含めてコツコツ楽しめる機種です。",
   rules: [
     "通常時大当り確率：1/99.9",
     "RUSH中の当選確率：約1/39.6（大当り+小当り合算）",

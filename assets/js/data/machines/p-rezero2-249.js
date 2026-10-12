@@ -38,6 +38,8 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights:
+    "129ver.とは型式の異なる249verで、RUSH突入率が高めに設定されているぶん一度火がつけば伸びやすい構成です。強欲RUSH中には「超強欲2400BONUS」という大きな出玉ループも用意され、まとめて稼ぐ展開を狙えます。",
   rules: [
     "通常時大当り確率：1/249.9",
     "強欲RUSH中の当選確率：1/99.9",

@@ -45,6 +45,8 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
+  highlights:
+    "「Re:ゼロ」の世界観らしく、強欲RUSH中に運が良ければ上位の超強欲PREMIUM BONUSへ格上げされ、次回大当りまで続く破格のステージに入ります。ただそこでも5%で強欲RUSHへ戻されることがあり、最後まで気が抜けません。",
   rules: [
     "通常時大当り確率：1/129.9",
     "強欲RUSH・超強欲PREMIUM BONUS中の大当り確率：約1/99.9",
