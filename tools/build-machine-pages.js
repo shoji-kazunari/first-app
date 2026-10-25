@@ -158,6 +158,30 @@ function renderMachineScripts(currentHtml, machines, srcPrefix, label) {
   );
 }
 
+// 検索エンジン向けのsitemap.xml。全ページのURLをcanonicalと同じ組み立て方で列挙する。
+// tests/ は開発用の検査ページなので含めない（robots.txtでも別途アクセスを止めている）。
+function buildSitemap(machines, siteBaseUrl) {
+  const relativePaths = [
+    "index.html",
+    ...machines.map((m) => path.join("machines", m.slug, "index.html")),
+    path.join("yosou", "index.html"),
+    path.join("naniutsu", "index.html"),
+    path.join("about", "index.html"),
+    path.join("unei", "index.html"),
+    path.join("privacy", "index.html"),
+  ];
+  const urls = relativePaths
+    .map((rel) => `  <url>\n    <loc>${canonicalUrlFor(rel, siteBaseUrl)}</loc>\n  </url>`)
+    .join("\n");
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
+}
+
+// 検索エンジン向けのrobots.txt。全ページのクロールを許可し、開発用の検査ページ（tests/）だけ止める。
+function buildRobotsTxt(siteBaseUrl) {
+  const base = siteBaseUrl.replace(/\/+$/, "");
+  return `User-agent: *\nAllow: /\nDisallow: /tests/\n\nSitemap: ${base}/sitemap.xml\n`;
+}
+
 function main() {
   const checkOnly = process.argv.includes("--check");
   const { machines, siteTitle, siteBaseUrl } = loadSite();
@@ -190,6 +214,17 @@ function main() {
       filePath,
       content: withCanonical(fs.readFileSync(filePath, "utf8"), rel, siteBaseUrl),
     });
+  });
+
+  outputs.push({
+    label: "sitemap.xml",
+    filePath: path.join(ROOT, "sitemap.xml"),
+    content: buildSitemap(machines, siteBaseUrl),
+  });
+  outputs.push({
+    label: "robots.txt",
+    filePath: path.join(ROOT, "robots.txt"),
+    content: buildRobotsTxt(siteBaseUrl),
   });
 
   let changed = 0;
