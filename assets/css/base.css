@@ -327,23 +327,13 @@ button {
   font-weight: 500;
 }
 
-.ad-slot {
-  border: 1px dashed var(--color-border);
-  border-radius: var(--radius-md);
-  padding: var(--space-4);
-  text-align: center;
-  color: var(--color-text-muted);
-}
-
 .ad-slot__label {
   font-size: 0.7rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   margin-bottom: var(--space-1);
-}
-
-.ad-slot__placeholder {
-  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  text-align: center;
 }
 
 .affiliate-section__empty {

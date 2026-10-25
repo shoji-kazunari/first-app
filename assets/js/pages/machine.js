@@ -36,7 +36,6 @@
       effectArea: $("effectArea"),
       actionButton: $("actionButton"),
       speedToggleButtons: Array.from(document.querySelectorAll(".speed-toggle__btn")),
-      adSlot: $("adSlot"),
       affiliateSection: $("affiliateSection"),
       machineRanking: $("machineRanking"),
       machineRankingHeading: $("machineRankingHeading"),
@@ -119,8 +118,6 @@
     };
     const reelDisplay = new PachiSim.ui.ReelDisplay(els.reelDisplayEl);
     const maxRounds = Math.max(...Object.keys(machine.payoutTable).map(Number));
-
-    PachiSim.ui.renderAdSlot(els.adSlot, machine.name);
     PachiSim.ui.renderAffiliateSection(els.affiliateSection, machine.relatedProducts || []);
 
     function currentSpeedMode() {
