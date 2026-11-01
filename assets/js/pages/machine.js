@@ -25,6 +25,7 @@
       resetButton: $("resetButton"),
       currentStateLabel: $("currentStateLabel"),
       currentStateProbability: $("currentStateProbability"),
+      stampProgress: $("stampProgress"),
       spinCounter: $("spinCounter"),
       investmentDisplay: $("investmentDisplay"),
       simulationArea: $("simulationArea"),
@@ -307,6 +308,26 @@
       return `大当り ${hit}　転落 ${fall}`;
     }
 
+    // スタンプラリー型（state.stampCollection）の状態にいる間だけ、ここまで集めた
+    // 当たりtagをチェックリストとして出す。対象外の状態・対象外の機種では常に隠す。
+    function renderStampProgress(state) {
+      if (!els.stampProgress) return;
+      const sc = state.stampCollection;
+      if (!sc) {
+        els.stampProgress.hidden = true;
+        return;
+      }
+      const collected = session.stampsStateId === session.stateId ? session.stamps : [];
+      els.stampProgress.innerHTML = sc.requiredTags
+        .map((tag) => {
+          const label = (sc.tagLabels && sc.tagLabels[tag]) || tag;
+          const isCollected = collected.includes(tag);
+          return `<span class="stamp-progress__item${isCollected ? " is-collected" : ""}">${label}</span>`;
+        })
+        .join("");
+      els.stampProgress.hidden = false;
+    }
+
     // freezeStateDisplay: trueの間は「現在の状態」表示（状態名・背景テーマ・回転数）を
     // 更新しない。大当たり直後、session.stateIdは既に次の状態へ切り替わっているが、
     // 上部表示は「今までいた状態で何回転で当たったか」がわかるようそのまま残す
@@ -322,6 +343,7 @@
         els.currentStateProbability.textContent = stateProbabilityText(state);
         els.simulationArea.dataset.theme = state.theme;
         els.spinCounter.innerHTML = spinCounterText(state);
+        renderStampProgress(state);
       }
       // アクション中は、貯まった保留の分だけ差し引いた値のままにする
       els.investmentDisplay.innerHTML = investmentDisplayText(chargedThisAction);

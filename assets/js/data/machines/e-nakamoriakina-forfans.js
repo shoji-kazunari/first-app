@@ -119,6 +119,7 @@ PachiSim.machineRegistry.register({
       onExhausted: { nextState: "normal", tag: "rushEnd", resultLabel: "ST終了" },
       stampCollection: {
         requiredTags: ["continue4R", "continue10R", "continue7R"],
+        tagLabels: { continue4R: "4R", continue10R: "10R", continue7R: "7R" },
         completeNextState: "jitan100",
         completeTag: "stampComplete",
         completeResultLabel: "スタンプ達成！時短100突入",

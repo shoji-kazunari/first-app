@@ -197,6 +197,8 @@ PachiSim.machineValidator = (function () {
       }
       if (!Array.isArray(sc.requiredTags) || sc.requiredTags.length === 0 || !sc.requiredTags.every(isNonEmptyString)) {
         errors.push(`${where}.stampCollection: requiredTagsが1つ以上の文字列の配列でない`);
+      } else if (sc.tagLabels != null && !sc.requiredTags.every((t) => isNonEmptyString(sc.tagLabels[t]))) {
+        errors.push(`${where}.stampCollection: tagLabelsがrequiredTagsの全tagをカバーしていない（UI表示用の表示名が抜けている）`);
       }
       if (!machine.states[sc.completeNextState]) {
         errors.push(`${where}.stampCollection: completeNextState "${sc.completeNextState}" が存在しない`);

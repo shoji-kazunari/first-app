@@ -98,7 +98,8 @@
 //         // 初めて転落が確定する。公表の継続率が単純な「大当り/(大当り+転落)」の比率だけでは
 //         // 説明できず、残保留の引き戻し分だけ上乗せされている機種で使う。省略時は0
 //         // （転落＝即座に確定、残保留による引き戻しなし）。
-//       stampCollection: { requiredTags: [tag, ...], completeNextState, completeTag?, completeResultLabel? } | null,
+//       stampCollection: { requiredTags: [tag, ...], tagLabels?: {tag: "表示名"}, completeNextState,
+//                          completeTag?, completeResultLabel? } | null,
 //         // 「スタンプラリー型」のRUSH向け（任意）。この状態に居続ける間（＝同じ状態への
 //         // 当たりで居残り続ける間）に出たonHit.outcomesのtagを集め、requiredTagsを
 //         // 全種類集め終わらないまま規定回数を消化した（onExhaustedに落ちた）瞬間、
@@ -109,7 +110,9 @@
 //         // onHitのtag＝この状態へ突入させた当たりそのものは数えない。実機側の文言が
 //         // 「ST中に」の大当たりだけを対象としているため）。この状態の中で出た
 //         // onHitのtagだけが、同じ状態へ居残り続ける間だけ積み上がる。
-//         // requiredTagsに無いtagは無視する。
+//         // requiredTagsに無いtagは無視する。tagLabels（任意）はUI側が進捗を表示する
+//         // ときの表示名（例: tag "continue4R" → 表示名 "4R"）。requiredTagsの全tagを
+//         // カバーしていないとmachineValidatorが弾く。
 //     }
 //   },
 //   distributionTables: { [tableId]: [{rounds, weight}, ...] },

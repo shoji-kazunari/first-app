@@ -322,6 +322,29 @@
   color: var(--color-accent);
 }
 
+/* スタンプラリー型（stampCollection）の状態にいる間だけ出す、収集状況の簡易表示。
+   対象外の機種・対象外の状態では常にhiddenのまま */
+.stamp-progress {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-1);
+  margin: 2px 0 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.stamp-progress__item {
+  padding: 1px 6px;
+  border-radius: 999px;
+  color: var(--color-text-muted);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.stamp-progress__item.is-collected {
+  color: var(--color-accent-strong);
+  background: rgba(255, 255, 255, 0.18);
+}
+
 .spin-counter {
   /* .simulation-area__bodyのalign-items:centerは各行（flexアイテムである
      このp自体）をブロック単位で中央寄せするだけで、pの中の複数行そのものを
