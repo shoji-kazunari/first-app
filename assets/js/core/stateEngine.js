@@ -98,6 +98,18 @@
 //         // 初めて転落が確定する。公表の継続率が単純な「大当り/(大当り+転落)」の比率だけでは
 //         // 説明できず、残保留の引き戻し分だけ上乗せされている機種で使う。省略時は0
 //         // （転落＝即座に確定、残保留による引き戻しなし）。
+//       stampCollection: { requiredTags: [tag, ...], completeNextState, completeTag?, completeResultLabel? } | null,
+//         // 「スタンプラリー型」のRUSH向け（任意）。この状態に居続ける間（＝同じ状態への
+//         // 当たりで居残り続ける間）に出たonHit.outcomesのtagを集め、requiredTagsを
+//         // 全種類集め終わらないまま規定回数を消化した（onExhaustedに落ちた）瞬間、
+//         // 通常のonExhaustedではなくcompleteNextState（completeTag）へ振り替える。
+//         // 例: 中森明菜FORFANS … ST100回の中で4R/7R/10Rの3種類の大当たりを
+//         // すべて引けていたら、ST終了後は通常ではなく専用の時短100回へ。
+//         // 集計はこの状態に「外から入った瞬間」にリセットされる（外から入ってくる側の
+//         // onHitのtag＝この状態へ突入させた当たりそのものは数えない。実機側の文言が
+//         // 「ST中に」の大当たりだけを対象としているため）。この状態の中で出た
+//         // onHitのtagだけが、同じ状態へ居残り続ける間だけ積み上がる。
+//         // requiredTagsに無いtagは無視する。
 //     }
 //   },
 //   distributionTables: { [tableId]: [{rounds, weight}, ...] },
@@ -115,6 +127,8 @@ PachiSim.engine = (function () {
       // （ストックはRUSH側の状態に入って初めて意味を持つため）。
       stock: null,
       streak: null, // 進行中の「一撃」集計。通常状態にいる間はnull
+      stamps: [], // stampCollection用。その状態に居続ける間だけ積み上がる当たりtagの配列
+      stampsStateId: null, // stampsがどの状態の分かの記録。一致しない状態ではstampsは空扱い
     };
   }
 
@@ -333,6 +347,32 @@ PachiSim.engine = (function () {
       };
     }
 
+    // stampCollection（任意）: この状態に居続ける間だけ当たりtagを集め、規定回数を
+    // 消化（exhausted）した瞬間に全種類集まっていれば、通常のonExhaustedではなく
+    // completeNextStateへ振り替える。stampsは「この状態に外から入った」時点では
+    // 空から始まる（session.stampsStateIdが今の状態と一致する時だけ引き継ぐ）。
+    let stamps = session.stampsStateId === session.stateId ? session.stamps : [];
+    if (state.stampCollection) {
+      if (outcome.type === "hit") {
+        if (
+          outcome.tag &&
+          state.stampCollection.requiredTags.includes(outcome.tag) &&
+          !stamps.includes(outcome.tag)
+        ) {
+          stamps = stamps.concat([outcome.tag]);
+        }
+      } else {
+        const complete = state.stampCollection.requiredTags.every((t) => stamps.includes(t));
+        if (complete) {
+          outcome.nextStateId = state.stampCollection.completeNextState;
+          outcome.tag = state.stampCollection.completeTag || outcome.tag;
+          if (state.stampCollection.completeResultLabel) {
+            outcome.resultLabel = state.stampCollection.completeResultLabel;
+          }
+        }
+      }
+    }
+
     const nextState = machine.states[outcome.nextStateId];
     // 遷移先がstockMode状態の場合だけ、そのストックの引き継ぎ方を決める。
     // stockSet優先。どちらも無ければ0（この組み合わせはmachineValidatorで弾く想定）。
@@ -349,11 +389,16 @@ PachiSim.engine = (function () {
         nextStock = 0;
       }
     }
+    // 居残り（遷移先が今の状態そのもの）の間だけstampsを引き継ぐ。別の状態へ
+    // 抜けたら（completeNextStateへの振り替えも含め）次回また空から始まる。
+    const staysInCollectingState = !!state.stampCollection && outcome.nextStateId === session.stateId;
     const newSession = {
       stateId: outcome.nextStateId,
       remaining: nextState.maxAttempts,
       stock: nextStock,
       streak: session.streak,
+      stamps: staysInCollectingState ? stamps : [],
+      stampsStateId: staysInCollectingState ? session.stateId : null,
     };
 
     return {

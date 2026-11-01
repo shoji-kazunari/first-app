@@ -24,14 +24,23 @@
 //   継続率約70%は、素の1-(1-1/85.6)^100≈69.1%とほぼ一致するため、残保留等の
 //   引き戻しの無いシンプルな規定回数countDownで再現できる。
 //
-// 【「スタンプラリーシステム」は実装していない】
+// 【「スタンプラリーシステム」の実装について】
 // 実機は「1回のST中に10R・7R・4Rの大当たり全種類を獲得すると、ST消化後に
-// 時短100回へ移行する」という業界初システムを搭載している。ただし振り分け
-// 円グラフにはこの移行自体の確率が出ておらず（全種類獲得は複数回の大当たりに
-// またがる条件のため、1回の抽選の重みでは表現できない）、全種類獲得の
-// 達成率も1geki.jpに掲載が無い。達成率を推測で埋めることはせず、この
-// シミュレーターでは「ST消化後は通常へ戻る」のみを実装し、時短100回ボーナスは
-// 再現していない（確認でき次第、追加を検討する）。
+// 時短100回へ移行する」という業界初システムを搭載している。1geki.jpの本文に
+// 「一度のST中に10R・7R・4Rすべての大当たりを獲得することで、ST終了後に時短100回に
+// 移行する」と明記されており、この移行自体は条件達成で確定（スタンプ3種が
+// 揃えば100%）と判断し、stateEngine.jsに新設したstampCollection機構
+// （ST状態に居続ける間だけ当たりtagを集め、規定回数消化時に全種類揃っていれば
+// 通常のonExhaustedではなく時短100回へ振り替える）で再現した。
+//
+// ただし「時短100回」自体の中身は、以下の2点が1geki.jpに記載が無く確認できなかった。
+// 依頼者に確認の上、次の仮定で実装している（将来1geki.jpに追記されたら差し替える）:
+//   ・時短100回中の当選時の4R/7R/10R振り分け　→　確率が通常時と同じ1/319.7のため、
+//     通常時と同じ振り分け（4R 50.0%／10R 24.0%／7R 26.0%）を仮置き
+//   ・時短100回を1回も当たらず消化した場合の行き先　→　他機種と同じ慣例に合わせ、
+//     通常へ戻る想定
+// 時短100回中に当選した場合の移行先（STへ）は「消化後は必ずSTへと移行する」と
+// 明記されており、これは確認済みの数値。
 //
 // 【出玉は「実獲得個数」を採用】
 // スペック表の実獲得個数をそのまま使用（10R→1400個、7R→630個、4R→360個。
@@ -55,7 +64,7 @@ PachiSim.machineRegistry.register({
   spinsPer1000Yen: 16,
   baseStateId: "normal",
 
-  highlights: "ST中も通常時も4R・7R・10Rの3種類の当りが毎回抽選され、どのラウンドを引くかで出玉のリズムが変わる。ST突入率100%で、継続率約70%の粘り強さも併せ持つ。",
+  highlights: "ST中も通常時も4R・7R・10Rの3種類の当りが毎回抽選され、どのラウンドを引くかで出玉のリズムが変わる。ST突入率100%で、継続率約70%の粘り強さも併せ持つ。業界初の「スタンプラリーシステム」で、1回のST中に3種類すべての大当たりを引き切れば時短100回のボーナスが待っている。",
   rules: [
     "通常時大当り確率：1/319.7",
     "ST中の当選確率：1/85.6",
@@ -63,7 +72,8 @@ PachiSim.machineRegistry.register({
     "ST突入率：100%",
     "初当たり時の振り分け（いずれもST100回へ）：4R・実獲得約360個が50.0%、10R・実獲得約1400個が24.0%、7R・実獲得約630個が26.0%",
     "ST中の当選振り分け（いずれも継続）：4R・実獲得約360個が33.0%、10R・実獲得約1400個が34.0%、7R・実獲得約630個が33.0%",
-    "実機は1回のST中に全種類の大当たりを獲得すると時短100回を獲得できるが、達成率が非公開のためこのシミュレーターでは未実装",
+    "1回のST中に4R・7R・10Rの大当たり全種類を獲得すると、ST消化後に時短100回へ移行（業界初スタンプラリーシステム）",
+    "時短100回中の当選確率は通常時と同じ1/319.7。消化後は必ずSTへ移行し、1回も当たらず消化した場合は通常に戻る",
   ],
 
   states: {
@@ -107,6 +117,33 @@ PachiSim.machineRegistry.register({
         ],
       },
       onExhausted: { nextState: "normal", tag: "rushEnd", resultLabel: "ST終了" },
+      stampCollection: {
+        requiredTags: ["continue4R", "continue10R", "continue7R"],
+        completeNextState: "jitan100",
+        completeTag: "stampComplete",
+        completeResultLabel: "スタンプ達成！時短100突入",
+      },
+    },
+
+    jitan100: {
+      id: "jitan100",
+      label: "時短100",
+      mode: "countDown",
+      maxAttempts: 100,
+      probability: 1 / 319.7,
+      actionLabel: "START",
+      theme: "chance",
+      accruesInvestment: false,
+      isBaseState: false,
+      isRushEntry: false,
+      onHit: {
+        outcomes: [
+          { weight: 0.5, rounds: 4, balls: 360, nextState: "rush", tag: "jitanToRush4R", resultNote: "ST" },
+          { weight: 0.24, rounds: 10, balls: 1400, nextState: "rush", tag: "jitanToRush10R", resultNote: "ST" },
+          { weight: 0.26, rounds: 7, balls: 630, nextState: "rush", tag: "jitanToRush7R", resultNote: "ST" },
+        ],
+      },
+      onExhausted: { nextState: "normal", tag: "jitanEnd", resultLabel: "時短終了" },
     },
   },
 

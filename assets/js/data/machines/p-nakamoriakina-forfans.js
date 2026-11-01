@@ -15,7 +15,8 @@
 //   払い出し個数（実獲得個数） 10R=約1500個(約1400個) / 7R=約700個(約630個) /
 //                              4R=約400個(約360個)
 //
-// 【「スタンプラリーシステム」は実装していない】e版と同じ理由（達成率非公開）。
+// 【「スタンプラリーシステム」の実装について】e版（e-nakamoriakina-forfans.js）と
+// 同じ内容・同じ根拠・同じ仮定で実装済み。詳しくはe版のコメントを参照。
 //
 // 【spinsPer1000Yenについて】
 // ページの「ボーダーライン」は「現在調査中」で未公開のため、既定値の16を使用。
@@ -36,7 +37,7 @@ PachiSim.machineRegistry.register({
   baseStateId: "normal",
 
   highlights:
-    "歌姫をテーマにした一本道のST機で、初当りすれば必ずSTへ突入できる安心設計です。4R・7R・10Rの3種類の大当りがほぼ均等に抽選されるため、通常時もST中も毎回どのラウンドが来るかで表情が変わります。",
+    "歌姫をテーマにした一本道のST機で、初当りすれば必ずSTへ突入できる安心設計です。4R・7R・10Rの3種類の大当りがほぼ均等に抽選されるため、通常時もST中も毎回どのラウンドが来るかで表情が変わります。業界初の「スタンプラリーシステム」で、1回のST中に3種類すべての大当たりを引き切れば時短100回のボーナスが待っています。",
   rules: [
     "通常時大当り確率：1/319.7",
     "ST中の当選確率：1/85.6",
@@ -44,7 +45,8 @@ PachiSim.machineRegistry.register({
     "ST突入率：100%",
     "初当たり時の振り分け（いずれもST100回へ）：4R・実獲得約360個が50.0%、10R・実獲得約1400個が24.0%、7R・実獲得約630個が26.0%",
     "ST中の当選振り分け（いずれも継続）：4R・実獲得約360個が33.0%、10R・実獲得約1400個が34.0%、7R・実獲得約630個が33.0%",
-    "実機は1回のST中に全種類の大当たりを獲得すると時短100回を獲得できるが、達成率が非公開のためこのシミュレーターでは未実装",
+    "1回のST中に4R・7R・10Rの大当たり全種類を獲得すると、ST消化後に時短100回へ移行（業界初スタンプラリーシステム）",
+    "時短100回中の当選確率は通常時と同じ1/319.7。消化後は必ずSTへ移行し、1回も当たらず消化した場合は通常に戻る",
   ],
 
   states: {
@@ -88,6 +90,33 @@ PachiSim.machineRegistry.register({
         ],
       },
       onExhausted: { nextState: "normal", tag: "rushEnd", resultLabel: "ST終了" },
+      stampCollection: {
+        requiredTags: ["continue4R", "continue10R", "continue7R"],
+        completeNextState: "jitan100",
+        completeTag: "stampComplete",
+        completeResultLabel: "スタンプ達成！時短100突入",
+      },
+    },
+
+    jitan100: {
+      id: "jitan100",
+      label: "時短100",
+      mode: "countDown",
+      maxAttempts: 100,
+      probability: 1 / 319.7,
+      actionLabel: "START",
+      theme: "chance",
+      accruesInvestment: false,
+      isBaseState: false,
+      isRushEntry: false,
+      onHit: {
+        outcomes: [
+          { weight: 0.5, rounds: 4, balls: 360, nextState: "rush", tag: "jitanToRush4R", resultNote: "ST" },
+          { weight: 0.24, rounds: 10, balls: 1400, nextState: "rush", tag: "jitanToRush10R", resultNote: "ST" },
+          { weight: 0.26, rounds: 7, balls: 630, nextState: "rush", tag: "jitanToRush7R", resultNote: "ST" },
+        ],
+      },
+      onExhausted: { nextState: "normal", tag: "jitanEnd", resultLabel: "時短終了" },
     },
   },
 

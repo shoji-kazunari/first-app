@@ -188,6 +188,21 @@ PachiSim.machineValidator = (function () {
       }
     }
 
+    // スタンプラリー（任意）。この状態の中で出た当たりtagを集め、規定回数を消化した
+    // ときに全種類集まっていれば、通常のonExhaustedではなく別の状態へ振り替える。
+    if (state.stampCollection != null) {
+      const sc = state.stampCollection;
+      if (!state.onExhausted) {
+        errors.push(`${where}.stampCollection: onExhaustedが無い状態には指定できない（全種類集まらなかった時の行き先が無い）`);
+      }
+      if (!Array.isArray(sc.requiredTags) || sc.requiredTags.length === 0 || !sc.requiredTags.every(isNonEmptyString)) {
+        errors.push(`${where}.stampCollection: requiredTagsが1つ以上の文字列の配列でない`);
+      }
+      if (!machine.states[sc.completeNextState]) {
+        errors.push(`${where}.stampCollection: completeNextState "${sc.completeNextState}" が存在しない`);
+      }
+    }
+
     const onHit = state.onHit;
     if (!onHit) {
       errors.push(`${where}: onHitが無い`);
