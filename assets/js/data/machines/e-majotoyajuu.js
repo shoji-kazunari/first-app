@@ -92,10 +92,10 @@ PachiSim.machineRegistry.register({
       isRushEntry: false,
       onHit: {
         outcomes: [
-          { weight: 0.49, rounds: 1, balls: 400, nextState: "normal", tag: "toNormal" },
+          { weight: 0.49, rounds: 1, roundsUnknown: true, balls: 400, nextState: "normal", tag: "toNormal" },
           {
             weight: 0.5,
-            rounds: 1,
+            rounds: 1, roundsUnknown: true,
             balls: 400,
             nextState: "rushFirst",
             tag: "toRushFirst",

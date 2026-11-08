@@ -66,10 +66,10 @@ PachiSim.machineRegistry.register({
       isRushEntry: false,
       onHit: {
         outcomes: [
-          { weight: 0.49, rounds: 1, balls: 280, nextState: "normal", tag: "toNormal" },
+          { weight: 0.49, rounds: 1, roundsUnknown: true, balls: 280, nextState: "normal", tag: "toNormal" },
           {
             weight: 0.51,
-            rounds: 1,
+            rounds: 1, roundsUnknown: true,
             balls: 280,
             nextState: "saeteruRush",
             tag: "toRush",
@@ -93,12 +93,12 @@ PachiSim.machineRegistry.register({
       isRushEntry: true,
       onHit: {
         outcomes: [
-          { weight: 0.5, rounds: 1, balls: 280, nextState: "saeteruRush", tag: "continue300" },
-          { weight: 0.25, rounds: 1, balls: 560, nextState: "saeteruRush", tag: "continue600" },
-          { weight: 0.1, rounds: 1, balls: 1120, nextState: "saeteruRush", tag: "continue1200" },
+          { weight: 0.5, rounds: 1, roundsUnknown: true, balls: 280, nextState: "saeteruRush", tag: "continue300" },
+          { weight: 0.25, rounds: 1, roundsUnknown: true, balls: 560, nextState: "saeteruRush", tag: "continue600" },
+          { weight: 0.1, rounds: 1, roundsUnknown: true, balls: 1120, nextState: "saeteruRush", tag: "continue1200" },
           {
             weight: 0.15,
-            rounds: 1,
+            rounds: 1, roundsUnknown: true,
             balls: 2240,
             nextState: "saeteruRushFlat",
             tag: "toRushFlat",
@@ -122,10 +122,10 @@ PachiSim.machineRegistry.register({
       isRushEntry: true,
       onHit: {
         outcomes: [
-          { weight: 0.5, rounds: 1, balls: 280, nextState: "saeteruRushFlat", tag: "continue300" },
-          { weight: 0.25, rounds: 1, balls: 560, nextState: "saeteruRushFlat", tag: "continue600" },
-          { weight: 0.1, rounds: 1, balls: 1120, nextState: "saeteruRushFlat", tag: "continue1200" },
-          { weight: 0.15, rounds: 1, balls: 2240, nextState: "saeteruRushFlat", tag: "continue2400" },
+          { weight: 0.5, rounds: 1, roundsUnknown: true, balls: 280, nextState: "saeteruRushFlat", tag: "continue300" },
+          { weight: 0.25, rounds: 1, roundsUnknown: true, balls: 560, nextState: "saeteruRushFlat", tag: "continue600" },
+          { weight: 0.1, rounds: 1, roundsUnknown: true, balls: 1120, nextState: "saeteruRushFlat", tag: "continue1200" },
+          { weight: 0.15, rounds: 1, roundsUnknown: true, balls: 2240, nextState: "saeteruRushFlat", tag: "continue2400" },
         ],
       },
       onExhausted: { nextState: "normal", tag: "rushFlatEnd", resultLabel: "冴えてる彼女RUSH♭終了" },

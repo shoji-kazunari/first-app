@@ -76,8 +76,8 @@ PachiSim.machineRegistry.register({
       isRushEntry: false,
       onHit: {
         outcomes: [
-          { weight: 0.5, rounds: 1, balls: 210, nextState: "normal", tag: "toNormal" },
-          { weight: 0.5, rounds: 1, balls: 210, nextState: "fairyRush", tag: "toRush", resultNote: "FAIRY RUSH" },
+          { weight: 0.5, rounds: 1, roundsUnknown: true, balls: 210, nextState: "normal", tag: "toNormal" },
+          { weight: 0.5, rounds: 1, roundsUnknown: true, balls: 210, nextState: "fairyRush", tag: "toRush", resultNote: "FAIRY RUSH" },
         ],
       },
       onExhausted: null,
@@ -96,11 +96,12 @@ PachiSim.machineRegistry.register({
       isRushEntry: true,
       onHit: {
         outcomes: [
-          { weight: 0.6, rounds: 1, balls: 210, nextState: "fairyRush", tag: "continueSmall" },
-          { weight: 0.275, rounds: 1, balls: 1500, nextState: "fairyRush", tag: "continueBig" },
+          { weight: 0.6, rounds: 1, roundsUnknown: true, balls: 210, nextState: "fairyRush", tag: "continueSmall" },
+          { weight: 0.275, rounds: 1, roundsUnknown: true, balls: 1500, nextState: "fairyRush", tag: "continueBig" },
           {
             weight: 0.125,
             rounds: 1,
+            roundsUnknown: true,
             balls: 1500,
             nextState: "shichienryuuRush",
             tag: "toUpgrade",
@@ -125,10 +126,11 @@ PachiSim.machineRegistry.register({
       isRushEntry: true,
       onHit: {
         outcomes: [
-          { weight: 0.6, rounds: 1, balls: 210, nextState: "shichienryuuRush", tag: "continueSmall" },
+          { weight: 0.6, rounds: 1, roundsUnknown: true, balls: 210, nextState: "shichienryuuRush", tag: "continueSmall" },
           {
             weight: 0.4,
             rounds: 1,
+            roundsUnknown: true,
             balls: 1500,
             nextState: "shichienryuuRush",
             tag: "continueBig",

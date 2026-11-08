@@ -851,7 +851,8 @@
           // ラウンドはdisplayRounds（省略時はroundsと同じ）を使い、「10R×3」のような
           // 複数ブロック連続の当たりは実機のデータカウンターと同じく合計R（30）で見せる。
           spins: spinsSinceLastHit,
-          rounds: outcome.displayRounds,
+          // ラウンド数が非公開の当たりは、データランプにR数を出さない
+          rounds: outcome.roundsUnknown ? null : outcome.displayRounds,
           context: fromState.isBaseState || fromState.resetsStreak ? "normal" : "rush",
           streakId: currentStreakId,
         });
@@ -863,7 +864,7 @@
           line1:
             outcome.balls === 0
               ? outcome.resultNote || "継続"
-              : `大当たり＜${outcome.displayRounds}R獲得＞${
+              : `大当たり${outcome.roundsUnknown ? "" : `＜${outcome.displayRounds}R獲得＞`}${
                   outcome.resultNote ? `（${outcome.resultNote}）` : ""
                 }`,
           ballsLine: outcome.balls === 0 ? undefined : `+${PachiSim.format.ball(outcome.balls)}`,

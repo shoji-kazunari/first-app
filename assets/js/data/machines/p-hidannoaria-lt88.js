@@ -70,7 +70,7 @@ PachiSim.machineRegistry.register({
         outcomes: [
           {
             weight: 0.673,
-            rounds: 1,
+            rounds: 1, roundsUnknown: true,
             balls: 300,
             nextState: "assaultQuest",
             tag: "toAssault",
@@ -86,7 +86,7 @@ PachiSim.machineRegistry.register({
           },
           {
             weight: 0.007,
-            rounds: 1,
+            rounds: 1, roundsUnknown: true,
             balls: 1000,
             nextState: "lbr",
             tag: "toLbrDirect",
@@ -112,7 +112,7 @@ PachiSim.machineRegistry.register({
         outcomes: [
           {
             weight: 0.664,
-            rounds: 1,
+            rounds: 1, roundsUnknown: true,
             balls: 300,
             nextState: "lbr",
             tag: "toLbr300",
@@ -120,7 +120,7 @@ PachiSim.machineRegistry.register({
           },
           {
             weight: 0.209,
-            rounds: 1,
+            rounds: 1, roundsUnknown: true,
             balls: 1000,
             nextState: "lbr",
             tag: "toLbr1000",
@@ -128,7 +128,7 @@ PachiSim.machineRegistry.register({
           },
           {
             weight: 0.127,
-            rounds: 1,
+            rounds: 1, roundsUnknown: true,
             balls: 1000,
             nextState: "superLbr",
             tag: "toSuperLbr",
@@ -152,11 +152,11 @@ PachiSim.machineRegistry.register({
       isRushEntry: true,
       onHit: {
         outcomes: [
-          { weight: 0.664, rounds: 1, balls: 300, nextState: "lbr", tag: "continue300" },
-          { weight: 0.209, rounds: 1, balls: 1000, nextState: "lbr", tag: "continue1000" },
+          { weight: 0.664, rounds: 1, roundsUnknown: true, balls: 300, nextState: "lbr", tag: "continue300" },
+          { weight: 0.209, rounds: 1, roundsUnknown: true, balls: 1000, nextState: "lbr", tag: "continue1000" },
           {
             weight: 0.127,
-            rounds: 1,
+            rounds: 1, roundsUnknown: true,
             balls: 1000,
             nextState: "superLbr",
             tag: "toSuperLbr",
@@ -180,8 +180,8 @@ PachiSim.machineRegistry.register({
       isRushEntry: true,
       onHit: {
         outcomes: [
-          { weight: 0.664, rounds: 1, balls: 300, nextState: "superLbr", tag: "continue300" },
-          { weight: 0.336, rounds: 1, balls: 1000, nextState: "superLbr", tag: "continue1000" },
+          { weight: 0.664, rounds: 1, roundsUnknown: true, balls: 300, nextState: "superLbr", tag: "continue300" },
+          { weight: 0.336, rounds: 1, roundsUnknown: true, balls: 1000, nextState: "superLbr", tag: "continue1000" },
         ],
       },
       onExhausted: { nextState: "normal", tag: "superLbrEnd", resultLabel: "超LBR終了" },

@@ -49,8 +49,8 @@ PachiSim.machineRegistry.register({
       isRushEntry: false,
       onHit: {
         outcomes: [
-          { weight: 0.67, rounds: 1, balls: 280, nextState: "normal", tag: "toNormal" },
-          { weight: 0.33, rounds: 1, balls: 280, nextState: "rush", tag: "toRush", resultNote: "頂RUSH" },
+          { weight: 0.67, rounds: 1, roundsUnknown: true, balls: 280, nextState: "normal", tag: "toNormal" },
+          { weight: 0.33, rounds: 1, roundsUnknown: true, balls: 280, nextState: "rush", tag: "toRush", resultNote: "頂RUSH" },
         ],
       },
       onExhausted: null,
@@ -69,10 +69,10 @@ PachiSim.machineRegistry.register({
       isRushEntry: true,
       onHit: {
         outcomes: [
-          { weight: 0.5, rounds: 1, balls: 280, nextState: "rush", tag: "rushContinue300" },
+          { weight: 0.5, rounds: 1, roundsUnknown: true, balls: 280, nextState: "rush", tag: "rushContinue300" },
           {
             weight: 0.5,
-            rounds: 1,
+            rounds: 1, roundsUnknown: true,
             balls: 1960,
             nextState: "rush",
             tag: "rushContinue2100",

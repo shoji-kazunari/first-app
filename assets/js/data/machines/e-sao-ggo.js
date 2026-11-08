@@ -80,10 +80,10 @@ PachiSim.machineRegistry.register({
       isRushEntry: false,
       onHit: {
         outcomes: [
-          { weight: 0.97, rounds: 1, balls: 280, nextState: "sjJudge", tag: "toSjJudge", resultNote: "SJ JUDGE" },
+          { weight: 0.97, rounds: 1, roundsUnknown: true, balls: 280, nextState: "sjJudge", tag: "toSjJudge", resultNote: "SJ JUDGE" },
           {
             weight: 0.03,
-            rounds: 1,
+            rounds: 1, roundsUnknown: true,
             balls: 4200,
             nextState: "sjRush",
             tag: "toSjRushDirect",
@@ -107,7 +107,7 @@ PachiSim.machineRegistry.register({
       isRushEntry: false,
       onHit: {
         outcomes: [
-          { weight: 1, rounds: 1, balls: 3360, nextState: "sjRush", tag: "toSjRush", resultNote: "SJ RUSH" },
+          { weight: 1, rounds: 1, roundsUnknown: true, balls: 3360, nextState: "sjRush", tag: "toSjRush", resultNote: "SJ RUSH" },
         ],
       },
       onExhausted: { nextState: "normal", tag: "sjJudgeEnd", resultLabel: "SJ JUDGE終了" },
@@ -126,12 +126,12 @@ PachiSim.machineRegistry.register({
       isRushEntry: true,
       onHit: {
         outcomes: [
-          { weight: 0.3, rounds: 1, balls: 3360, nextState: "sjRush", tag: "continue3600" },
-          { weight: 0.2, rounds: 1, balls: 1960, nextState: "sjRush", tag: "continue2100" },
-          { weight: 0.25, rounds: 1, balls: 1400, nextState: "sjRush", tag: "continue1500" },
-          { weight: 0.1, rounds: 1, balls: 840, nextState: "sjRush", tag: "continue900" },
-          { weight: 0.1, rounds: 1, balls: 560, nextState: "sjRush", tag: "continue600" },
-          { weight: 0.05, rounds: 1, balls: 280, nextState: "sjRush", tag: "continue300" },
+          { weight: 0.3, rounds: 1, roundsUnknown: true, balls: 3360, nextState: "sjRush", tag: "continue3600" },
+          { weight: 0.2, rounds: 1, roundsUnknown: true, balls: 1960, nextState: "sjRush", tag: "continue2100" },
+          { weight: 0.25, rounds: 1, roundsUnknown: true, balls: 1400, nextState: "sjRush", tag: "continue1500" },
+          { weight: 0.1, rounds: 1, roundsUnknown: true, balls: 840, nextState: "sjRush", tag: "continue900" },
+          { weight: 0.1, rounds: 1, roundsUnknown: true, balls: 560, nextState: "sjRush", tag: "continue600" },
+          { weight: 0.05, rounds: 1, roundsUnknown: true, balls: 280, nextState: "sjRush", tag: "continue300" },
         ],
       },
       onExhausted: { nextState: "normal", tag: "sjRushEnd", resultLabel: "SJ RUSH終了" },

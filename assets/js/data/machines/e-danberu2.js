@@ -90,10 +90,10 @@ PachiSim.machineRegistry.register({
       isRushEntry: true,
       onHit: {
         outcomes: [
-          { weight: 0.125, rounds: 1, balls: 840, nextState: "rush", tag: "continue900" },
-          { weight: 0.375, rounds: 1, balls: 1960, nextState: "rush", tag: "continue2100" },
-          { weight: 0.375, rounds: 1, balls: 3080, nextState: "rush", tag: "continue3300" },
-          { weight: 0.125, rounds: 1, balls: 4200, nextState: "rush", tag: "continue4500", resultNote: "ゴールデンタイム" },
+          { weight: 0.125, rounds: 1, roundsUnknown: true, balls: 840, nextState: "rush", tag: "continue900" },
+          { weight: 0.375, rounds: 1, roundsUnknown: true, balls: 1960, nextState: "rush", tag: "continue2100" },
+          { weight: 0.375, rounds: 1, roundsUnknown: true, balls: 3080, nextState: "rush", tag: "continue3300" },
+          { weight: 0.125, rounds: 1, roundsUnknown: true, balls: 4200, nextState: "rush", tag: "continue4500", resultNote: "ゴールデンタイム" },
         ],
       },
       onExhausted: { nextState: "normal", tag: "rushEnd", resultLabel: "RUSH終了" },

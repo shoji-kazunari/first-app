@@ -66,6 +66,10 @@ PachiSim.machineValidator = (function () {
     if (outcome.displayRounds != null && !isPositiveInteger(outcome.displayRounds)) {
       errors.push(`${where}: displayRoundsが正の整数でない（${outcome.displayRounds}）`);
     }
+    // roundsUnknown（任意）: ラウンド数が非公開で出玉の個数だけ公開されている当たり。R数を表示しない。
+    if (outcome.roundsUnknown != null && typeof outcome.roundsUnknown !== "boolean") {
+      errors.push(`${where}: roundsUnknownがtrue/falseでない（${outcome.roundsUnknown}）`);
+    }
     if (!machine.states[outcome.nextState]) {
       errors.push(`${where}: nextState "${outcome.nextState}" が存在しない`);
     } else if (machine.states[outcome.nextState].stockMode) {

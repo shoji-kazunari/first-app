@@ -60,6 +60,11 @@
 //       // 同じラウンド数でも文脈によって出玉が変わる機種（例: 通常大当たりと特別大当たりが
 //       // 同じ10Rでも出玉が違う）を表現するための上書き値。
 //       //
+//       // roundsUnknown（任意、true/false）: 公開情報が出玉の個数だけでラウンド数が
+//       // 非公開の当たり。roundsはpayoutTable参照・7の出し分け用の形式的な値（1など）の
+//       // ままにし、画面ではR数を出さない（「大当たり＜1R獲得＞ +1,960玉」と誤解を招く
+//       // 表示になるのを防ぐ）。
+//       //
 //       // displayRounds（任意）: データランプ・演出欄の「○R獲得」表示にだけ使う値。
 //       // 省略時はroundsをそのまま使う。roundsは7が出せる最大R（reelOmens.decideの
 //       // maxRounds判定）とpayoutTable参照の両方に使われる内部値なので、「10R×3」の
@@ -230,12 +235,13 @@ PachiSim.engine = (function () {
 
     let outcome;
     if (lastRoll.hit) {
-      let rounds, displayRounds, nextStateId, tag, ballsOverride, stockAdd, stockSet, stockUnlimited, bonusLoop;
+      let rounds, displayRounds, roundsUnknown, nextStateId, tag, ballsOverride, stockAdd, stockSet, stockUnlimited, bonusLoop;
       let resultNote;
       if (state.onHit.outcomes) {
         const picked = PachiSim.rng.weightedPick(rng, state.onHit.outcomes);
         rounds = picked.rounds;
         displayRounds = picked.displayRounds != null ? picked.displayRounds : rounds;
+        roundsUnknown = !!picked.roundsUnknown;
         nextStateId = picked.nextState;
         tag = picked.tag || null;
         resultNote = picked.resultNote || null;
@@ -271,6 +277,7 @@ PachiSim.engine = (function () {
         const picked = PachiSim.rng.weightedPick(rng, bucket.outcomes);
         rounds = picked.rounds;
         displayRounds = picked.displayRounds != null ? picked.displayRounds : rounds;
+        roundsUnknown = !!picked.roundsUnknown;
         nextStateId = picked.nextState;
         tag = picked.tag || null;
         resultNote = picked.resultNote || null;
@@ -284,6 +291,7 @@ PachiSim.engine = (function () {
         const picked = PachiSim.rng.weightedPick(rng, table);
         rounds = picked.rounds;
         displayRounds = picked.displayRounds != null ? picked.displayRounds : rounds;
+        roundsUnknown = !!picked.roundsUnknown;
         nextStateId = state.onHit.nextState;
         tag = state.onHit.tag || null;
         resultNote = state.onHit.resultNote || null;
@@ -322,6 +330,7 @@ PachiSim.engine = (function () {
         attempts,
         rounds,
         displayRounds,
+        roundsUnknown,
         balls,
         nextStateId,
         tag,
