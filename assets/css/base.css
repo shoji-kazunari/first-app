@@ -327,6 +327,16 @@ button {
   font-weight: 500;
 }
 
+/* 広告カード: 忍者AdMaxの336×280がスマホ幅のカード内側（左右余白込みで324px@390px幅）に
+   収まらずはみ出していたため、このカードだけ左右余白をなくして中央寄せにする。 */
+.ad-slot {
+  padding-left: 0;
+  padding-right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .ad-slot__label {
   font-size: 0.7rem;
   letter-spacing: 0.08em;
