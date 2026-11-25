@@ -234,9 +234,20 @@
 
     // 戻り値はHTML（els.spinCounter.innerHTMLへ代入する。中身は固定文言＋数値のみで
     // ユーザー入力を含まないため、そのままinnerHTMLに使ってよい）。
+    // 遊タイム（machine.yutime）を持つ機種で、数える状態（通常・時短）にいる間だけ
+    // 「遊タイムまで あと○回」を回転数の下に小さく出す。sessionはアクションが
+    // 終わるまで更新されないので、アクション開始時点の残り回数から、今回すでに
+    // 回した分（liveCount - spinsCarriedOver）を引いて、1回転ごとに減っていくようにする。
+    function yutimeNoteHtml(state) {
+      const base = PachiSim.engine.yutimeRemaining(session, machine, state);
+      if (base == null) return "";
+      const left = Math.max(0, base - Math.max(0, liveCount - spinsCarriedOver));
+      return `<span class="spin-counter__note">遊タイムまで あと${PachiSim.format.number(left)}回</span>`;
+    }
+
     function spinCounterText(state) {
       if (state.mode === "countUp") {
-        return `${PachiSim.format.number(liveCount)}回転`;
+        return `${PachiSim.format.number(liveCount)}回転${yutimeNoteHtml(state)}`;
       }
       const remaining = liveRemaining == null ? state.maxAttempts : liveRemaining;
       // remainingLabel（任意）: 「残り」の直後に挟みたい名称（例:「残りお願い玉4個」）。
@@ -262,7 +273,7 @@
       // 注記を添える。
       const note = state.includesResidualHold
         ? `<span class="spin-counter__note">（残保留込み）</span>`
-        : "";
+        : yutimeNoteHtml(state);
       return `残り${state.remainingLabel || ""}${remaining}${state.remainingUnit || "回"}${note}`;
     }
 

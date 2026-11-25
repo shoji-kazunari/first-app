@@ -1033,3 +1033,58 @@
     );
   });
 })();
+
+// 遊タイム（machine.yutime）: 低確率状態の回転数を状態をまたいで積算し、
+// 規定回数で遊タイムへ移る。大当たり間で1回だけ。
+(function () {
+  const { test, assertEqual, assertTrue } = PachiSimTest;
+  const m = PachiSim.machineRegistry.getBySlug("e-oumi5sp-yutime");
+  const never = () => 0.999999; // 一度も当たらない
+  const always = () => 0; // 必ず当たり、振り分けは先頭（確変）
+
+  test("遊タイム: 通常で950回はずれると遊タイムへ移る", () => {
+    const s = PachiSim.engine.createSession(m);
+    const r = PachiSim.engine.resolveAction(s, m, never);
+    assertEqual(r.outcome.type, "exhausted");
+    assertEqual(r.outcome.attempts, 950);
+    assertEqual(r.outcome.nextStateId, "yutime");
+    assertEqual(r.outcome.viaYutime, true);
+    assertEqual(r.newSession.yutimeUsed, true);
+  });
+
+  test("遊タイム: 時短の回転数も数える（時短100回→通常は残り850回で発動）", () => {
+    const s = Object.assign(PachiSim.engine.createSession(m), { stateId: "jitan100", remaining: 100 });
+    const r1 = PachiSim.engine.resolveAction(s, m, never);
+    assertEqual(r1.outcome.nextStateId, "normal");
+    assertEqual(r1.newSession.lowProbSpins, 100);
+    assertEqual(PachiSim.engine.yutimeRemaining(r1.newSession, m, m.states.normal), 850);
+    const r2 = PachiSim.engine.resolveAction(r1.newSession, m, never);
+    assertEqual(r2.outcome.attempts, 850);
+    assertEqual(r2.outcome.nextStateId, "yutime");
+  });
+
+  test("遊タイム: 外しきった後は次の大当たりまで再発動しない", () => {
+    const s = PachiSim.engine.createSession(m);
+    const r1 = PachiSim.engine.resolveAction(s, m, never); // 950回→遊タイム
+    const r2 = PachiSim.engine.resolveAction(r1.newSession, m, never); // 遊タイム350回外し→通常
+    assertEqual(r2.outcome.nextStateId, "normal");
+    assertEqual(PachiSim.engine.yutimeRemaining(r2.newSession, m, m.states.normal), null);
+    // 1000回はずれた後に当たるRNG。発動済みなので950回で打ち切られず、1001回目に当たる
+    const lateHit = PachiSim.rng.createScriptedRng(new Array(1000).fill(0.999999).concat([0]));
+    const r3 = PachiSim.engine.resolveAction(r2.newSession, m, lateHit);
+    assertEqual(r3.outcome.type, "hit");
+    assertEqual(r3.outcome.attempts, 1001);
+  });
+
+  test("遊タイム: 大当たりで回転数と発動済みフラグが戻る", () => {
+    const s = Object.assign(PachiSim.engine.createSession(m), { lowProbSpins: 500, yutimeUsed: true });
+    const r = PachiSim.engine.resolveAction(s, m, always);
+    assertEqual(r.outcome.type, "hit");
+    assertEqual(r.newSession.lowProbSpins, 0);
+    assertEqual(r.newSession.yutimeUsed, false);
+  });
+
+  test("遊タイム: 確変中は数えない", () => {
+    assertEqual(PachiSim.engine.yutimeRemaining({ lowProbSpins: 0, yutimeUsed: false }, m, m.states.kakuhen), null);
+  });
+})();

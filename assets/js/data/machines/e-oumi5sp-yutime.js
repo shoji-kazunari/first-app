@@ -29,10 +29,15 @@
 //   時短の回数による引き戻し: 1-(1-1/319.6)^100 ≈ 26.9%、^200 ≈ 46.6%
 //
 // 【迷った箇所】
-// ・遊タイム（低確率950回消化で時短350回）は、このシミュレーターの状態エンジンが
-//   「状態をまたいだ低確率回転数の積算」を持たないため実装していない
-//   （pa-momotetsu.js・p-denonbu.js等と同じ扱い。rulesにも明記）。
-//   950回まで当たらない確率は(1-1/319.6)^950 ≈ 5.1%。
+// ・遊タイム（低確率950回消化で時短350回、発動は大当たり間で1回のみ）は、
+//   状態エンジンのyutime機能で実装した。通常・時短100回・時短200回（いずれも低確率）を
+//   countsTowardYutimeにして回転数を状態をまたいで積算し、950回に達したら遊タイム
+//   （時短350回、1/319.6）へ移る。950回まで当たらない確率は(1-1/319.6)^950 ≈ 5.1%。
+//   検算: 遊タイム350回で当たる確率 1-(1-1/319.6)^350 ≈ 66.6%（公表の「遊タイム発動時の
+//   大当たり期待値 約66.6%」と一致）。
+//   遊タイム中の当たりの振り分けは、円グラフ（通常時・時短中・確変中で共通）の54%/46%。
+//   遊タイムは時短なので、通常当たりの後はスペック表の注記「時短中の通常大当たり後は
+//   時短200回」に従って時短200回へ移す。
 // ・ゲームフロー図の「継続率64%」は、上記の素直な組み立てから計算すると
 //   確変→確変の直接継続54%、時短100回の引き戻し込みで約66%、最終的に確変へ戻る確率で
 //   約62.5%となり、どの定義でも64%ちょうどにはならなかった。1gekiに継続率の定義の
@@ -58,7 +63,7 @@ PachiSim.machineRegistry.register({
   baseStateId: "normal",
 
   highlights:
-    "『大海物語5スペシャル』がスマパチで登場。当たりはすべて10R約1500個で、その54%が次回まで続く確変。通常当たりでも時短100回が付き、時短中に通常当たりを引くと時短200回にアップするBIGアシストシステムで、引き戻しのチャンスが厚い。海物語シリーズ初の両手ハンドル筐体も話題。",
+    "『大海物語5スペシャル』がスマパチで登場。当たりはすべて10R約1500個で、その54%が次回まで続く確変。通常当たりでも時短100回が付き、時短中に通常当たりを引くと時短200回にアップするBIGアシストシステムで、引き戻しのチャンスが厚い。低確率で950回ハマると遊タイム（時短350回）が発動し、約66.6%で救済される。海物語シリーズ初の両手ハンドル筐体も話題。",
   rules: [
     "通常時大当たり確率：約1/319.6",
     "右打ち中（確変中）大当たり確率：約1/31.9",
@@ -67,7 +72,8 @@ PachiSim.machineRegistry.register({
     "大当たり振り分け（通常時・時短中・確変中で共通）：確変（次回まで）が54%、通常（時短付き）が46%",
     "通常大当たり後は時短100回。時短中に通常大当たりを引いた場合は時短200回（BIGアシストシステム）",
     "確変継続率：約64%（ゲームフロー図の公表値）",
-    "遊タイム（低確率950回消化で時短350回）はこのシミュレーターでは未実装",
+    "遊タイム：低確率状態（通常・時短）を950回消化すると時短350回（大当たり間で1回のみ）。遊タイム中に当たる確率は約66.6%",
+    "遊タイム中の通常大当たり後も時短200回（時短中の通常大当たりと同じ扱い）",
   ],
 
   states: {
@@ -82,6 +88,7 @@ PachiSim.machineRegistry.register({
       accruesInvestment: true,
       isBaseState: true,
       isRushEntry: false,
+      countsTowardYutime: true,
       onHit: {
         outcomes: [
           { weight: 0.54, rounds: 10, balls: 1400, nextState: "kakuhen", tag: "toKakuhen", resultNote: "確変" },
@@ -122,6 +129,7 @@ PachiSim.machineRegistry.register({
       accruesInvestment: false,
       isBaseState: false,
       isRushEntry: false,
+      countsTowardYutime: true,
       onHit: {
         outcomes: [
           { weight: 0.54, rounds: 10, balls: 1400, nextState: "kakuhen", tag: "jitan100ToKakuhen", resultNote: "引き戻し・確変" },
@@ -142,6 +150,7 @@ PachiSim.machineRegistry.register({
       accruesInvestment: false,
       isBaseState: false,
       isRushEntry: false,
+      countsTowardYutime: true,
       onHit: {
         outcomes: [
           { weight: 0.54, rounds: 10, balls: 1400, nextState: "kakuhen", tag: "jitan200ToKakuhen", resultNote: "引き戻し・確変" },
@@ -150,7 +159,30 @@ PachiSim.machineRegistry.register({
       },
       onExhausted: { nextState: "normal", tag: "jitan200End", resultLabel: "時短終了" },
     },
+
+    yutime: {
+      id: "yutime",
+      label: "遊タイム（時短350回）",
+      mode: "countDown",
+      maxAttempts: 350,
+      probability: 1 / 319.6,
+      actionLabel: "START",
+      theme: "chance",
+      accruesInvestment: false,
+      isBaseState: false,
+      isRushEntry: false,
+      onHit: {
+        outcomes: [
+          { weight: 0.54, rounds: 10, balls: 1400, nextState: "kakuhen", tag: "yutimeToKakuhen", resultNote: "遊タイムで当選・確変" },
+          { weight: 0.46, rounds: 10, balls: 1400, nextState: "jitan200", tag: "yutimeToJitan200", resultNote: "遊タイムで当選・時短200回" },
+        ],
+      },
+      onExhausted: { nextState: "normal", tag: "yutimeEnd", resultLabel: "遊タイム終了" },
+    },
   },
+
+  // 遊タイム: 低確率状態を950回消化で時短350回（大当たり間で1回のみ）
+  yutime: { triggerSpins: 950, nextState: "yutime", tag: "yutimeStart", resultLabel: "遊タイム突入（時短350回）" },
 
   distributionTables: {},
 

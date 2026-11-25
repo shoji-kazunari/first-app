@@ -324,7 +324,31 @@ PachiSim.machineValidator = (function () {
 
     Object.keys(states).forEach((stateId) => {
       validateState(machine, stateId, states[stateId], errors);
+      const cty = states[stateId].countsTowardYutime;
+      if (cty != null && typeof cty !== "boolean") {
+        errors.push(`states.${stateId}: countsTowardYutimeがtrue/falseでない（${cty}）`);
+      }
+      if (cty && !machine.yutime) {
+        errors.push(`states.${stateId}: countsTowardYutimeがあるのにmachine.yutimeが無い`);
+      }
     });
+
+    // 遊タイム（任意）
+    if (machine.yutime != null) {
+      const y = machine.yutime;
+      if (!isPositiveInteger(y.triggerSpins)) {
+        errors.push(`yutime: triggerSpinsが正の整数でない（${y.triggerSpins}）`);
+      }
+      if (!states[y.nextState]) {
+        errors.push(`yutime: nextState "${y.nextState}" が存在しない`);
+      } else if (states[y.nextState].countsTowardYutime) {
+        // 遊タイム中の回転まで数えると、外しきった直後に「もう発動回数を超えている」状態になる
+        errors.push(`yutime: 遊タイムの状態"${y.nextState}"にcountsTowardYutimeを付けてはいけない`);
+      }
+      if (!Object.keys(states).some((id) => states[id].countsTowardYutime)) {
+        errors.push("yutime: countsTowardYutimeがtrueの状態が1つも無い（発動回数を数えられない）");
+      }
+    }
 
     return errors;
   }

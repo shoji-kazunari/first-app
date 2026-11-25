@@ -118,8 +118,18 @@
 //         // requiredTagsに無いtagは無視する。tagLabels（任意）はUI側が進捗を表示する
 //         // ときの表示名（例: tag "continue4R" → 表示名 "4R"）。requiredTagsの全tagを
 //         // カバーしていないとmachineValidatorが弾く。
+//       countsTowardYutime: boolean,   // （任意）遊タイムの発動回数に数える「低確率状態」か。
+//         // machine.yutimeを持つ機種で、通常・時短などの低確率の状態に付ける。確変・STなど
+//         // 高確率の状態や、遊タイムそのものの状態には付けない。
 //     }
 //   },
+//   yutime: { triggerSpins, nextState, tag?, resultLabel? } | null,
+//     // 遊タイム（任意）。「大当たりから次の大当たりまでの間に、countsTowardYutimeの状態で
+//     // 合計triggerSpins回はずれたら、nextState（遊タイム＝時短）へ移る」救済機能。
+//     // 回転数は状態をまたいで積算する（例: 時短100回を外して通常へ戻った場合、時短の
+//     // 100回も数える。実機の「低確率○回消化」と同じ）。大当たりを引いた時点で0に戻る。
+//     // 発動は大当たり間で1回だけ（遊タイムを外しきって通常へ戻っても、次の大当たりまでは
+//     // 再び発動しない）。session.lowProbSpins / session.yutimeUsedで管理する。
 //   distributionTables: { [tableId]: [{rounds, weight}, ...] },
 //   payoutTable: { [rounds]: balls },
 // }
@@ -137,7 +147,16 @@ PachiSim.engine = (function () {
       streak: null, // 進行中の「一撃」集計。通常状態にいる間はnull
       stamps: [], // stampCollection用。その状態に居続ける間だけ積み上がる当たりtagの配列
       stampsStateId: null, // stampsがどの状態の分かの記録。一致しない状態ではstampsは空扱い
+      lowProbSpins: 0, // 遊タイム用。前回の大当たりから数えた低確率状態のはずれ回転数
+      yutimeUsed: false, // 遊タイム用。前回の大当たり以降に遊タイムが発動済みか
     };
+  }
+
+  // 遊タイムが残り何回で発動するか。遊タイムを持たない機種・数えない状態・発動済みの
+  // 大当たり間ではnull。UI側の「遊タイムまで あと○回」表示にも使う。
+  function yutimeRemaining(session, machine, state) {
+    if (!machine.yutime || !state.countsTowardYutime || session.yutimeUsed) return null;
+    return Math.max(0, machine.yutime.triggerSpins - (session.lowProbSpins || 0));
   }
 
   // 1回のボタン押下（START/JUDGEMENT）に対応する抽選を、
@@ -164,6 +183,7 @@ PachiSim.engine = (function () {
     const displayCap = state.stockMode ? session.stock : state.maxAttempts;
 
     const rolls = [];
+    let yutimeCapped = false;
     // stockRemaining: stockMode状態でのみ意味を持つ「消化中に減っていくストック」。
     // judgmentGateが無ければ「1回転＝1回の当落判定」なので毎回転1個ずつ減る（旧来どおり）。
     // judgmentGateがあれば、判定が発生しなかった回転（素通り）は減らさない。
@@ -191,6 +211,14 @@ PachiSim.engine = (function () {
       }
     } else {
       cap = state.maxAttempts == null ? PachiSim.config.maxSimulatedSpins : state.maxAttempts;
+      // 遊タイム: 発動までの残り回数がこの状態の上限より小さければ、そこで打ち切る。
+      // 打ち切った（当たらずにちょうど発動回数に達した）ら、下でonExhaustedの代わりに
+      // machine.yutimeへ振り替える。
+      const toYutime = yutimeRemaining(session, machine, state);
+      if (toYutime != null && toYutime > 0 && toYutime <= cap) {
+        cap = toYutime;
+        yutimeCapped = true;
+      }
       let i = 0;
       while (i < cap) {
         i++;
@@ -342,7 +370,18 @@ PachiSim.engine = (function () {
     } else {
       // 転落で終わった場合も「当たらずにその状態が終わった」ことに変わりはないので、
       // 遷移先の情報の出どころだけを差し替えて同じ形のoutcomeにする。
-      const ex = lastRoll.fell ? state.onFall : state.onExhausted;
+      // 遊タイムの発動回数ちょうどで打ち切った場合は、本来のonExhausted（時短終了など）
+      // より遊タイムを優先する（実機でも低確率○回を消化した瞬間に遊タイムへ移る）。
+      const yutimeFired = yutimeCapped && !lastRoll.fell && attempts === cap;
+      const ex = yutimeFired
+        ? {
+            nextState: machine.yutime.nextState,
+            tag: machine.yutime.tag || "yutime",
+            resultLabel: machine.yutime.resultLabel || "遊タイム突入",
+          }
+        : lastRoll.fell
+        ? state.onFall
+        : state.onExhausted;
       if (!ex) {
         throw new Error(
           `状態「${state.label}」が当たりも転落もしないまま上限（${cap}回転）に達しました。` +
@@ -356,6 +395,7 @@ PachiSim.engine = (function () {
         tag: ex.tag || null,
         resultLabel: ex.resultLabel || null,
         viaFall: !!lastRoll.fell,
+        viaYutime: yutimeFired,
       };
     }
 
@@ -404,6 +444,17 @@ PachiSim.engine = (function () {
     // 居残り（遷移先が今の状態そのもの）の間だけstampsを引き継ぐ。別の状態へ
     // 抜けたら（completeNextStateへの振り替えも含め）次回また空から始まる。
     const staysInCollectingState = !!state.stampCollection && outcome.nextStateId === session.stateId;
+    // 遊タイム用の積算。大当たりで0に戻し、発動済みフラグも下ろす。はずれで終わった
+    // 場合は、数える状態のときだけ今回の回転数を足す。
+    let lowProbSpins = session.lowProbSpins || 0;
+    let yutimeUsed = !!session.yutimeUsed;
+    if (outcome.type === "hit") {
+      lowProbSpins = 0;
+      yutimeUsed = false;
+    } else {
+      if (state.countsTowardYutime) lowProbSpins += attempts;
+      if (outcome.viaYutime) yutimeUsed = true;
+    }
     const newSession = {
       stateId: outcome.nextStateId,
       remaining: nextState.maxAttempts,
@@ -411,6 +462,8 @@ PachiSim.engine = (function () {
       streak: session.streak,
       stamps: staysInCollectingState ? stamps : [],
       stampsStateId: staysInCollectingState ? session.stateId : null,
+      lowProbSpins,
+      yutimeUsed,
     };
 
     return {
@@ -434,5 +487,5 @@ PachiSim.engine = (function () {
     return state.probability * gate;
   }
 
-  return { createSession, resolveAction, effectiveHitProbability };
+  return { createSession, resolveAction, effectiveHitProbability, yutimeRemaining };
 })();
